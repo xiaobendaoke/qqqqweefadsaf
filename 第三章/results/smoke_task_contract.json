@@ -1,0 +1,12 @@
+{
+  "mode": "task_contract",
+  "status": "ok",
+  "observation_dim": 17,
+  "required_task_fields": [
+    "service_type",
+    "slack",
+    "deadline",
+    "required_reliability",
+    "success_probability"
+  ]
+}

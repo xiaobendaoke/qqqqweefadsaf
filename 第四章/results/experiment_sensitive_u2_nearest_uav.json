@@ -1,0 +1,119 @@
+{
+  "episodes": 1,
+  "seed": 42,
+  "overrides": {
+    "num_uavs": 2,
+    "assignment_rule": "nearest_uav",
+    "num_users": 10,
+    "steps_per_episode": 6,
+    "task_arrival_rate": 1.0,
+    "task_input_size_range_bits": [
+      2000000.0,
+      3000000.0
+    ],
+    "task_cpu_cycles_range": [
+      1000000000.0,
+      1800000000.0
+    ],
+    "task_slack_range": [
+      1.4,
+      2.0
+    ],
+    "required_reliability": 0.9,
+    "bandwidth_edge_hz": 1200000.0,
+    "bandwidth_backhaul_hz": 8000000.0,
+    "uav_compute_hz": 4000000000.0,
+    "bs_compute_hz": 5000000000.0,
+    "uav_service_cache_capacity": 2,
+    "fixed_uav_positions": [
+      [
+        130.0,
+        200.0
+      ],
+      [
+        220.0,
+        200.0
+      ]
+    ],
+    "fixed_user_positions": [
+      [
+        150.0,
+        190.0
+      ],
+      [
+        155.0,
+        195.0
+      ],
+      [
+        160.0,
+        205.0
+      ],
+      [
+        165.0,
+        198.0
+      ],
+      [
+        170.0,
+        202.0
+      ],
+      [
+        175.0,
+        206.0
+      ],
+      [
+        180.0,
+        200.0
+      ],
+      [
+        185.0,
+        203.0
+      ],
+      [
+        260.0,
+        250.0
+      ],
+      [
+        270.0,
+        255.0
+      ]
+    ],
+    "observation_max_neighbors": 1
+  },
+  "averaged_metrics": {
+    "completion_rate": 1.0,
+    "average_latency": 0.8227117932825445,
+    "total_energy": 222.02094876025043,
+    "cache_hit_rate": 0.5172413793103449,
+    "fairness_user_completion": 1.0,
+    "fairness_uav_load": 0.9411764705882353,
+    "deadline_violation_rate": 0.0,
+    "reliability_violation_rate": 0.0
+  },
+  "episode_summaries": [
+    {
+      "episode": 0,
+      "seed": 42,
+      "metrics": {
+        "completion_rate": 1.0,
+        "average_latency": 0.8227117932825445,
+        "total_energy": 222.02094876025043,
+        "cache_hit_rate": 0.5172413793103449,
+        "fairness_user_completion": 1.0,
+        "fairness_uav_load": 0.9411764705882353,
+        "deadline_violation_rate": 0.0,
+        "reliability_violation_rate": 0.0
+      },
+      "last_info": {
+        "time_step": 6,
+        "num_generated_tasks": 9,
+        "num_completed_tasks": 9,
+        "num_cache_hits": 6,
+        "num_deadline_violations": 0,
+        "num_reliability_violations": 0
+      }
+    }
+  ],
+  "chapter": "chapter4",
+  "profile": "sensitive",
+  "assignment_rule": "nearest_uav"
+}

@@ -1,0 +1,43 @@
+{
+  "episodes": 1,
+  "seed": 42,
+  "overrides": {
+    "num_uavs": 1
+  },
+  "averaged_metrics": {
+    "completion_rate": 1.0,
+    "average_latency": 0.2898769422422626,
+    "total_energy": 56.18071535557137,
+    "cache_hit_rate": 0.9166666666666666,
+    "fairness_user_completion": 1.0,
+    "fairness_uav_load": null,
+    "deadline_violation_rate": 0.0,
+    "reliability_violation_rate": 0.0
+  },
+  "episode_summaries": [
+    {
+      "episode": 0,
+      "seed": 42,
+      "metrics": {
+        "completion_rate": 1.0,
+        "average_latency": 0.2898769422422626,
+        "total_energy": 56.18071535557137,
+        "cache_hit_rate": 0.9166666666666666,
+        "fairness_user_completion": 1.0,
+        "fairness_uav_load": null,
+        "deadline_violation_rate": 0.0,
+        "reliability_violation_rate": 0.0
+      },
+      "last_info": {
+        "time_step": 8,
+        "num_generated_tasks": 4,
+        "num_completed_tasks": 4,
+        "num_cache_hits": 4,
+        "num_deadline_violations": 0,
+        "num_reliability_violations": 0
+      }
+    }
+  ],
+  "chapter": "chapter4",
+  "profile": "default"
+}
