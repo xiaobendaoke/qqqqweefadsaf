@@ -35,7 +35,7 @@ class MetricTracker:
             self.total_latency += task.total_latency
             if task.cache_hit:
                 self.total_cache_hits += 1
-            if task.execution_target == "uav" and task.assigned_uav_id is not None:
+            if task.execution_target in {"uav", "collaborator"} and task.assigned_uav_id is not None:
                 self.uav_loads[task.assigned_uav_id] = self.uav_loads.get(task.assigned_uav_id, 0) + 1
             if task.completed:
                 self.total_completed += 1

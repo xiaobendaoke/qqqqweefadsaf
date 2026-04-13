@@ -1,0 +1,25 @@
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from chapter4.marl import run_final_paper_package
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--seeds", type=int, nargs="+", default=[42, 52, 62])
+    parser.add_argument("--eval-episodes", type=int, default=4)
+    args = parser.parse_args()
+    result = run_final_paper_package(seeds=args.seeds, eval_episodes=args.eval_episodes)
+    print(json.dumps(result, indent=2, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

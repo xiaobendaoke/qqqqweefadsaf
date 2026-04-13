@@ -1,0 +1,115 @@
+{
+  "tuning_protocol": {
+    "seed": 42,
+    "eval_seed": 142,
+    "eval_episodes": 4,
+    "selection_rule": "highest completion_rate, then lowest total_energy, then lowest average_latency",
+    "main_setting": {
+      "num_uavs": 2,
+      "assignment_rule": "nearest_uav"
+    },
+    "candidates": [
+      {
+        "name": "base_e12",
+        "description": "baseline PPO, short training budget",
+        "overrides": {
+          "train_episodes": 12,
+          "actor_lr": 0.0003,
+          "critic_lr": 0.001,
+          "ppo_clip_eps": 0.2,
+          "entropy_coef": 0.01,
+          "value_loss_coef": 0.5,
+          "reward_energy_weight": 1.2,
+          "reward_action_magnitude_weight": 0.15
+        }
+      },
+      {
+        "name": "energy_e30",
+        "description": "lower exploration and stronger energy regularization",
+        "overrides": {
+          "train_episodes": 30,
+          "actor_lr": 0.00025,
+          "critic_lr": 0.0008,
+          "ppo_clip_eps": 0.18,
+          "entropy_coef": 0.008,
+          "value_loss_coef": 0.6,
+          "reward_energy_weight": 1.5,
+          "reward_action_magnitude_weight": 0.2
+        }
+      },
+      {
+        "name": "energy_e60",
+        "description": "same energy-focused setting with a longer budget",
+        "overrides": {
+          "train_episodes": 60,
+          "actor_lr": 0.00025,
+          "critic_lr": 0.0008,
+          "ppo_clip_eps": 0.18,
+          "entropy_coef": 0.008,
+          "value_loss_coef": 0.6,
+          "reward_energy_weight": 1.5,
+          "reward_action_magnitude_weight": 0.2
+        }
+      },
+      {
+        "name": "stable_e30",
+        "description": "tighter clip with lower entropy and stronger value fit",
+        "overrides": {
+          "train_episodes": 30,
+          "actor_lr": 0.0002,
+          "critic_lr": 0.0006,
+          "ppo_clip_eps": 0.15,
+          "entropy_coef": 0.005,
+          "value_loss_coef": 0.7,
+          "reward_energy_weight": 1.7,
+          "reward_action_magnitude_weight": 0.22
+        }
+      }
+    ]
+  },
+  "selected_final_config": {
+    "seed": 42,
+    "num_uavs": 2,
+    "assignment_rule": "nearest_uav",
+    "output_tag": "paper_main_u2",
+    "train_episodes": 30,
+    "eval_episodes": 4,
+    "gamma": 0.98,
+    "gae_lambda": 0.95,
+    "actor_lr": 0.00025,
+    "critic_lr": 0.0008,
+    "hidden_dim": 128,
+    "entropy_coef": 0.008,
+    "gradient_clip": 0.5,
+    "action_std_init": 0.25,
+    "action_std_min": 0.08,
+    "action_std_decay": 0.995,
+    "ppo_epochs": 8,
+    "ppo_clip_eps": 0.18,
+    "value_clip_eps": 0.2,
+    "value_loss_coef": 0.6,
+    "minibatch_size": 64,
+    "device": "cpu",
+    "reward_completion_weight": 1.0,
+    "reward_cache_hit_weight": 0.1,
+    "reward_latency_weight": 0.05,
+    "reward_energy_weight": 1.5,
+    "reward_deadline_weight": 0.5,
+    "reward_reliability_weight": 0.5,
+    "reward_action_magnitude_weight": 0.2,
+    "use_movement_budget": true
+  },
+  "main_matrix_notes": {
+    "chapter3_vs_chapter4": "NUM_UAVS=1 compare-ch4 check",
+    "assignment_rule_profile": "sensitive",
+    "ppo_vs_heuristic_settings": [
+      "u2 nearest_uav",
+      "u3 nearest_uav"
+    ]
+  },
+  "ablations": {
+    "no_energy_shaped_reward": "reward_energy_weight=0.0 and reward_action_magnitude_weight=0.0",
+    "no_movement_budget": "use_movement_budget=False with all other main PPO settings fixed",
+    "no_centralized_critic": "not included in this stage to keep a single algorithm implementation"
+  }
+}

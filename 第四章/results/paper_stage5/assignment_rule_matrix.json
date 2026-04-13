@@ -1,0 +1,48 @@
+{
+  "rows": [
+    {
+      "profile": "sensitive",
+      "num_uavs": 2,
+      "assignment_rule": "nearest_uav",
+      "completion_rate": 1.0,
+      "average_latency": 0.7913068339024849,
+      "total_energy": 32.94511440276091,
+      "cache_hit_rate": 0.5438326868923011,
+      "fairness_uav_load": 0.9922404903184621,
+      "result_path": "C:\\Users\\woshinibaba\\Documents\\研究生\\论文\\毕业论文\\论文正式\\第四章\\results\\experiment_sensitive_u2_nearest_uav.json"
+    },
+    {
+      "profile": "sensitive",
+      "num_uavs": 2,
+      "assignment_rule": "least_loaded_uav",
+      "completion_rate": 1.0,
+      "average_latency": 0.7953474494987626,
+      "total_energy": 32.793658122393566,
+      "cache_hit_rate": 0.5823341328455297,
+      "fairness_uav_load": 0.9995228523080433,
+      "result_path": "C:\\Users\\woshinibaba\\Documents\\研究生\\论文\\毕业论文\\论文正式\\第四章\\results\\experiment_sensitive_u2_least_loaded_uav.json"
+    },
+    {
+      "profile": "sensitive",
+      "num_uavs": 3,
+      "assignment_rule": "nearest_uav",
+      "completion_rate": 1.0,
+      "average_latency": 0.7679370024591761,
+      "total_energy": 76.26380151222608,
+      "cache_hit_rate": 0.5130363974132238,
+      "fairness_uav_load": 0.7519260328776769,
+      "result_path": "C:\\Users\\woshinibaba\\Documents\\研究生\\论文\\毕业论文\\论文正式\\第四章\\results\\experiment_sensitive_u3_nearest_uav.json"
+    },
+    {
+      "profile": "sensitive",
+      "num_uavs": 3,
+      "assignment_rule": "least_loaded_uav",
+      "completion_rate": 1.0,
+      "average_latency": 0.7392624618340504,
+      "total_energy": 76.45117456803078,
+      "cache_hit_rate": 0.5478757580817779,
+      "fairness_uav_load": 0.999169751169418,
+      "result_path": "C:\\Users\\woshinibaba\\Documents\\研究生\\论文\\毕业论文\\论文正式\\第四章\\results\\experiment_sensitive_u3_least_loaded_uav.json"
+    }
+  ]
+}

@@ -57,6 +57,7 @@ def run_step(
 
     decisions: list[OffloadingDecision] = []
     if uavs:
+        uav_lookup = {uav.uav_id: uav for uav in uavs}
         for task in tasks:
             ue = users[task.user_id]
             selected_uav = assign_uav(
@@ -68,12 +69,11 @@ def run_step(
             )
             if selected_uav is None:
                 continue
-            selected_uav.assigned_task_count_step += 1
-            selected_uav.total_assigned_task_count += 1
             decision = decide_offloading(
                 task=task,
                 ue=ue,
                 uav=selected_uav,
+                all_uavs=uavs,
                 bs=bs,
                 service_catalog=service_catalog,
                 config=config,
@@ -92,15 +92,20 @@ def run_step(
                 completed=decision.completed,
                 assigned_uav_id=decision.assigned_uav_id,
             )
+            if decision.assigned_uav_id is not None:
+                executed_uav = uav_lookup[decision.assigned_uav_id]
+                executed_uav.assigned_task_count_step += 1
+                executed_uav.total_assigned_task_count += 1
             if task.completed:
                 users[task.user_id].completed_tasks += 1
                 if decision.assigned_uav_id is not None:
-                    selected_uav.served_task_count += 1
-                    selected_uav.completed_task_count_step += 1
-                    selected_uav.total_completed_task_count += 1
+                    executed_uav = uav_lookup[decision.assigned_uav_id]
+                    executed_uav.served_task_count += 1
+                    executed_uav.completed_task_count_step += 1
+                    executed_uav.total_completed_task_count += 1
                     compute_energy = task.cpu_cycles * config.uav_compute_energy_per_cycle
                     energy_spent += compute_energy
-                    selected_uav.remaining_energy_j = max(0.0, selected_uav.remaining_energy_j - compute_energy)
+                    executed_uav.remaining_energy_j = max(0.0, executed_uav.remaining_energy_j - compute_energy)
             decisions.append(decision)
 
     for uav in uavs:

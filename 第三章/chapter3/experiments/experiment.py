@@ -10,7 +10,8 @@ from common.uav_mec.logging_utils import write_json
 from common.uav_mec.simulation import compare_metric_dicts, run_short_experiment
 
 from ..env import Chapter3Env
-from ..policies.mobility_heuristic import select_actions
+from ..policies.mobility_heuristic import select_actions as select_actions_heuristic
+from ..policies.mpc_shell import select_actions as select_actions_mpc
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CHAPTER3_ROOT = Path(__file__).resolve().parents[2]
@@ -54,7 +55,7 @@ def _ensure_chapter4_package_loaded(repo_root: Path) -> None:
     spec.loader.exec_module(module)
 
 
-def run_experiment(*, seed: int, episodes: int, hard: bool) -> dict[str, Any]:
+def run_experiment(*, seed: int, episodes: int, hard: bool, policy: str = "heuristic") -> dict[str, Any]:
     overrides = {}
     if hard:
         overrides = {
@@ -71,16 +72,23 @@ def run_experiment(*, seed: int, episodes: int, hard: bool) -> dict[str, Any]:
             "uav_compute_hz": 9.0e9,
             "uav_service_cache_capacity": 2,
         }
+    if policy not in {"heuristic", "mpc"}:
+        raise ValueError(f"Unsupported Chapter 3 policy: {policy}")
+    policy_fn = select_actions_heuristic if policy == "heuristic" else select_actions_mpc
     result = run_short_experiment(
         env_factory=Chapter3Env,
-        policy_fn=select_actions,
+        policy_fn=policy_fn,
         overrides=overrides,
         episodes=episodes,
         seed=seed,
     )
     result["chapter"] = "chapter3"
     result["profile"] = "hard" if hard else "default"
-    output_name = "experiment_hard.json" if hard else "experiment_short.json"
+    result["policy"] = policy
+    if policy == "mpc":
+        output_name = "experiment_hard_mpc.json" if hard else "experiment_short_mpc.json"
+    else:
+        output_name = "experiment_hard.json" if hard else "experiment_short.json"
     write_json(CHAPTER3_RESULTS / output_name, result)
     return result
 
@@ -95,7 +103,7 @@ def compare_with_chapter4(*, seed: int, episodes: int) -> dict[str, Any]:
 
     left = run_short_experiment(
         env_factory=Chapter3Env,
-        policy_fn=select_actions,
+        policy_fn=select_actions_heuristic,
         overrides={},
         episodes=episodes,
         seed=seed,

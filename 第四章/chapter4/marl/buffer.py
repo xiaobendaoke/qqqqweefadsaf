@@ -2,35 +2,44 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import numpy as np
+
+
+FloatArray = np.ndarray
+
 
 @dataclass(slots=True)
 class RolloutBatch:
-    states: list[list[float]]
-    observations: list[list[list[float]]]
-    actions: list[list[list[float]]]
-    log_probs: list[list[float]]
-    rewards: list[float]
-    dones: list[float]
-    values: list[float]
-    advantages: list[float]
-    returns: list[float]
+    states: FloatArray
+    observations: FloatArray
+    actions: FloatArray
+    log_probs: FloatArray
+    rewards: FloatArray
+    dones: FloatArray
+    values: FloatArray
+    advantages: FloatArray
+    returns: FloatArray
 
     @property
-    def team_advantages(self) -> list[float]:
+    def team_advantages(self) -> FloatArray:
         return self.advantages
 
     @property
-    def flat_observations(self) -> list[list[float]]:
-        return [observation for step in self.observations for observation in step]
+    def flat_observations(self) -> FloatArray:
+        return self.observations.reshape(-1, self.observations.shape[-1])
 
     @property
-    def flat_actions(self) -> list[list[float]]:
-        return [action for step in self.actions for action in step]
+    def flat_actions(self) -> FloatArray:
+        return self.actions.reshape(-1, self.actions.shape[-1])
 
     @property
-    def flat_advantages(self) -> list[float]:
-        num_agents = len(self.observations[0]) if self.observations else 0
-        return [advantage for advantage in self.advantages for _ in range(num_agents)]
+    def flat_log_probs(self) -> FloatArray:
+        return self.log_probs.reshape(-1)
+
+    @property
+    def flat_advantages(self) -> FloatArray:
+        num_agents = self.observations.shape[1] if self.observations.ndim >= 2 else 0
+        return np.repeat(self.advantages, num_agents).astype(np.float32)
 
 
 class RolloutBuffer:
@@ -63,32 +72,31 @@ class RolloutBuffer:
         self.values.append(float(value))
 
     def finalize(self, *, gamma: float, gae_lambda: float, last_value: float) -> RolloutBatch:
-        rewards = [float(item) for item in self.rewards]
-        dones = [float(item) for item in self.dones]
-        values = [float(item) for item in self.values]
-        advantages = [0.0 for _ in rewards]
+        rewards = np.asarray(self.rewards, dtype=np.float32)
+        dones = np.asarray(self.dones, dtype=np.float32)
+        values = np.asarray(self.values, dtype=np.float32)
+        advantages = np.zeros_like(rewards, dtype=np.float32)
         gae = 0.0
         next_value = float(last_value)
         for index in range(len(rewards) - 1, -1, -1):
-            mask = 1.0 - dones[index]
-            delta = rewards[index] + gamma * next_value * mask - values[index]
+            mask = 1.0 - float(dones[index])
+            delta = float(rewards[index]) + gamma * next_value * mask - float(values[index])
             gae = delta + gamma * gae_lambda * mask * gae
             advantages[index] = gae
-            next_value = values[index]
-        returns = [advantage + value for advantage, value in zip(advantages, values)]
+            next_value = float(values[index])
+        returns = advantages + values
         if len(advantages) > 1:
-            mean_adv = sum(advantages) / len(advantages)
-            variance = sum((advantage - mean_adv) ** 2 for advantage in advantages) / len(advantages)
-            std_adv = variance ** 0.5
-            advantages = [(advantage - mean_adv) / (std_adv + 1e-8) for advantage in advantages]
+            mean_adv = float(np.mean(advantages))
+            std_adv = float(np.std(advantages))
+            advantages = (advantages - mean_adv) / (std_adv + 1e-8)
         return RolloutBatch(
-            states=self.states,
-            observations=self.observations,
-            actions=self.actions,
-            log_probs=self.log_probs,
+            states=np.asarray(self.states, dtype=np.float32),
+            observations=np.asarray(self.observations, dtype=np.float32),
+            actions=np.asarray(self.actions, dtype=np.float32),
+            log_probs=np.asarray(self.log_probs, dtype=np.float32),
             rewards=rewards,
             dones=dones,
             values=values,
-            advantages=advantages,
-            returns=returns,
+            advantages=advantages.astype(np.float32),
+            returns=returns.astype(np.float32),
         )

@@ -63,6 +63,7 @@ def run_smoke(mode: str, *, seed: int = 42) -> dict[str, Any]:
             task=tasks[0],
             ue=env.users[tasks[0].user_id],
             uav=env.uavs[0],
+            all_uavs=env.uavs,
             bs=env.bs,
             service_catalog=env.service_catalog,
             config=env.config,

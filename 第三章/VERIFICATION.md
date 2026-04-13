@@ -113,3 +113,27 @@ python 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42
 ### 结果文件
 
 - `第三章/results/experiment_compare_ch3_ch4.json`
+
+## 第六阶段补完：MPC shell
+
+### 新增运行命令
+
+```powershell
+.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --policy mpc --seed 42
+.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42
+```
+
+### 关键结果
+
+- `mpc`:
+  - `completion_rate=1.0`
+  - `average_latency=0.28992447022728784`
+  - `total_energy=216.22837538036669`
+  - `cache_hit_rate=0.9166666666666666`
+- `compare-ch4`:
+  - 第三章与第四章 `NUM_UAVS=1` 逐项对照继续成立
+  - `completion_rate / average_latency / total_energy delta=0.0`
+
+### 新增结果文件
+
+- `第三章/results/experiment_short_mpc.json`

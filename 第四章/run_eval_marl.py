@@ -19,6 +19,7 @@ def main() -> None:
     parser.add_argument("--num-uavs", type=int, default=2)
     parser.add_argument("--assignment-rule", type=str, default="nearest_uav", choices=["nearest_uav", "least_loaded_uav"])
     parser.add_argument("--model-path", type=str, required=True)
+    parser.add_argument("--tag", type=str, default="default")
     args = parser.parse_args()
     result = run_marl_evaluation(
         seed=args.seed,
@@ -26,6 +27,7 @@ def main() -> None:
         num_uavs=args.num_uavs,
         assignment_rule=args.assignment_rule,
         model_path=args.model_path,
+        overrides={"output_tag": args.tag},
     )
     print(json.dumps(result, indent=2, ensure_ascii=False))
 

@@ -15,7 +15,14 @@
     "gradient_clip": 5.0,
     "action_std_init": 0.35,
     "action_std_min": 0.1,
-    "action_std_decay": 0.995
+    "action_std_decay": 0.995,
+    "reward_completion_weight": 1.0,
+    "reward_cache_hit_weight": 0.1,
+    "reward_latency_weight": 0.05,
+    "reward_energy_weight": 1.2,
+    "reward_deadline_weight": 0.5,
+    "reward_reliability_weight": 0.5,
+    "reward_action_magnitude_weight": 0.15
   },
   "model_path": "c:\\Users\\woshinibaba\\Documents\\研究生\\论文\\毕业论文\\第四章\\results\\marl_shared_ac_u2_nearest_uav.json",
   "interface_contract": {
@@ -598,8 +605,8 @@
   },
   "marl_metrics": {
     "completion_rate": 1.0,
-    "average_latency": 0.25998963405751235,
-    "total_energy": 181.66260509156172,
+    "average_latency": 0.2599826757271505,
+    "total_energy": 159.3156091199015,
     "cache_hit_rate": 0.909963768115942,
     "fairness_user_completion": 1.0,
     "fairness_uav_load": 0.7,
@@ -618,9 +625,9 @@
   },
   "comparison": {
     "average_latency": {
-      "left": 0.25998963405751235,
+      "left": 0.2599826757271505,
       "right": 0.25996999112363817,
-      "delta": 1.9642933874186586e-05
+      "delta": 1.2684603512336246e-05
     },
     "cache_hit_rate": {
       "left": 0.909963768115942,
@@ -653,9 +660,9 @@
       "delta": 0.0
     },
     "total_energy": {
-      "left": 181.66260509156172,
+      "left": 159.3156091199015,
       "right": 27.865925714269967,
-      "delta": 153.79667937729175
+      "delta": 131.44968340563153
     }
   },
   "marl_episode_logs": [
@@ -668,8 +675,8 @@
       "assignment_rule": "nearest_uav",
       "global_metrics": {
         "completion_rate": 1.0,
-        "average_latency": 0.2322576833103909,
-        "total_energy": 166.21220112213155,
+        "average_latency": 0.23224588019933334,
+        "total_energy": 148.4691875483752,
         "cache_hit_rate": 0.9333333333333333,
         "fairness_user_completion": 1.0,
         "fairness_uav_load": 0.5,
@@ -687,8 +694,8 @@
           "current_queue_delay": 0.0,
           "cumulative_queue_delay": 0.0,
           "max_queue_length": 0,
-          "remaining_energy_j": 4915.357169720068,
-          "energy_used_j": 84.64283027993224,
+          "remaining_energy_j": 4923.89536137522,
+          "energy_used_j": 76.10463862477991,
           "cache_usage_ratio": 0.0,
           "cache_services": []
         },
@@ -700,10 +707,10 @@
           "completed_task_count_total": 1,
           "current_queue_length": 1,
           "current_queue_delay": 0.0,
-          "cumulative_queue_delay": 0.019640603298817005,
+          "cumulative_queue_delay": 0.019516655402475713,
           "max_queue_length": 1,
-          "remaining_energy_j": 4918.4306291578,
-          "energy_used_j": 81.56937084220044,
+          "remaining_energy_j": 4927.635451076405,
+          "energy_used_j": 72.36454892359507,
           "cache_usage_ratio": 0.3333333333333333,
           "cache_services": [
             2
@@ -981,8 +988,8 @@
       "assignment_rule": "nearest_uav",
       "global_metrics": {
         "completion_rate": 1.0,
-        "average_latency": 0.2919694818385551,
-        "total_energy": 171.82733405463006,
+        "average_latency": 0.29195709693253347,
+        "total_energy": 151.7881618753312,
         "cache_hit_rate": 0.85,
         "fairness_user_completion": 1.0,
         "fairness_uav_load": 0.9,
@@ -998,10 +1005,10 @@
           "completed_task_count_total": 1,
           "current_queue_length": 1,
           "current_queue_delay": 0.0,
-          "cumulative_queue_delay": 0.028573458296108356,
+          "cumulative_queue_delay": 0.028296502134416812,
           "max_queue_length": 1,
-          "remaining_energy_j": 4904.034942728903,
-          "energy_used_j": 95.96505727109707,
+          "remaining_energy_j": 4916.44596125978,
+          "energy_used_j": 83.55403874021977,
           "cache_usage_ratio": 0.3333333333333333,
           "cache_services": [
             2
@@ -1015,10 +1022,10 @@
           "completed_task_count_total": 2,
           "current_queue_length": 2,
           "current_queue_delay": 0.0,
-          "cumulative_queue_delay": 0.04927210403393101,
+          "cumulative_queue_delay": 0.049410605440483035,
           "max_queue_length": 2,
-          "remaining_energy_j": 4924.137723216468,
-          "energy_used_j": 75.86227678353225,
+          "remaining_energy_j": 4931.765876864888,
+          "energy_used_j": 68.23412313511199,
           "cache_usage_ratio": 0.6666666666666666,
           "cache_services": [
             0,
@@ -1297,8 +1304,8 @@
       "assignment_rule": "nearest_uav",
       "global_metrics": {
         "completion_rate": 1.0,
-        "average_latency": 0.2672534025060551,
-        "total_energy": 182.89438334543695,
+        "average_latency": 0.26725527216556566,
+        "total_energy": 157.06613815202564,
         "cache_hit_rate": 0.9565217391304348,
         "fairness_user_completion": 1.0,
         "fairness_uav_load": 0.5,
@@ -1316,8 +1323,8 @@
           "current_queue_delay": 0.0,
           "cumulative_queue_delay": 0.0,
           "max_queue_length": 0,
-          "remaining_energy_j": 4906.411794980092,
-          "energy_used_j": 93.58820501990795,
+          "remaining_energy_j": 4919.212246463884,
+          "energy_used_j": 80.78775353611582,
           "cache_usage_ratio": 0.0,
           "cache_services": []
         },
@@ -1329,10 +1336,10 @@
           "completed_task_count_total": 1,
           "current_queue_length": 1,
           "current_queue_delay": 0.0,
-          "cumulative_queue_delay": 0.02117992411566716,
+          "cumulative_queue_delay": 0.02124844150731553,
           "max_queue_length": 1,
-          "remaining_energy_j": 4910.693821674471,
-          "energy_used_j": 89.30617832552889,
+          "remaining_energy_j": 4923.721615384092,
+          "energy_used_j": 76.27838461590818,
           "cache_usage_ratio": 0.3333333333333333,
           "cache_services": [
             1
@@ -1610,8 +1617,8 @@
       "assignment_rule": "nearest_uav",
       "global_metrics": {
         "completion_rate": 1.0,
-        "average_latency": 0.24847796857504836,
-        "total_energy": 205.7165018440483,
+        "average_latency": 0.2484724536111696,
+        "total_energy": 179.93894890387392,
         "cache_hit_rate": 0.9,
         "fairness_user_completion": 1.0,
         "fairness_uav_load": 0.9,
@@ -1627,10 +1634,10 @@
           "completed_task_count_total": 1,
           "current_queue_length": 1,
           "current_queue_delay": 0.0,
-          "cumulative_queue_delay": 0.02715300624308359,
+          "cumulative_queue_delay": 0.02697336447345844,
           "max_queue_length": 1,
-          "remaining_energy_j": 4898.64512400844,
-          "energy_used_j": 101.35487599156022,
+          "remaining_energy_j": 4912.330656900559,
+          "energy_used_j": 87.669343099441,
           "cache_usage_ratio": 0.3333333333333333,
           "cache_services": [
             3
@@ -1644,10 +1651,10 @@
           "completed_task_count_total": 2,
           "current_queue_length": 2,
           "current_queue_delay": 0.0,
-          "cumulative_queue_delay": 0.05523596007391118,
+          "cumulative_queue_delay": 0.05540221685546398,
           "max_queue_length": 2,
-          "remaining_energy_j": 4895.638374147513,
-          "energy_used_j": 104.36162585248712,
+          "remaining_energy_j": 4907.730394195565,
+          "energy_used_j": 92.26960580443483,
           "cache_usage_ratio": 0.3333333333333333,
           "cache_services": [
             1

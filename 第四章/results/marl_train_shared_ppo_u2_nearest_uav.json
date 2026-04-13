@@ -1,0 +1,4567 @@
+{
+  "algorithm": "shared_ppo_centralized_critic",
+  "source_inspiration": "minimal PPO/MAPPO-style shared actor with centralized critic, implemented in torch for the unified multi-UAV environment",
+  "framework": {
+    "torch_version": "2.11.0+cpu",
+    "numpy_version": "2.4.3",
+    "device": "cpu"
+  },
+  "config": {
+    "seed": 42,
+    "num_uavs": 2,
+    "assignment_rule": "nearest_uav",
+    "train_episodes": 12,
+    "eval_episodes": 4,
+    "gamma": 0.98,
+    "gae_lambda": 0.95,
+    "actor_lr": 0.0003,
+    "critic_lr": 0.001,
+    "hidden_dim": 128,
+    "entropy_coef": 0.01,
+    "gradient_clip": 0.5,
+    "action_std_init": 0.25,
+    "action_std_min": 0.08,
+    "action_std_decay": 0.995,
+    "ppo_epochs": 8,
+    "ppo_clip_eps": 0.2,
+    "value_clip_eps": 0.2,
+    "value_loss_coef": 0.5,
+    "minibatch_size": 64,
+    "device": "cpu",
+    "reward_completion_weight": 1.0,
+    "reward_cache_hit_weight": 0.1,
+    "reward_latency_weight": 0.05,
+    "reward_energy_weight": 1.2,
+    "reward_deadline_weight": 0.5,
+    "reward_reliability_weight": 0.5,
+    "reward_action_magnitude_weight": 0.15
+  },
+  "training_signal": {
+    "type": "shaped_team_reward_v2",
+    "terms": [
+      "completion_rate",
+      "cache_hit_rate",
+      "average_latency",
+      "delta_total_energy",
+      "deadline_violation_rate",
+      "reliability_violation_rate",
+      "action_magnitude"
+    ]
+  },
+  "interface_contract": {
+    "observation_batch_shape": [
+      "T",
+      2,
+      46
+    ],
+    "central_state_shape": [
+      "T",
+      92
+    ],
+    "action_batch_shape": [
+      "T",
+      2,
+      2
+    ],
+    "team_reward_shape": [
+      "T"
+    ],
+    "value_shape": [
+      "T"
+    ],
+    "advantage_shape": [
+      "T"
+    ]
+  },
+  "action_schema": {
+    "schema_version": "action.v1",
+    "canonical_shape": [
+      2,
+      2
+    ],
+    "single_agent_compatibility": null,
+    "agent_order": [
+      "uav_0",
+      "uav_1"
+    ],
+    "fields_per_agent": [
+      "dx",
+      "dy"
+    ],
+    "value_range": [
+      -1.0,
+      1.0
+    ],
+    "scaled_max_displacement_per_step": 18.0
+  },
+  "observation_schema": {
+    "schema_version": "observation.v1",
+    "sections": [
+      {
+        "name": "own_state",
+        "fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio"
+        ],
+        "repeat": 1
+      },
+      {
+        "name": "neighbor_uav_states",
+        "fields": [
+          "neighbor_rel_x_norm",
+          "neighbor_rel_y_norm",
+          "neighbor_queue_length_norm",
+          "neighbor_queue_delay_norm",
+          "neighbor_assigned_task_count_norm",
+          "neighbor_completed_task_count_norm",
+          "neighbor_cache_usage_ratio"
+        ],
+        "repeat": 2
+      },
+      {
+        "name": "queue_load_summary",
+        "fields": [
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm"
+        ],
+        "repeat": 1
+      },
+      {
+        "name": "local_cache_summary",
+        "fields": [
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4"
+        ],
+        "repeat": 1
+      },
+      {
+        "name": "associated_user_state",
+        "fields": [
+          "user_rel_x_norm",
+          "user_rel_y_norm",
+          "user_pending_task_count_norm",
+          "user_min_slack_norm",
+          "user_service_type_norm"
+        ],
+        "repeat": 3
+      }
+    ],
+    "flat_fields": [
+      "self_x_norm",
+      "self_y_norm",
+      "self_energy_ratio",
+      "self_queue_length_norm",
+      "self_queue_delay_norm",
+      "self_assigned_task_count_norm",
+      "self_completed_task_count_norm",
+      "self_cache_usage_ratio",
+      "neighbor_uav_states[0].neighbor_rel_x_norm",
+      "neighbor_uav_states[0].neighbor_rel_y_norm",
+      "neighbor_uav_states[0].neighbor_queue_length_norm",
+      "neighbor_uav_states[0].neighbor_queue_delay_norm",
+      "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+      "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+      "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+      "neighbor_uav_states[1].neighbor_rel_x_norm",
+      "neighbor_uav_states[1].neighbor_rel_y_norm",
+      "neighbor_uav_states[1].neighbor_queue_length_norm",
+      "neighbor_uav_states[1].neighbor_queue_delay_norm",
+      "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+      "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+      "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+      "queue_length_norm",
+      "queue_delay_norm",
+      "assigned_task_count_norm",
+      "completed_task_count_norm",
+      "cache_service_0",
+      "cache_service_1",
+      "cache_service_2",
+      "cache_service_3",
+      "cache_service_4",
+      "associated_user_state[0].user_rel_x_norm",
+      "associated_user_state[0].user_rel_y_norm",
+      "associated_user_state[0].user_pending_task_count_norm",
+      "associated_user_state[0].user_min_slack_norm",
+      "associated_user_state[0].user_service_type_norm",
+      "associated_user_state[1].user_rel_x_norm",
+      "associated_user_state[1].user_rel_y_norm",
+      "associated_user_state[1].user_pending_task_count_norm",
+      "associated_user_state[1].user_min_slack_norm",
+      "associated_user_state[1].user_service_type_norm",
+      "associated_user_state[2].user_rel_x_norm",
+      "associated_user_state[2].user_rel_y_norm",
+      "associated_user_state[2].user_pending_task_count_norm",
+      "associated_user_state[2].user_min_slack_norm",
+      "associated_user_state[2].user_service_type_norm"
+    ],
+    "section_slices": {
+      "own_state": [
+        0,
+        8
+      ],
+      "neighbor_uav_states": [
+        8,
+        22
+      ],
+      "queue_load_summary": [
+        22,
+        26
+      ],
+      "local_cache_summary": [
+        26,
+        31
+      ],
+      "associated_user_state": [
+        31,
+        46
+      ]
+    },
+    "total_length": 46
+  },
+  "uav_state_schema": {
+    "schema_version": "uav_state.v1",
+    "sections": [
+      {
+        "name": "own_state",
+        "fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio"
+        ],
+        "repeat": 1
+      },
+      {
+        "name": "neighbor_uav_states",
+        "fields": [
+          "neighbor_rel_x_norm",
+          "neighbor_rel_y_norm",
+          "neighbor_queue_length_norm",
+          "neighbor_queue_delay_norm",
+          "neighbor_assigned_task_count_norm",
+          "neighbor_completed_task_count_norm",
+          "neighbor_cache_usage_ratio"
+        ],
+        "repeat": 2
+      },
+      {
+        "name": "queue_load_summary",
+        "fields": [
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm"
+        ],
+        "repeat": 1
+      },
+      {
+        "name": "local_cache_summary",
+        "fields": [
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4"
+        ],
+        "repeat": 1
+      }
+    ],
+    "flat_fields": [
+      "self_x_norm",
+      "self_y_norm",
+      "self_energy_ratio",
+      "self_queue_length_norm",
+      "self_queue_delay_norm",
+      "self_assigned_task_count_norm",
+      "self_completed_task_count_norm",
+      "self_cache_usage_ratio",
+      "neighbor_uav_states[0].neighbor_rel_x_norm",
+      "neighbor_uav_states[0].neighbor_rel_y_norm",
+      "neighbor_uav_states[0].neighbor_queue_length_norm",
+      "neighbor_uav_states[0].neighbor_queue_delay_norm",
+      "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+      "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+      "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+      "neighbor_uav_states[1].neighbor_rel_x_norm",
+      "neighbor_uav_states[1].neighbor_rel_y_norm",
+      "neighbor_uav_states[1].neighbor_queue_length_norm",
+      "neighbor_uav_states[1].neighbor_queue_delay_norm",
+      "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+      "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+      "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+      "queue_length_norm",
+      "queue_delay_norm",
+      "assigned_task_count_norm",
+      "completed_task_count_norm",
+      "cache_service_0",
+      "cache_service_1",
+      "cache_service_2",
+      "cache_service_3",
+      "cache_service_4"
+    ],
+    "section_slices": {
+      "own_state": [
+        0,
+        8
+      ],
+      "neighbor_uav_states": [
+        8,
+        22
+      ],
+      "queue_load_summary": [
+        22,
+        26
+      ],
+      "local_cache_summary": [
+        26,
+        31
+      ]
+    },
+    "total_length": 31
+  },
+  "episode_log_schema": {
+    "schema_version": "episode_log.v1",
+    "top_level_fields": [
+      "chapter_name",
+      "episode_index",
+      "seed",
+      "num_uavs",
+      "num_users",
+      "assignment_rule",
+      "global_metrics",
+      "per_uav_metrics",
+      "action_schema",
+      "observation_schema",
+      "uav_state_schema"
+    ],
+    "action_schema": {
+      "schema_version": "action.v1",
+      "canonical_shape": [
+        2,
+        2
+      ],
+      "single_agent_compatibility": null,
+      "agent_order": [
+        "uav_0",
+        "uav_1"
+      ],
+      "fields_per_agent": [
+        "dx",
+        "dy"
+      ],
+      "value_range": [
+        -1.0,
+        1.0
+      ],
+      "scaled_max_displacement_per_step": 18.0
+    },
+    "observation_schema": {
+      "schema_version": "observation.v1",
+      "sections": [
+        {
+          "name": "own_state",
+          "fields": [
+            "self_x_norm",
+            "self_y_norm",
+            "self_energy_ratio",
+            "self_queue_length_norm",
+            "self_queue_delay_norm",
+            "self_assigned_task_count_norm",
+            "self_completed_task_count_norm",
+            "self_cache_usage_ratio"
+          ],
+          "repeat": 1
+        },
+        {
+          "name": "neighbor_uav_states",
+          "fields": [
+            "neighbor_rel_x_norm",
+            "neighbor_rel_y_norm",
+            "neighbor_queue_length_norm",
+            "neighbor_queue_delay_norm",
+            "neighbor_assigned_task_count_norm",
+            "neighbor_completed_task_count_norm",
+            "neighbor_cache_usage_ratio"
+          ],
+          "repeat": 2
+        },
+        {
+          "name": "queue_load_summary",
+          "fields": [
+            "queue_length_norm",
+            "queue_delay_norm",
+            "assigned_task_count_norm",
+            "completed_task_count_norm"
+          ],
+          "repeat": 1
+        },
+        {
+          "name": "local_cache_summary",
+          "fields": [
+            "cache_service_0",
+            "cache_service_1",
+            "cache_service_2",
+            "cache_service_3",
+            "cache_service_4"
+          ],
+          "repeat": 1
+        },
+        {
+          "name": "associated_user_state",
+          "fields": [
+            "user_rel_x_norm",
+            "user_rel_y_norm",
+            "user_pending_task_count_norm",
+            "user_min_slack_norm",
+            "user_service_type_norm"
+          ],
+          "repeat": 3
+        }
+      ],
+      "flat_fields": [
+        "self_x_norm",
+        "self_y_norm",
+        "self_energy_ratio",
+        "self_queue_length_norm",
+        "self_queue_delay_norm",
+        "self_assigned_task_count_norm",
+        "self_completed_task_count_norm",
+        "self_cache_usage_ratio",
+        "neighbor_uav_states[0].neighbor_rel_x_norm",
+        "neighbor_uav_states[0].neighbor_rel_y_norm",
+        "neighbor_uav_states[0].neighbor_queue_length_norm",
+        "neighbor_uav_states[0].neighbor_queue_delay_norm",
+        "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+        "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+        "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+        "neighbor_uav_states[1].neighbor_rel_x_norm",
+        "neighbor_uav_states[1].neighbor_rel_y_norm",
+        "neighbor_uav_states[1].neighbor_queue_length_norm",
+        "neighbor_uav_states[1].neighbor_queue_delay_norm",
+        "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+        "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+        "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+        "queue_length_norm",
+        "queue_delay_norm",
+        "assigned_task_count_norm",
+        "completed_task_count_norm",
+        "cache_service_0",
+        "cache_service_1",
+        "cache_service_2",
+        "cache_service_3",
+        "cache_service_4",
+        "associated_user_state[0].user_rel_x_norm",
+        "associated_user_state[0].user_rel_y_norm",
+        "associated_user_state[0].user_pending_task_count_norm",
+        "associated_user_state[0].user_min_slack_norm",
+        "associated_user_state[0].user_service_type_norm",
+        "associated_user_state[1].user_rel_x_norm",
+        "associated_user_state[1].user_rel_y_norm",
+        "associated_user_state[1].user_pending_task_count_norm",
+        "associated_user_state[1].user_min_slack_norm",
+        "associated_user_state[1].user_service_type_norm",
+        "associated_user_state[2].user_rel_x_norm",
+        "associated_user_state[2].user_rel_y_norm",
+        "associated_user_state[2].user_pending_task_count_norm",
+        "associated_user_state[2].user_min_slack_norm",
+        "associated_user_state[2].user_service_type_norm"
+      ],
+      "section_slices": {
+        "own_state": [
+          0,
+          8
+        ],
+        "neighbor_uav_states": [
+          8,
+          22
+        ],
+        "queue_load_summary": [
+          22,
+          26
+        ],
+        "local_cache_summary": [
+          26,
+          31
+        ],
+        "associated_user_state": [
+          31,
+          46
+        ]
+      },
+      "total_length": 46
+    },
+    "uav_state_schema": {
+      "schema_version": "uav_state.v1",
+      "sections": [
+        {
+          "name": "own_state",
+          "fields": [
+            "self_x_norm",
+            "self_y_norm",
+            "self_energy_ratio",
+            "self_queue_length_norm",
+            "self_queue_delay_norm",
+            "self_assigned_task_count_norm",
+            "self_completed_task_count_norm",
+            "self_cache_usage_ratio"
+          ],
+          "repeat": 1
+        },
+        {
+          "name": "neighbor_uav_states",
+          "fields": [
+            "neighbor_rel_x_norm",
+            "neighbor_rel_y_norm",
+            "neighbor_queue_length_norm",
+            "neighbor_queue_delay_norm",
+            "neighbor_assigned_task_count_norm",
+            "neighbor_completed_task_count_norm",
+            "neighbor_cache_usage_ratio"
+          ],
+          "repeat": 2
+        },
+        {
+          "name": "queue_load_summary",
+          "fields": [
+            "queue_length_norm",
+            "queue_delay_norm",
+            "assigned_task_count_norm",
+            "completed_task_count_norm"
+          ],
+          "repeat": 1
+        },
+        {
+          "name": "local_cache_summary",
+          "fields": [
+            "cache_service_0",
+            "cache_service_1",
+            "cache_service_2",
+            "cache_service_3",
+            "cache_service_4"
+          ],
+          "repeat": 1
+        }
+      ],
+      "flat_fields": [
+        "self_x_norm",
+        "self_y_norm",
+        "self_energy_ratio",
+        "self_queue_length_norm",
+        "self_queue_delay_norm",
+        "self_assigned_task_count_norm",
+        "self_completed_task_count_norm",
+        "self_cache_usage_ratio",
+        "neighbor_uav_states[0].neighbor_rel_x_norm",
+        "neighbor_uav_states[0].neighbor_rel_y_norm",
+        "neighbor_uav_states[0].neighbor_queue_length_norm",
+        "neighbor_uav_states[0].neighbor_queue_delay_norm",
+        "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+        "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+        "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+        "neighbor_uav_states[1].neighbor_rel_x_norm",
+        "neighbor_uav_states[1].neighbor_rel_y_norm",
+        "neighbor_uav_states[1].neighbor_queue_length_norm",
+        "neighbor_uav_states[1].neighbor_queue_delay_norm",
+        "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+        "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+        "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+        "queue_length_norm",
+        "queue_delay_norm",
+        "assigned_task_count_norm",
+        "completed_task_count_norm",
+        "cache_service_0",
+        "cache_service_1",
+        "cache_service_2",
+        "cache_service_3",
+        "cache_service_4"
+      ],
+      "section_slices": {
+        "own_state": [
+          0,
+          8
+        ],
+        "neighbor_uav_states": [
+          8,
+          22
+        ],
+        "queue_load_summary": [
+          22,
+          26
+        ],
+        "local_cache_summary": [
+          26,
+          31
+        ]
+      },
+      "total_length": 31
+    },
+    "per_uav_metrics_fields": [
+      "agent_id",
+      "uav_id",
+      "served_task_count_total",
+      "assigned_task_count_total",
+      "completed_task_count_total",
+      "current_queue_length",
+      "current_queue_delay",
+      "cumulative_queue_delay",
+      "max_queue_length",
+      "remaining_energy_j",
+      "energy_used_j",
+      "cache_usage_ratio",
+      "cache_services"
+    ]
+  },
+  "checkpoint_path": "C:\\Users\\woshinibaba\\Documents\\研究生\\论文\\毕业论文\\论文正式\\第四章\\results\\marl_shared_ppo_u2_nearest_uav.pt",
+  "model_path": "C:\\Users\\woshinibaba\\Documents\\研究生\\论文\\毕业论文\\论文正式\\第四章\\results\\marl_shared_ppo_u2_nearest_uav.pt",
+  "training_log": [
+    {
+      "episode": 0,
+      "seed": 42,
+      "team_return": 4.194825172424316,
+      "completion_rate": 1.0,
+      "average_latency": 0.2892902322758323,
+      "total_energy": 178.71281825686273,
+      "mean_step_energy": 22.33910228210784,
+      "mean_step_action_magnitude": 0.30986882443836117,
+      "actor_loss": -0.055647116132604424,
+      "critic_loss": 2.6283752620220184,
+      "entropy": 0.06519803404808044,
+      "action_std_scale": 0.2486747695505619
+    },
+    {
+      "episode": 1,
+      "seed": 43,
+      "team_return": 5.8885111808776855,
+      "completion_rate": 1.0,
+      "average_latency": 0.24574225366232375,
+      "total_energy": 149.89344946929648,
+      "mean_step_energy": 18.73668118366206,
+      "mean_step_action_magnitude": 0.26023168310641764,
+      "actor_loss": -0.021800826500111725,
+      "critic_loss": 2.2657114565372467,
+      "entropy": 0.053334519267082214,
+      "action_std_scale": 0.2470128794014454
+    },
+    {
+      "episode": 2,
+      "seed": 44,
+      "team_return": 5.116028785705566,
+      "completion_rate": 1.0,
+      "average_latency": 0.28443525435120137,
+      "total_energy": 179.4488357980691,
+      "mean_step_energy": 22.431104474758637,
+      "mean_step_action_magnitude": 0.3100377744438718,
+      "actor_loss": -0.02292828235295019,
+      "critic_loss": 1.6762283444404602,
+      "entropy": 0.03997902572154999,
+      "action_std_scale": 0.2454716782271862
+    },
+    {
+      "episode": 3,
+      "seed": 45,
+      "team_return": 4.730950355529785,
+      "completion_rate": 1.0,
+      "average_latency": 0.28776712617813294,
+      "total_energy": 206.36830420208514,
+      "mean_step_energy": 25.796038025260643,
+      "mean_step_action_magnitude": 0.35696092009971914,
+      "actor_loss": -0.02063189022737788,
+      "critic_loss": 1.1527208089828491,
+      "entropy": 0.028363287448883057,
+      "action_std_scale": 0.24416540540754794
+    },
+    {
+      "episode": 4,
+      "seed": 46,
+      "team_return": 5.221702575683594,
+      "completion_rate": 1.0,
+      "average_latency": 0.28408650749190395,
+      "total_energy": 176.58698892280722,
+      "mean_step_energy": 22.073373615350903,
+      "mean_step_action_magnitude": 0.304880698147577,
+      "actor_loss": -0.02095233556065068,
+      "critic_loss": 0.9505859687924385,
+      "entropy": 0.017639994621276855,
+      "action_std_scale": 0.24280193135142325
+    },
+    {
+      "episode": 5,
+      "seed": 47,
+      "team_return": 6.209861755371094,
+      "completion_rate": 1.0,
+      "average_latency": 0.2995290171741071,
+      "total_energy": 124.65872092458306,
+      "mean_step_energy": 15.582340115572883,
+      "mean_step_action_magnitude": 0.21505980704393943,
+      "actor_loss": -0.020207416937410017,
+      "critic_loss": 1.4594862163066864,
+      "entropy": 0.006866768002510071,
+      "action_std_scale": 0.24164874374866485
+    },
+    {
+      "episode": 6,
+      "seed": 48,
+      "team_return": 5.692951202392578,
+      "completion_rate": 1.0,
+      "average_latency": 0.275737006924487,
+      "total_energy": 158.18191892885167,
+      "mean_step_energy": 19.77273986610646,
+      "mean_step_action_magnitude": 0.27446187778774433,
+      "actor_loss": -0.0529660345987395,
+      "critic_loss": 0.7333413809537888,
+      "entropy": -0.001744002103805542,
+      "action_std_scale": 0.24068163067102433
+    },
+    {
+      "episode": 7,
+      "seed": 49,
+      "team_return": 5.258251190185547,
+      "completion_rate": 1.0,
+      "average_latency": 0.281884063821489,
+      "total_energy": 181.3673829202604,
+      "mean_step_energy": 22.67092286503255,
+      "mean_step_action_magnitude": 0.3146655987010195,
+      "actor_loss": -0.011082543558586622,
+      "critic_loss": 0.6701978668570518,
+      "entropy": -0.01048383116722107,
+      "action_std_scale": 0.23949033856391908
+    },
+    {
+      "episode": 8,
+      "seed": 50,
+      "team_return": 4.108956336975098,
+      "completion_rate": 1.0,
+      "average_latency": 0.2525300397107913,
+      "total_energy": 185.76669010855994,
+      "mean_step_energy": 23.220836263569993,
+      "mean_step_action_magnitude": 0.3225116147718054,
+      "actor_loss": -0.014750778736924985,
+      "critic_loss": 0.5123471431434155,
+      "entropy": -0.01908828318119049,
+      "action_std_scale": 0.23879925332963467
+    },
+    {
+      "episode": 9,
+      "seed": 51,
+      "team_return": 5.303447723388672,
+      "completion_rate": 1.0,
+      "average_latency": 0.3071707038899114,
+      "total_energy": 177.40449017631306,
+      "mean_step_energy": 22.175561272039133,
+      "mean_step_action_magnitude": 0.30761148584022185,
+      "actor_loss": -0.05324737587943673,
+      "critic_loss": 0.7903321608901024,
+      "entropy": -0.02467234432697296,
+      "action_std_scale": 0.237994477301836
+    },
+    {
+      "episode": 10,
+      "seed": 52,
+      "team_return": 5.673726558685303,
+      "completion_rate": 1.0,
+      "average_latency": 0.2691237631447089,
+      "total_energy": 159.46714951841358,
+      "mean_step_energy": 19.933393689801697,
+      "mean_step_action_magnitude": 0.2766880717478525,
+      "actor_loss": -0.025813924199610483,
+      "critic_loss": 1.1293295323848724,
+      "entropy": -0.03209538757801056,
+      "action_std_scale": 0.23708999201655387
+    },
+    {
+      "episode": 11,
+      "seed": 53,
+      "team_return": 5.802996635437012,
+      "completion_rate": 1.0,
+      "average_latency": 0.265137386601984,
+      "total_energy": 153.3242015030313,
+      "mean_step_energy": 19.165525187878913,
+      "mean_step_action_magnitude": 0.2660426394665849,
+      "actor_loss": -0.02018913887513918,
+      "critic_loss": 0.8800726532936096,
+      "entropy": -0.04038429260253906,
+      "action_std_scale": 0.23592913903295995
+    }
+  ],
+  "episode_logs": [
+    {
+      "chapter_name": "chapter4",
+      "episode_index": 0,
+      "seed": 42,
+      "num_uavs": 2,
+      "num_users": 6,
+      "assignment_rule": "nearest_uav",
+      "global_metrics": {
+        "completion_rate": 1.0,
+        "average_latency": 0.2892902322758323,
+        "total_energy": 178.71281825686273,
+        "cache_hit_rate": 0.9130434782608695,
+        "fairness_user_completion": 1.0,
+        "fairness_uav_load": 1.0,
+        "deadline_violation_rate": 0.0,
+        "reliability_violation_rate": 0.0
+      },
+      "per_uav_metrics": [
+        {
+          "agent_id": "uav_0",
+          "uav_id": 0,
+          "served_task_count_total": 1,
+          "assigned_task_count_total": 11,
+          "completed_task_count_total": 1,
+          "current_queue_length": 1,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.021574989666560462,
+          "max_queue_length": 1,
+          "remaining_energy_j": 4906.089990541098,
+          "energy_used_j": 93.9100094589021,
+          "cache_usage_ratio": 0.3333333333333333,
+          "cache_services": [
+            4
+          ]
+        },
+        {
+          "agent_id": "uav_1",
+          "uav_id": 1,
+          "served_task_count_total": 1,
+          "assigned_task_count_total": 12,
+          "completed_task_count_total": 1,
+          "current_queue_length": 1,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.03938400926212626,
+          "max_queue_length": 1,
+          "remaining_energy_j": 4915.197191202038,
+          "energy_used_j": 84.80280879796192,
+          "cache_usage_ratio": 0.3333333333333333,
+          "cache_services": [
+            3
+          ]
+        }
+      ],
+      "action_schema": {
+        "schema_version": "action.v1",
+        "canonical_shape": [
+          2,
+          2
+        ],
+        "single_agent_compatibility": null,
+        "agent_order": [
+          "uav_0",
+          "uav_1"
+        ],
+        "fields_per_agent": [
+          "dx",
+          "dy"
+        ],
+        "value_range": [
+          -1.0,
+          1.0
+        ],
+        "scaled_max_displacement_per_step": 18.0
+      },
+      "observation_schema": {
+        "schema_version": "observation.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "associated_user_state",
+            "fields": [
+              "user_rel_x_norm",
+              "user_rel_y_norm",
+              "user_pending_task_count_norm",
+              "user_min_slack_norm",
+              "user_service_type_norm"
+            ],
+            "repeat": 3
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4",
+          "associated_user_state[0].user_rel_x_norm",
+          "associated_user_state[0].user_rel_y_norm",
+          "associated_user_state[0].user_pending_task_count_norm",
+          "associated_user_state[0].user_min_slack_norm",
+          "associated_user_state[0].user_service_type_norm",
+          "associated_user_state[1].user_rel_x_norm",
+          "associated_user_state[1].user_rel_y_norm",
+          "associated_user_state[1].user_pending_task_count_norm",
+          "associated_user_state[1].user_min_slack_norm",
+          "associated_user_state[1].user_service_type_norm",
+          "associated_user_state[2].user_rel_x_norm",
+          "associated_user_state[2].user_rel_y_norm",
+          "associated_user_state[2].user_pending_task_count_norm",
+          "associated_user_state[2].user_min_slack_norm",
+          "associated_user_state[2].user_service_type_norm"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ],
+          "associated_user_state": [
+            31,
+            46
+          ]
+        },
+        "total_length": 46
+      },
+      "uav_state_schema": {
+        "schema_version": "uav_state.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ]
+        },
+        "total_length": 31
+      }
+    },
+    {
+      "chapter_name": "chapter4",
+      "episode_index": 1,
+      "seed": 43,
+      "num_uavs": 2,
+      "num_users": 6,
+      "assignment_rule": "nearest_uav",
+      "global_metrics": {
+        "completion_rate": 1.0,
+        "average_latency": 0.24574225366232375,
+        "total_energy": 149.89344946929648,
+        "cache_hit_rate": 1.0,
+        "fairness_user_completion": 1.0,
+        "fairness_uav_load": 0.0,
+        "deadline_violation_rate": 0.0,
+        "reliability_violation_rate": 0.0
+      },
+      "per_uav_metrics": [
+        {
+          "agent_id": "uav_0",
+          "uav_id": 0,
+          "served_task_count_total": 0,
+          "assigned_task_count_total": 16,
+          "completed_task_count_total": 0,
+          "current_queue_length": 0,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.0,
+          "max_queue_length": 0,
+          "remaining_energy_j": 4915.93276638411,
+          "energy_used_j": 84.06723361588956,
+          "cache_usage_ratio": 0.0,
+          "cache_services": []
+        },
+        {
+          "agent_id": "uav_1",
+          "uav_id": 1,
+          "served_task_count_total": 0,
+          "assigned_task_count_total": 0,
+          "completed_task_count_total": 0,
+          "current_queue_length": 0,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.0,
+          "max_queue_length": 0,
+          "remaining_energy_j": 4934.173784146593,
+          "energy_used_j": 65.82621585340712,
+          "cache_usage_ratio": 0.0,
+          "cache_services": []
+        }
+      ],
+      "action_schema": {
+        "schema_version": "action.v1",
+        "canonical_shape": [
+          2,
+          2
+        ],
+        "single_agent_compatibility": null,
+        "agent_order": [
+          "uav_0",
+          "uav_1"
+        ],
+        "fields_per_agent": [
+          "dx",
+          "dy"
+        ],
+        "value_range": [
+          -1.0,
+          1.0
+        ],
+        "scaled_max_displacement_per_step": 18.0
+      },
+      "observation_schema": {
+        "schema_version": "observation.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "associated_user_state",
+            "fields": [
+              "user_rel_x_norm",
+              "user_rel_y_norm",
+              "user_pending_task_count_norm",
+              "user_min_slack_norm",
+              "user_service_type_norm"
+            ],
+            "repeat": 3
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4",
+          "associated_user_state[0].user_rel_x_norm",
+          "associated_user_state[0].user_rel_y_norm",
+          "associated_user_state[0].user_pending_task_count_norm",
+          "associated_user_state[0].user_min_slack_norm",
+          "associated_user_state[0].user_service_type_norm",
+          "associated_user_state[1].user_rel_x_norm",
+          "associated_user_state[1].user_rel_y_norm",
+          "associated_user_state[1].user_pending_task_count_norm",
+          "associated_user_state[1].user_min_slack_norm",
+          "associated_user_state[1].user_service_type_norm",
+          "associated_user_state[2].user_rel_x_norm",
+          "associated_user_state[2].user_rel_y_norm",
+          "associated_user_state[2].user_pending_task_count_norm",
+          "associated_user_state[2].user_min_slack_norm",
+          "associated_user_state[2].user_service_type_norm"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ],
+          "associated_user_state": [
+            31,
+            46
+          ]
+        },
+        "total_length": 46
+      },
+      "uav_state_schema": {
+        "schema_version": "uav_state.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ]
+        },
+        "total_length": 31
+      }
+    },
+    {
+      "chapter_name": "chapter4",
+      "episode_index": 2,
+      "seed": 44,
+      "num_uavs": 2,
+      "num_users": 6,
+      "assignment_rule": "nearest_uav",
+      "global_metrics": {
+        "completion_rate": 1.0,
+        "average_latency": 0.28443525435120137,
+        "total_energy": 179.4488357980691,
+        "cache_hit_rate": 0.7777777777777778,
+        "fairness_user_completion": 1.0,
+        "fairness_uav_load": 0.5,
+        "deadline_violation_rate": 0.0,
+        "reliability_violation_rate": 0.0
+      },
+      "per_uav_metrics": [
+        {
+          "agent_id": "uav_0",
+          "uav_id": 0,
+          "served_task_count_total": 0,
+          "assigned_task_count_total": 9,
+          "completed_task_count_total": 0,
+          "current_queue_length": 0,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.0,
+          "max_queue_length": 0,
+          "remaining_energy_j": 4912.47793629705,
+          "energy_used_j": 87.52206370294971,
+          "cache_usage_ratio": 0.0,
+          "cache_services": []
+        },
+        {
+          "agent_id": "uav_1",
+          "uav_id": 1,
+          "served_task_count_total": 6,
+          "assigned_task_count_total": 9,
+          "completed_task_count_total": 6,
+          "current_queue_length": 6,
+          "current_queue_delay": 0.03379332685901559,
+          "cumulative_queue_delay": 0.18812500821145062,
+          "max_queue_length": 6,
+          "remaining_energy_j": 4908.073227904882,
+          "energy_used_j": 91.9267720951184,
+          "cache_usage_ratio": 1.0,
+          "cache_services": [
+            1,
+            2,
+            4
+          ]
+        }
+      ],
+      "action_schema": {
+        "schema_version": "action.v1",
+        "canonical_shape": [
+          2,
+          2
+        ],
+        "single_agent_compatibility": null,
+        "agent_order": [
+          "uav_0",
+          "uav_1"
+        ],
+        "fields_per_agent": [
+          "dx",
+          "dy"
+        ],
+        "value_range": [
+          -1.0,
+          1.0
+        ],
+        "scaled_max_displacement_per_step": 18.0
+      },
+      "observation_schema": {
+        "schema_version": "observation.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "associated_user_state",
+            "fields": [
+              "user_rel_x_norm",
+              "user_rel_y_norm",
+              "user_pending_task_count_norm",
+              "user_min_slack_norm",
+              "user_service_type_norm"
+            ],
+            "repeat": 3
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4",
+          "associated_user_state[0].user_rel_x_norm",
+          "associated_user_state[0].user_rel_y_norm",
+          "associated_user_state[0].user_pending_task_count_norm",
+          "associated_user_state[0].user_min_slack_norm",
+          "associated_user_state[0].user_service_type_norm",
+          "associated_user_state[1].user_rel_x_norm",
+          "associated_user_state[1].user_rel_y_norm",
+          "associated_user_state[1].user_pending_task_count_norm",
+          "associated_user_state[1].user_min_slack_norm",
+          "associated_user_state[1].user_service_type_norm",
+          "associated_user_state[2].user_rel_x_norm",
+          "associated_user_state[2].user_rel_y_norm",
+          "associated_user_state[2].user_pending_task_count_norm",
+          "associated_user_state[2].user_min_slack_norm",
+          "associated_user_state[2].user_service_type_norm"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ],
+          "associated_user_state": [
+            31,
+            46
+          ]
+        },
+        "total_length": 46
+      },
+      "uav_state_schema": {
+        "schema_version": "uav_state.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ]
+        },
+        "total_length": 31
+      }
+    },
+    {
+      "chapter_name": "chapter4",
+      "episode_index": 3,
+      "seed": 45,
+      "num_uavs": 2,
+      "num_users": 6,
+      "assignment_rule": "nearest_uav",
+      "global_metrics": {
+        "completion_rate": 1.0,
+        "average_latency": 0.28776712617813294,
+        "total_energy": 206.36830420208514,
+        "cache_hit_rate": 0.9,
+        "fairness_user_completion": 1.0,
+        "fairness_uav_load": 0.5,
+        "deadline_violation_rate": 0.0,
+        "reliability_violation_rate": 0.0
+      },
+      "per_uav_metrics": [
+        {
+          "agent_id": "uav_0",
+          "uav_id": 0,
+          "served_task_count_total": 0,
+          "assigned_task_count_total": 12,
+          "completed_task_count_total": 0,
+          "current_queue_length": 0,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.0,
+          "max_queue_length": 0,
+          "remaining_energy_j": 4905.629597208007,
+          "energy_used_j": 94.370402791993,
+          "cache_usage_ratio": 0.0,
+          "cache_services": []
+        },
+        {
+          "agent_id": "uav_1",
+          "uav_id": 1,
+          "served_task_count_total": 4,
+          "assigned_task_count_total": 8,
+          "completed_task_count_total": 4,
+          "current_queue_length": 4,
+          "current_queue_delay": 0.01716008780349121,
+          "cumulative_queue_delay": 0.08171526399096951,
+          "max_queue_length": 4,
+          "remaining_energy_j": 4888.002098589907,
+          "energy_used_j": 111.99790141009271,
+          "cache_usage_ratio": 0.6666666666666666,
+          "cache_services": [
+            2,
+            3
+          ]
+        }
+      ],
+      "action_schema": {
+        "schema_version": "action.v1",
+        "canonical_shape": [
+          2,
+          2
+        ],
+        "single_agent_compatibility": null,
+        "agent_order": [
+          "uav_0",
+          "uav_1"
+        ],
+        "fields_per_agent": [
+          "dx",
+          "dy"
+        ],
+        "value_range": [
+          -1.0,
+          1.0
+        ],
+        "scaled_max_displacement_per_step": 18.0
+      },
+      "observation_schema": {
+        "schema_version": "observation.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "associated_user_state",
+            "fields": [
+              "user_rel_x_norm",
+              "user_rel_y_norm",
+              "user_pending_task_count_norm",
+              "user_min_slack_norm",
+              "user_service_type_norm"
+            ],
+            "repeat": 3
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4",
+          "associated_user_state[0].user_rel_x_norm",
+          "associated_user_state[0].user_rel_y_norm",
+          "associated_user_state[0].user_pending_task_count_norm",
+          "associated_user_state[0].user_min_slack_norm",
+          "associated_user_state[0].user_service_type_norm",
+          "associated_user_state[1].user_rel_x_norm",
+          "associated_user_state[1].user_rel_y_norm",
+          "associated_user_state[1].user_pending_task_count_norm",
+          "associated_user_state[1].user_min_slack_norm",
+          "associated_user_state[1].user_service_type_norm",
+          "associated_user_state[2].user_rel_x_norm",
+          "associated_user_state[2].user_rel_y_norm",
+          "associated_user_state[2].user_pending_task_count_norm",
+          "associated_user_state[2].user_min_slack_norm",
+          "associated_user_state[2].user_service_type_norm"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ],
+          "associated_user_state": [
+            31,
+            46
+          ]
+        },
+        "total_length": 46
+      },
+      "uav_state_schema": {
+        "schema_version": "uav_state.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ]
+        },
+        "total_length": 31
+      }
+    },
+    {
+      "chapter_name": "chapter4",
+      "episode_index": 4,
+      "seed": 46,
+      "num_uavs": 2,
+      "num_users": 6,
+      "assignment_rule": "nearest_uav",
+      "global_metrics": {
+        "completion_rate": 1.0,
+        "average_latency": 0.28408650749190395,
+        "total_energy": 176.58698892280722,
+        "cache_hit_rate": 0.8076923076923077,
+        "fairness_user_completion": 1.0,
+        "fairness_uav_load": 0.6621621621621622,
+        "deadline_violation_rate": 0.0,
+        "reliability_violation_rate": 0.0
+      },
+      "per_uav_metrics": [
+        {
+          "agent_id": "uav_0",
+          "uav_id": 0,
+          "served_task_count_total": 6,
+          "assigned_task_count_total": 10,
+          "completed_task_count_total": 6,
+          "current_queue_length": 6,
+          "current_queue_delay": 0.028567906030946943,
+          "cumulative_queue_delay": 0.1682624708133576,
+          "max_queue_length": 6,
+          "remaining_energy_j": 4908.099582645129,
+          "energy_used_j": 91.90041735487102,
+          "cache_usage_ratio": 1.0,
+          "cache_services": [
+            0,
+            3,
+            4
+          ]
+        },
+        {
+          "agent_id": "uav_1",
+          "uav_id": 1,
+          "served_task_count_total": 1,
+          "assigned_task_count_total": 16,
+          "completed_task_count_total": 1,
+          "current_queue_length": 1,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.01823484798269881,
+          "max_queue_length": 1,
+          "remaining_energy_j": 4915.313428432066,
+          "energy_used_j": 84.68657156793415,
+          "cache_usage_ratio": 0.3333333333333333,
+          "cache_services": [
+            0
+          ]
+        }
+      ],
+      "action_schema": {
+        "schema_version": "action.v1",
+        "canonical_shape": [
+          2,
+          2
+        ],
+        "single_agent_compatibility": null,
+        "agent_order": [
+          "uav_0",
+          "uav_1"
+        ],
+        "fields_per_agent": [
+          "dx",
+          "dy"
+        ],
+        "value_range": [
+          -1.0,
+          1.0
+        ],
+        "scaled_max_displacement_per_step": 18.0
+      },
+      "observation_schema": {
+        "schema_version": "observation.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "associated_user_state",
+            "fields": [
+              "user_rel_x_norm",
+              "user_rel_y_norm",
+              "user_pending_task_count_norm",
+              "user_min_slack_norm",
+              "user_service_type_norm"
+            ],
+            "repeat": 3
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4",
+          "associated_user_state[0].user_rel_x_norm",
+          "associated_user_state[0].user_rel_y_norm",
+          "associated_user_state[0].user_pending_task_count_norm",
+          "associated_user_state[0].user_min_slack_norm",
+          "associated_user_state[0].user_service_type_norm",
+          "associated_user_state[1].user_rel_x_norm",
+          "associated_user_state[1].user_rel_y_norm",
+          "associated_user_state[1].user_pending_task_count_norm",
+          "associated_user_state[1].user_min_slack_norm",
+          "associated_user_state[1].user_service_type_norm",
+          "associated_user_state[2].user_rel_x_norm",
+          "associated_user_state[2].user_rel_y_norm",
+          "associated_user_state[2].user_pending_task_count_norm",
+          "associated_user_state[2].user_min_slack_norm",
+          "associated_user_state[2].user_service_type_norm"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ],
+          "associated_user_state": [
+            31,
+            46
+          ]
+        },
+        "total_length": 46
+      },
+      "uav_state_schema": {
+        "schema_version": "uav_state.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ]
+        },
+        "total_length": 31
+      }
+    },
+    {
+      "chapter_name": "chapter4",
+      "episode_index": 5,
+      "seed": 47,
+      "num_uavs": 2,
+      "num_users": 6,
+      "assignment_rule": "nearest_uav",
+      "global_metrics": {
+        "completion_rate": 1.0,
+        "average_latency": 0.2995290171741071,
+        "total_energy": 124.65872092458306,
+        "cache_hit_rate": 0.8518518518518519,
+        "fairness_user_completion": 1.0,
+        "fairness_uav_load": 0.5,
+        "deadline_violation_rate": 0.0,
+        "reliability_violation_rate": 0.0
+      },
+      "per_uav_metrics": [
+        {
+          "agent_id": "uav_0",
+          "uav_id": 0,
+          "served_task_count_total": 5,
+          "assigned_task_count_total": 26,
+          "completed_task_count_total": 5,
+          "current_queue_length": 5,
+          "current_queue_delay": 0.029207376958595432,
+          "cumulative_queue_delay": 0.1818749309318977,
+          "max_queue_length": 5,
+          "remaining_energy_j": 4937.468032387915,
+          "energy_used_j": 62.53196761208528,
+          "cache_usage_ratio": 1.0,
+          "cache_services": [
+            1,
+            3,
+            4
+          ]
+        },
+        {
+          "agent_id": "uav_1",
+          "uav_id": 1,
+          "served_task_count_total": 0,
+          "assigned_task_count_total": 1,
+          "completed_task_count_total": 0,
+          "current_queue_length": 0,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.0,
+          "max_queue_length": 0,
+          "remaining_energy_j": 4937.8732466875,
+          "energy_used_j": 62.126753312500114,
+          "cache_usage_ratio": 0.0,
+          "cache_services": []
+        }
+      ],
+      "action_schema": {
+        "schema_version": "action.v1",
+        "canonical_shape": [
+          2,
+          2
+        ],
+        "single_agent_compatibility": null,
+        "agent_order": [
+          "uav_0",
+          "uav_1"
+        ],
+        "fields_per_agent": [
+          "dx",
+          "dy"
+        ],
+        "value_range": [
+          -1.0,
+          1.0
+        ],
+        "scaled_max_displacement_per_step": 18.0
+      },
+      "observation_schema": {
+        "schema_version": "observation.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "associated_user_state",
+            "fields": [
+              "user_rel_x_norm",
+              "user_rel_y_norm",
+              "user_pending_task_count_norm",
+              "user_min_slack_norm",
+              "user_service_type_norm"
+            ],
+            "repeat": 3
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4",
+          "associated_user_state[0].user_rel_x_norm",
+          "associated_user_state[0].user_rel_y_norm",
+          "associated_user_state[0].user_pending_task_count_norm",
+          "associated_user_state[0].user_min_slack_norm",
+          "associated_user_state[0].user_service_type_norm",
+          "associated_user_state[1].user_rel_x_norm",
+          "associated_user_state[1].user_rel_y_norm",
+          "associated_user_state[1].user_pending_task_count_norm",
+          "associated_user_state[1].user_min_slack_norm",
+          "associated_user_state[1].user_service_type_norm",
+          "associated_user_state[2].user_rel_x_norm",
+          "associated_user_state[2].user_rel_y_norm",
+          "associated_user_state[2].user_pending_task_count_norm",
+          "associated_user_state[2].user_min_slack_norm",
+          "associated_user_state[2].user_service_type_norm"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ],
+          "associated_user_state": [
+            31,
+            46
+          ]
+        },
+        "total_length": 46
+      },
+      "uav_state_schema": {
+        "schema_version": "uav_state.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ]
+        },
+        "total_length": 31
+      }
+    },
+    {
+      "chapter_name": "chapter4",
+      "episode_index": 6,
+      "seed": 48,
+      "num_uavs": 2,
+      "num_users": 6,
+      "assignment_rule": "nearest_uav",
+      "global_metrics": {
+        "completion_rate": 1.0,
+        "average_latency": 0.275737006924487,
+        "total_energy": 158.18191892885167,
+        "cache_hit_rate": 0.9523809523809523,
+        "fairness_user_completion": 1.0,
+        "fairness_uav_load": 0.5,
+        "deadline_violation_rate": 0.0,
+        "reliability_violation_rate": 0.0
+      },
+      "per_uav_metrics": [
+        {
+          "agent_id": "uav_0",
+          "uav_id": 0,
+          "served_task_count_total": 0,
+          "assigned_task_count_total": 1,
+          "completed_task_count_total": 0,
+          "current_queue_length": 0,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.0,
+          "max_queue_length": 0,
+          "remaining_energy_j": 4909.887981776713,
+          "energy_used_j": 90.11201822328712,
+          "cache_usage_ratio": 0.0,
+          "cache_services": []
+        },
+        {
+          "agent_id": "uav_1",
+          "uav_id": 1,
+          "served_task_count_total": 1,
+          "assigned_task_count_total": 20,
+          "completed_task_count_total": 1,
+          "current_queue_length": 1,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.03073869683759023,
+          "max_queue_length": 1,
+          "remaining_energy_j": 4931.930099294435,
+          "energy_used_j": 68.06990070556458,
+          "cache_usage_ratio": 0.3333333333333333,
+          "cache_services": [
+            0
+          ]
+        }
+      ],
+      "action_schema": {
+        "schema_version": "action.v1",
+        "canonical_shape": [
+          2,
+          2
+        ],
+        "single_agent_compatibility": null,
+        "agent_order": [
+          "uav_0",
+          "uav_1"
+        ],
+        "fields_per_agent": [
+          "dx",
+          "dy"
+        ],
+        "value_range": [
+          -1.0,
+          1.0
+        ],
+        "scaled_max_displacement_per_step": 18.0
+      },
+      "observation_schema": {
+        "schema_version": "observation.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "associated_user_state",
+            "fields": [
+              "user_rel_x_norm",
+              "user_rel_y_norm",
+              "user_pending_task_count_norm",
+              "user_min_slack_norm",
+              "user_service_type_norm"
+            ],
+            "repeat": 3
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4",
+          "associated_user_state[0].user_rel_x_norm",
+          "associated_user_state[0].user_rel_y_norm",
+          "associated_user_state[0].user_pending_task_count_norm",
+          "associated_user_state[0].user_min_slack_norm",
+          "associated_user_state[0].user_service_type_norm",
+          "associated_user_state[1].user_rel_x_norm",
+          "associated_user_state[1].user_rel_y_norm",
+          "associated_user_state[1].user_pending_task_count_norm",
+          "associated_user_state[1].user_min_slack_norm",
+          "associated_user_state[1].user_service_type_norm",
+          "associated_user_state[2].user_rel_x_norm",
+          "associated_user_state[2].user_rel_y_norm",
+          "associated_user_state[2].user_pending_task_count_norm",
+          "associated_user_state[2].user_min_slack_norm",
+          "associated_user_state[2].user_service_type_norm"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ],
+          "associated_user_state": [
+            31,
+            46
+          ]
+        },
+        "total_length": 46
+      },
+      "uav_state_schema": {
+        "schema_version": "uav_state.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ]
+        },
+        "total_length": 31
+      }
+    },
+    {
+      "chapter_name": "chapter4",
+      "episode_index": 7,
+      "seed": 49,
+      "num_uavs": 2,
+      "num_users": 6,
+      "assignment_rule": "nearest_uav",
+      "global_metrics": {
+        "completion_rate": 1.0,
+        "average_latency": 0.281884063821489,
+        "total_energy": 181.3673829202604,
+        "cache_hit_rate": 0.9523809523809523,
+        "fairness_user_completion": 1.0,
+        "fairness_uav_load": 0.5,
+        "deadline_violation_rate": 0.0,
+        "reliability_violation_rate": 0.0
+      },
+      "per_uav_metrics": [
+        {
+          "agent_id": "uav_0",
+          "uav_id": 0,
+          "served_task_count_total": 0,
+          "assigned_task_count_total": 2,
+          "completed_task_count_total": 0,
+          "current_queue_length": 0,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.0,
+          "max_queue_length": 0,
+          "remaining_energy_j": 4906.142894441353,
+          "energy_used_j": 93.85710555864716,
+          "cache_usage_ratio": 0.0,
+          "cache_services": []
+        },
+        {
+          "agent_id": "uav_1",
+          "uav_id": 1,
+          "served_task_count_total": 1,
+          "assigned_task_count_total": 19,
+          "completed_task_count_total": 1,
+          "current_queue_length": 1,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.03614201924554994,
+          "max_queue_length": 1,
+          "remaining_energy_j": 4912.489722638388,
+          "energy_used_j": 87.51027736161177,
+          "cache_usage_ratio": 0.3333333333333333,
+          "cache_services": [
+            3
+          ]
+        }
+      ],
+      "action_schema": {
+        "schema_version": "action.v1",
+        "canonical_shape": [
+          2,
+          2
+        ],
+        "single_agent_compatibility": null,
+        "agent_order": [
+          "uav_0",
+          "uav_1"
+        ],
+        "fields_per_agent": [
+          "dx",
+          "dy"
+        ],
+        "value_range": [
+          -1.0,
+          1.0
+        ],
+        "scaled_max_displacement_per_step": 18.0
+      },
+      "observation_schema": {
+        "schema_version": "observation.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "associated_user_state",
+            "fields": [
+              "user_rel_x_norm",
+              "user_rel_y_norm",
+              "user_pending_task_count_norm",
+              "user_min_slack_norm",
+              "user_service_type_norm"
+            ],
+            "repeat": 3
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4",
+          "associated_user_state[0].user_rel_x_norm",
+          "associated_user_state[0].user_rel_y_norm",
+          "associated_user_state[0].user_pending_task_count_norm",
+          "associated_user_state[0].user_min_slack_norm",
+          "associated_user_state[0].user_service_type_norm",
+          "associated_user_state[1].user_rel_x_norm",
+          "associated_user_state[1].user_rel_y_norm",
+          "associated_user_state[1].user_pending_task_count_norm",
+          "associated_user_state[1].user_min_slack_norm",
+          "associated_user_state[1].user_service_type_norm",
+          "associated_user_state[2].user_rel_x_norm",
+          "associated_user_state[2].user_rel_y_norm",
+          "associated_user_state[2].user_pending_task_count_norm",
+          "associated_user_state[2].user_min_slack_norm",
+          "associated_user_state[2].user_service_type_norm"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ],
+          "associated_user_state": [
+            31,
+            46
+          ]
+        },
+        "total_length": 46
+      },
+      "uav_state_schema": {
+        "schema_version": "uav_state.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ]
+        },
+        "total_length": 31
+      }
+    },
+    {
+      "chapter_name": "chapter4",
+      "episode_index": 8,
+      "seed": 50,
+      "num_uavs": 2,
+      "num_users": 6,
+      "assignment_rule": "nearest_uav",
+      "global_metrics": {
+        "completion_rate": 1.0,
+        "average_latency": 0.2525300397107913,
+        "total_energy": 185.76669010855994,
+        "cache_hit_rate": 1.0,
+        "fairness_user_completion": 1.0,
+        "fairness_uav_load": 0.0,
+        "deadline_violation_rate": 0.0,
+        "reliability_violation_rate": 0.0
+      },
+      "per_uav_metrics": [
+        {
+          "agent_id": "uav_0",
+          "uav_id": 0,
+          "served_task_count_total": 0,
+          "assigned_task_count_total": 6,
+          "completed_task_count_total": 0,
+          "current_queue_length": 0,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.0,
+          "max_queue_length": 0,
+          "remaining_energy_j": 4902.490872741925,
+          "energy_used_j": 97.50912725807484,
+          "cache_usage_ratio": 0.0,
+          "cache_services": []
+        },
+        {
+          "agent_id": "uav_1",
+          "uav_id": 1,
+          "served_task_count_total": 0,
+          "assigned_task_count_total": 11,
+          "completed_task_count_total": 0,
+          "current_queue_length": 0,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.0,
+          "max_queue_length": 0,
+          "remaining_energy_j": 4911.742437149514,
+          "energy_used_j": 88.25756285048556,
+          "cache_usage_ratio": 0.0,
+          "cache_services": []
+        }
+      ],
+      "action_schema": {
+        "schema_version": "action.v1",
+        "canonical_shape": [
+          2,
+          2
+        ],
+        "single_agent_compatibility": null,
+        "agent_order": [
+          "uav_0",
+          "uav_1"
+        ],
+        "fields_per_agent": [
+          "dx",
+          "dy"
+        ],
+        "value_range": [
+          -1.0,
+          1.0
+        ],
+        "scaled_max_displacement_per_step": 18.0
+      },
+      "observation_schema": {
+        "schema_version": "observation.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "associated_user_state",
+            "fields": [
+              "user_rel_x_norm",
+              "user_rel_y_norm",
+              "user_pending_task_count_norm",
+              "user_min_slack_norm",
+              "user_service_type_norm"
+            ],
+            "repeat": 3
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4",
+          "associated_user_state[0].user_rel_x_norm",
+          "associated_user_state[0].user_rel_y_norm",
+          "associated_user_state[0].user_pending_task_count_norm",
+          "associated_user_state[0].user_min_slack_norm",
+          "associated_user_state[0].user_service_type_norm",
+          "associated_user_state[1].user_rel_x_norm",
+          "associated_user_state[1].user_rel_y_norm",
+          "associated_user_state[1].user_pending_task_count_norm",
+          "associated_user_state[1].user_min_slack_norm",
+          "associated_user_state[1].user_service_type_norm",
+          "associated_user_state[2].user_rel_x_norm",
+          "associated_user_state[2].user_rel_y_norm",
+          "associated_user_state[2].user_pending_task_count_norm",
+          "associated_user_state[2].user_min_slack_norm",
+          "associated_user_state[2].user_service_type_norm"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ],
+          "associated_user_state": [
+            31,
+            46
+          ]
+        },
+        "total_length": 46
+      },
+      "uav_state_schema": {
+        "schema_version": "uav_state.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ]
+        },
+        "total_length": 31
+      }
+    },
+    {
+      "chapter_name": "chapter4",
+      "episode_index": 9,
+      "seed": 51,
+      "num_uavs": 2,
+      "num_users": 6,
+      "assignment_rule": "nearest_uav",
+      "global_metrics": {
+        "completion_rate": 1.0,
+        "average_latency": 0.3071707038899114,
+        "total_energy": 177.40449017631306,
+        "cache_hit_rate": 0.9130434782608695,
+        "fairness_user_completion": 1.0,
+        "fairness_uav_load": 0.5,
+        "deadline_violation_rate": 0.0,
+        "reliability_violation_rate": 0.0
+      },
+      "per_uav_metrics": [
+        {
+          "agent_id": "uav_0",
+          "uav_id": 0,
+          "served_task_count_total": 0,
+          "assigned_task_count_total": 11,
+          "completed_task_count_total": 0,
+          "current_queue_length": 0,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.0,
+          "max_queue_length": 0,
+          "remaining_energy_j": 4914.675538900377,
+          "energy_used_j": 85.32446109962257,
+          "cache_usage_ratio": 0.0,
+          "cache_services": []
+        },
+        {
+          "agent_id": "uav_1",
+          "uav_id": 1,
+          "served_task_count_total": 2,
+          "assigned_task_count_total": 12,
+          "completed_task_count_total": 2,
+          "current_queue_length": 2,
+          "current_queue_delay": 0.04158376459206714,
+          "cumulative_queue_delay": 0.08009361817607275,
+          "max_queue_length": 2,
+          "remaining_energy_j": 4907.919970923309,
+          "energy_used_j": 92.08002907669106,
+          "cache_usage_ratio": 0.6666666666666666,
+          "cache_services": [
+            3,
+            4
+          ]
+        }
+      ],
+      "action_schema": {
+        "schema_version": "action.v1",
+        "canonical_shape": [
+          2,
+          2
+        ],
+        "single_agent_compatibility": null,
+        "agent_order": [
+          "uav_0",
+          "uav_1"
+        ],
+        "fields_per_agent": [
+          "dx",
+          "dy"
+        ],
+        "value_range": [
+          -1.0,
+          1.0
+        ],
+        "scaled_max_displacement_per_step": 18.0
+      },
+      "observation_schema": {
+        "schema_version": "observation.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "associated_user_state",
+            "fields": [
+              "user_rel_x_norm",
+              "user_rel_y_norm",
+              "user_pending_task_count_norm",
+              "user_min_slack_norm",
+              "user_service_type_norm"
+            ],
+            "repeat": 3
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4",
+          "associated_user_state[0].user_rel_x_norm",
+          "associated_user_state[0].user_rel_y_norm",
+          "associated_user_state[0].user_pending_task_count_norm",
+          "associated_user_state[0].user_min_slack_norm",
+          "associated_user_state[0].user_service_type_norm",
+          "associated_user_state[1].user_rel_x_norm",
+          "associated_user_state[1].user_rel_y_norm",
+          "associated_user_state[1].user_pending_task_count_norm",
+          "associated_user_state[1].user_min_slack_norm",
+          "associated_user_state[1].user_service_type_norm",
+          "associated_user_state[2].user_rel_x_norm",
+          "associated_user_state[2].user_rel_y_norm",
+          "associated_user_state[2].user_pending_task_count_norm",
+          "associated_user_state[2].user_min_slack_norm",
+          "associated_user_state[2].user_service_type_norm"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ],
+          "associated_user_state": [
+            31,
+            46
+          ]
+        },
+        "total_length": 46
+      },
+      "uav_state_schema": {
+        "schema_version": "uav_state.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ]
+        },
+        "total_length": 31
+      }
+    },
+    {
+      "chapter_name": "chapter4",
+      "episode_index": 10,
+      "seed": 52,
+      "num_uavs": 2,
+      "num_users": 6,
+      "assignment_rule": "nearest_uav",
+      "global_metrics": {
+        "completion_rate": 1.0,
+        "average_latency": 0.2691237631447089,
+        "total_energy": 159.46714951841358,
+        "cache_hit_rate": 0.9523809523809523,
+        "fairness_user_completion": 1.0,
+        "fairness_uav_load": 0.5,
+        "deadline_violation_rate": 0.0,
+        "reliability_violation_rate": 0.0
+      },
+      "per_uav_metrics": [
+        {
+          "agent_id": "uav_0",
+          "uav_id": 0,
+          "served_task_count_total": 0,
+          "assigned_task_count_total": 5,
+          "completed_task_count_total": 0,
+          "current_queue_length": 0,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.0,
+          "max_queue_length": 0,
+          "remaining_energy_j": 4937.714184198203,
+          "energy_used_j": 62.28581580179707,
+          "cache_usage_ratio": 0.0,
+          "cache_services": []
+        },
+        {
+          "agent_id": "uav_1",
+          "uav_id": 1,
+          "served_task_count_total": 1,
+          "assigned_task_count_total": 16,
+          "completed_task_count_total": 1,
+          "current_queue_length": 1,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.03348503264183227,
+          "max_queue_length": 1,
+          "remaining_energy_j": 4902.818666283383,
+          "energy_used_j": 97.18133371661679,
+          "cache_usage_ratio": 0.3333333333333333,
+          "cache_services": [
+            0
+          ]
+        }
+      ],
+      "action_schema": {
+        "schema_version": "action.v1",
+        "canonical_shape": [
+          2,
+          2
+        ],
+        "single_agent_compatibility": null,
+        "agent_order": [
+          "uav_0",
+          "uav_1"
+        ],
+        "fields_per_agent": [
+          "dx",
+          "dy"
+        ],
+        "value_range": [
+          -1.0,
+          1.0
+        ],
+        "scaled_max_displacement_per_step": 18.0
+      },
+      "observation_schema": {
+        "schema_version": "observation.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "associated_user_state",
+            "fields": [
+              "user_rel_x_norm",
+              "user_rel_y_norm",
+              "user_pending_task_count_norm",
+              "user_min_slack_norm",
+              "user_service_type_norm"
+            ],
+            "repeat": 3
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4",
+          "associated_user_state[0].user_rel_x_norm",
+          "associated_user_state[0].user_rel_y_norm",
+          "associated_user_state[0].user_pending_task_count_norm",
+          "associated_user_state[0].user_min_slack_norm",
+          "associated_user_state[0].user_service_type_norm",
+          "associated_user_state[1].user_rel_x_norm",
+          "associated_user_state[1].user_rel_y_norm",
+          "associated_user_state[1].user_pending_task_count_norm",
+          "associated_user_state[1].user_min_slack_norm",
+          "associated_user_state[1].user_service_type_norm",
+          "associated_user_state[2].user_rel_x_norm",
+          "associated_user_state[2].user_rel_y_norm",
+          "associated_user_state[2].user_pending_task_count_norm",
+          "associated_user_state[2].user_min_slack_norm",
+          "associated_user_state[2].user_service_type_norm"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ],
+          "associated_user_state": [
+            31,
+            46
+          ]
+        },
+        "total_length": 46
+      },
+      "uav_state_schema": {
+        "schema_version": "uav_state.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ]
+        },
+        "total_length": 31
+      }
+    },
+    {
+      "chapter_name": "chapter4",
+      "episode_index": 11,
+      "seed": 53,
+      "num_uavs": 2,
+      "num_users": 6,
+      "assignment_rule": "nearest_uav",
+      "global_metrics": {
+        "completion_rate": 1.0,
+        "average_latency": 0.265137386601984,
+        "total_energy": 153.3242015030313,
+        "cache_hit_rate": 0.9615384615384616,
+        "fairness_user_completion": 1.0,
+        "fairness_uav_load": 0.5,
+        "deadline_violation_rate": 0.0,
+        "reliability_violation_rate": 0.0
+      },
+      "per_uav_metrics": [
+        {
+          "agent_id": "uav_0",
+          "uav_id": 0,
+          "served_task_count_total": 1,
+          "assigned_task_count_total": 12,
+          "completed_task_count_total": 1,
+          "current_queue_length": 1,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.040698863236117155,
+          "max_queue_length": 1,
+          "remaining_energy_j": 4911.589114524495,
+          "energy_used_j": 88.41088547550498,
+          "cache_usage_ratio": 0.3333333333333333,
+          "cache_services": [
+            4
+          ]
+        },
+        {
+          "agent_id": "uav_1",
+          "uav_id": 1,
+          "served_task_count_total": 0,
+          "assigned_task_count_total": 14,
+          "completed_task_count_total": 0,
+          "current_queue_length": 0,
+          "current_queue_delay": 0.0,
+          "cumulative_queue_delay": 0.0,
+          "max_queue_length": 0,
+          "remaining_energy_j": 4935.086683972474,
+          "energy_used_j": 64.91331602752598,
+          "cache_usage_ratio": 0.0,
+          "cache_services": []
+        }
+      ],
+      "action_schema": {
+        "schema_version": "action.v1",
+        "canonical_shape": [
+          2,
+          2
+        ],
+        "single_agent_compatibility": null,
+        "agent_order": [
+          "uav_0",
+          "uav_1"
+        ],
+        "fields_per_agent": [
+          "dx",
+          "dy"
+        ],
+        "value_range": [
+          -1.0,
+          1.0
+        ],
+        "scaled_max_displacement_per_step": 18.0
+      },
+      "observation_schema": {
+        "schema_version": "observation.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "associated_user_state",
+            "fields": [
+              "user_rel_x_norm",
+              "user_rel_y_norm",
+              "user_pending_task_count_norm",
+              "user_min_slack_norm",
+              "user_service_type_norm"
+            ],
+            "repeat": 3
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4",
+          "associated_user_state[0].user_rel_x_norm",
+          "associated_user_state[0].user_rel_y_norm",
+          "associated_user_state[0].user_pending_task_count_norm",
+          "associated_user_state[0].user_min_slack_norm",
+          "associated_user_state[0].user_service_type_norm",
+          "associated_user_state[1].user_rel_x_norm",
+          "associated_user_state[1].user_rel_y_norm",
+          "associated_user_state[1].user_pending_task_count_norm",
+          "associated_user_state[1].user_min_slack_norm",
+          "associated_user_state[1].user_service_type_norm",
+          "associated_user_state[2].user_rel_x_norm",
+          "associated_user_state[2].user_rel_y_norm",
+          "associated_user_state[2].user_pending_task_count_norm",
+          "associated_user_state[2].user_min_slack_norm",
+          "associated_user_state[2].user_service_type_norm"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ],
+          "associated_user_state": [
+            31,
+            46
+          ]
+        },
+        "total_length": 46
+      },
+      "uav_state_schema": {
+        "schema_version": "uav_state.v1",
+        "sections": [
+          {
+            "name": "own_state",
+            "fields": [
+              "self_x_norm",
+              "self_y_norm",
+              "self_energy_ratio",
+              "self_queue_length_norm",
+              "self_queue_delay_norm",
+              "self_assigned_task_count_norm",
+              "self_completed_task_count_norm",
+              "self_cache_usage_ratio"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "neighbor_uav_states",
+            "fields": [
+              "neighbor_rel_x_norm",
+              "neighbor_rel_y_norm",
+              "neighbor_queue_length_norm",
+              "neighbor_queue_delay_norm",
+              "neighbor_assigned_task_count_norm",
+              "neighbor_completed_task_count_norm",
+              "neighbor_cache_usage_ratio"
+            ],
+            "repeat": 2
+          },
+          {
+            "name": "queue_load_summary",
+            "fields": [
+              "queue_length_norm",
+              "queue_delay_norm",
+              "assigned_task_count_norm",
+              "completed_task_count_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "local_cache_summary",
+            "fields": [
+              "cache_service_0",
+              "cache_service_1",
+              "cache_service_2",
+              "cache_service_3",
+              "cache_service_4"
+            ],
+            "repeat": 1
+          }
+        ],
+        "flat_fields": [
+          "self_x_norm",
+          "self_y_norm",
+          "self_energy_ratio",
+          "self_queue_length_norm",
+          "self_queue_delay_norm",
+          "self_assigned_task_count_norm",
+          "self_completed_task_count_norm",
+          "self_cache_usage_ratio",
+          "neighbor_uav_states[0].neighbor_rel_x_norm",
+          "neighbor_uav_states[0].neighbor_rel_y_norm",
+          "neighbor_uav_states[0].neighbor_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[0].neighbor_cache_usage_ratio",
+          "neighbor_uav_states[1].neighbor_rel_x_norm",
+          "neighbor_uav_states[1].neighbor_rel_y_norm",
+          "neighbor_uav_states[1].neighbor_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
+          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
+          "neighbor_uav_states[1].neighbor_cache_usage_ratio",
+          "queue_length_norm",
+          "queue_delay_norm",
+          "assigned_task_count_norm",
+          "completed_task_count_norm",
+          "cache_service_0",
+          "cache_service_1",
+          "cache_service_2",
+          "cache_service_3",
+          "cache_service_4"
+        ],
+        "section_slices": {
+          "own_state": [
+            0,
+            8
+          ],
+          "neighbor_uav_states": [
+            8,
+            22
+          ],
+          "queue_load_summary": [
+            22,
+            26
+          ],
+          "local_cache_summary": [
+            26,
+            31
+          ]
+        },
+        "total_length": 31
+      }
+    }
+  ]
+}

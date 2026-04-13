@@ -3,6 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+import torch
+
 from common.uav_mec.logging_utils import write_json
 from common.uav_mec.simulation.experiment_runner import compare_metric_dicts
 from common.uav_mec.simulation.experiment_runner import run_short_experiment
@@ -48,10 +51,7 @@ def run_evaluation(config: MinimalMARLConfig, *, model_path: str | Path) -> dict
     reset_result = probe_env.reset(seed=config.seed)
     obs_dim = len(reset_result["observations"][0])
     action_dim = len(probe_env.get_action_schema()["fields_per_agent"])
-    model = MinimalMultiAgentActorCritic.load(
-        model_path,
-        seed=config.seed,
-    )
+    model = MinimalMultiAgentActorCritic.load(model_path, seed=config.seed, device=config.device)
     assert model.obs_dim == obs_dim
     assert model.action_dim == action_dim
     assert model.num_agents == config.num_uavs
@@ -66,7 +66,7 @@ def run_evaluation(config: MinimalMARLConfig, *, model_path: str | Path) -> dict
     averaged_marl_metrics: dict[str, float | None] = {}
     for key in marl_metrics[0].keys():
         values = [metric[key] for metric in marl_metrics if metric[key] is not None]
-        averaged_marl_metrics[key] = float(sum(values) / len(values)) if values else None
+        averaged_marl_metrics[key] = float(np.mean(values)) if values else None
 
     heuristic_result = run_short_experiment(
         env_factory=Chapter4Env,
@@ -78,9 +78,17 @@ def run_evaluation(config: MinimalMARLConfig, *, model_path: str | Path) -> dict
 
     comparison = compare_metric_dicts(averaged_marl_metrics, heuristic_result["averaged_metrics"])
     payload = {
-        "algorithm": "shared_centralized_actor_critic",
+        "algorithm": "shared_ppo_centralized_critic",
+        "framework": {
+            "torch_version": torch.__version__,
+            "numpy_version": np.__version__,
+            "device": config.device,
+        },
         "config": config.to_dict(),
         "model_path": str(model_path),
+        "paper_controls": {
+            "use_movement_budget": config.use_movement_budget,
+        },
         "interface_contract": model.tensor_contract(),
         "action_schema": probe_env.get_action_schema(),
         "observation_schema": probe_env.get_observation_schema(),
@@ -91,7 +99,7 @@ def run_evaluation(config: MinimalMARLConfig, *, model_path: str | Path) -> dict
         "comparison": comparison,
         "marl_episode_logs": marl_episode_logs,
     }
-    eval_path = RESULTS_DIR / f"marl_eval_u{config.num_uavs}_{config.assignment_rule}.json"
+    eval_path = RESULTS_DIR / f"marl_eval_shared_ppo_{config.result_suffix()}.json"
     write_json(eval_path, payload)
     payload["eval_path"] = str(eval_path)
     return payload

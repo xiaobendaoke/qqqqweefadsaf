@@ -1,0 +1,5 @@
+profile,num_uavs,assignment_rule,completion_rate,average_latency,total_energy,cache_hit_rate,fairness_uav_load,result_path
+sensitive,2,nearest_uav,1.0,0.7913068339024849,32.94511440276091,0.5438326868923011,0.9922404903184621,C:\Users\woshinibaba\Documents\研究生\论文\毕业论文\论文正式\第四章\results\experiment_sensitive_u2_nearest_uav.json
+sensitive,2,least_loaded_uav,1.0,0.7953474494987626,32.793658122393566,0.5823341328455297,0.9995228523080433,C:\Users\woshinibaba\Documents\研究生\论文\毕业论文\论文正式\第四章\results\experiment_sensitive_u2_least_loaded_uav.json
+sensitive,3,nearest_uav,1.0,0.7679370024591761,76.26380151222608,0.5130363974132238,0.7519260328776769,C:\Users\woshinibaba\Documents\研究生\论文\毕业论文\论文正式\第四章\results\experiment_sensitive_u3_nearest_uav.json
+sensitive,3,least_loaded_uav,1.0,0.7392624618340504,76.45117456803078,0.5478757580817779,0.999169751169418,C:\Users\woshinibaba\Documents\研究生\论文\毕业论文\论文正式\第四章\results\experiment_sensitive_u3_least_loaded_uav.json

@@ -1,0 +1,60 @@
+{
+  "rows": [
+    {
+      "metric": "average_latency",
+      "num_seeds": 3,
+      "delta_mean": 0.0,
+      "delta_std": 0.0,
+      "delta_mean_std": "0.0000 +/- 0.0000"
+    },
+    {
+      "metric": "cache_hit_rate",
+      "num_seeds": 3,
+      "delta_mean": 0.0,
+      "delta_std": 0.0,
+      "delta_mean_std": "0.0000 +/- 0.0000"
+    },
+    {
+      "metric": "completion_rate",
+      "num_seeds": 3,
+      "delta_mean": 0.0,
+      "delta_std": 0.0,
+      "delta_mean_std": "0.0000 +/- 0.0000"
+    },
+    {
+      "metric": "deadline_violation_rate",
+      "num_seeds": 3,
+      "delta_mean": 0.0,
+      "delta_std": 0.0,
+      "delta_mean_std": "0.0000 +/- 0.0000"
+    },
+    {
+      "metric": "fairness_uav_load",
+      "num_seeds": 3,
+      "delta_mean": 0.0,
+      "delta_std": 0.0,
+      "delta_mean_std": "0.0000 +/- 0.0000"
+    },
+    {
+      "metric": "fairness_user_completion",
+      "num_seeds": 3,
+      "delta_mean": 0.0,
+      "delta_std": 0.0,
+      "delta_mean_std": "0.0000 +/- 0.0000"
+    },
+    {
+      "metric": "reliability_violation_rate",
+      "num_seeds": 3,
+      "delta_mean": 0.0,
+      "delta_std": 0.0,
+      "delta_mean_std": "0.0000 +/- 0.0000"
+    },
+    {
+      "metric": "total_energy",
+      "num_seeds": 3,
+      "delta_mean": 0.0,
+      "delta_std": 0.0,
+      "delta_mean_std": "0.0000 +/- 0.0000"
+    }
+  ]
+}

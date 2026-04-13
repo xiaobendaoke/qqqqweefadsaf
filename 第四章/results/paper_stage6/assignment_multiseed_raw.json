@@ -1,0 +1,136 @@
+{
+  "rows": [
+    {
+      "seed": 42,
+      "profile": "sensitive",
+      "num_uavs": 2,
+      "assignment_rule": "nearest_uav",
+      "completion_rate": 1.0,
+      "average_latency": 0.7925781147317141,
+      "total_energy": 32.8019516306713,
+      "cache_hit_rate": 0.5687624291255209,
+      "fairness_uav_load": 0.9968695357062651
+    },
+    {
+      "seed": 42,
+      "profile": "sensitive",
+      "num_uavs": 2,
+      "assignment_rule": "least_loaded_uav",
+      "completion_rate": 1.0,
+      "average_latency": 0.7925781147317141,
+      "total_energy": 32.8019516306713,
+      "cache_hit_rate": 0.5687624291255209,
+      "fairness_uav_load": 0.9968695357062651
+    },
+    {
+      "seed": 42,
+      "profile": "sensitive",
+      "num_uavs": 3,
+      "assignment_rule": "nearest_uav",
+      "completion_rate": 1.0,
+      "average_latency": 0.7282079454194527,
+      "total_energy": 76.60447629691593,
+      "cache_hit_rate": 0.5428922480208278,
+      "fairness_uav_load": 0.9831126301217914
+    },
+    {
+      "seed": 42,
+      "profile": "sensitive",
+      "num_uavs": 3,
+      "assignment_rule": "least_loaded_uav",
+      "completion_rate": 1.0,
+      "average_latency": 0.7282079454194527,
+      "total_energy": 76.60447629691593,
+      "cache_hit_rate": 0.5428922480208278,
+      "fairness_uav_load": 0.9831126301217914
+    },
+    {
+      "seed": 52,
+      "profile": "sensitive",
+      "num_uavs": 2,
+      "assignment_rule": "nearest_uav",
+      "completion_rate": 1.0,
+      "average_latency": 0.7847582893895523,
+      "total_energy": 33.46896704875775,
+      "cache_hit_rate": 0.622755753018911,
+      "fairness_uav_load": 0.9975102889182041
+    },
+    {
+      "seed": 52,
+      "profile": "sensitive",
+      "num_uavs": 2,
+      "assignment_rule": "least_loaded_uav",
+      "completion_rate": 1.0,
+      "average_latency": 0.7847582893895523,
+      "total_energy": 33.46896704875775,
+      "cache_hit_rate": 0.622755753018911,
+      "fairness_uav_load": 0.9975102889182041
+    },
+    {
+      "seed": 52,
+      "profile": "sensitive",
+      "num_uavs": 3,
+      "assignment_rule": "nearest_uav",
+      "completion_rate": 1.0,
+      "average_latency": 0.7232647694030412,
+      "total_energy": 77.5870539647277,
+      "cache_hit_rate": 0.506815333789018,
+      "fairness_uav_load": 0.9839218001817174
+    },
+    {
+      "seed": 52,
+      "profile": "sensitive",
+      "num_uavs": 3,
+      "assignment_rule": "least_loaded_uav",
+      "completion_rate": 1.0,
+      "average_latency": 0.7232647694030412,
+      "total_energy": 77.5870539647277,
+      "cache_hit_rate": 0.506815333789018,
+      "fairness_uav_load": 0.9839218001817174
+    },
+    {
+      "seed": 62,
+      "profile": "sensitive",
+      "num_uavs": 2,
+      "assignment_rule": "nearest_uav",
+      "completion_rate": 1.0,
+      "average_latency": 0.7854489505609473,
+      "total_energy": 33.996205969176316,
+      "cache_hit_rate": 0.5891418888129414,
+      "fairness_uav_load": 0.9989808771534983
+    },
+    {
+      "seed": 62,
+      "profile": "sensitive",
+      "num_uavs": 2,
+      "assignment_rule": "least_loaded_uav",
+      "completion_rate": 1.0,
+      "average_latency": 0.7854489505609473,
+      "total_energy": 33.996205969176316,
+      "cache_hit_rate": 0.5891418888129414,
+      "fairness_uav_load": 0.9989808771534983
+    },
+    {
+      "seed": 62,
+      "profile": "sensitive",
+      "num_uavs": 3,
+      "assignment_rule": "nearest_uav",
+      "completion_rate": 1.0,
+      "average_latency": 0.7223890553270502,
+      "total_energy": 77.7615938018402,
+      "cache_hit_rate": 0.5270277967646388,
+      "fairness_uav_load": 0.9756344637032761
+    },
+    {
+      "seed": 62,
+      "profile": "sensitive",
+      "num_uavs": 3,
+      "assignment_rule": "least_loaded_uav",
+      "completion_rate": 1.0,
+      "average_latency": 0.7223890553270502,
+      "total_energy": 77.7615938018402,
+      "cache_hit_rate": 0.5270277967646388,
+      "fairness_uav_load": 0.9756344637032761
+    }
+  ]
+}
