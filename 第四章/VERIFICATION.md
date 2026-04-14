@@ -562,3 +562,32 @@ python -m venv .venv
   - `main total_energy=68.7092 +/- 11.7735`
   - `no_energy_shaped_reward total_energy=84.3502 +/- 44.7163`
   - `no_movement_budget total_energy=73.4761 +/- 13.3339`
+
+## 第六阶段整理：论文终稿图表重排
+
+### 运行命令
+
+```powershell
+.\.venv\Scripts\python.exe 第四章/run_finalize_paper.py --seeds 42 52 62 --eval-episodes 4
+```
+
+### 结果说明
+
+- `paper_stage6` 结果已基于当前代码重新复跑
+- 终稿图已拆分为多张独立图，避免原先“训练曲线 + 混合柱状图”信息过载
+- 当前可直接用于正文或附录的图包括：
+  - `final_training_return_curve.png`
+  - `final_training_energy_curve.png`
+  - `final_ppo_vs_heuristic.png`
+  - `final_assignment_comparison.png`
+  - `final_ablation_energy.png`
+  - `final_comparison_bars.png`
+
+### 更新图表文件
+
+- `第四章/results/paper_stage6/figures/final_training_return_curve.png`
+- `第四章/results/paper_stage6/figures/final_training_energy_curve.png`
+- `第四章/results/paper_stage6/figures/final_ppo_vs_heuristic.png`
+- `第四章/results/paper_stage6/figures/final_assignment_comparison.png`
+- `第四章/results/paper_stage6/figures/final_ablation_energy.png`
+- `第四章/results/paper_stage6/figures/final_comparison_bars.png`

@@ -10,12 +10,16 @@ from common.uav_mec.logging_utils import write_json
 from common.uav_mec.simulation import compare_metric_dicts, run_short_experiment
 
 from ..env import Chapter3Env
+from ..policies.fixed_patrol import select_actions as select_actions_fixed_patrol
+from ..policies.fixed_point import select_actions as select_actions_fixed_point
 from ..policies.mobility_heuristic import select_actions as select_actions_heuristic
 from ..policies.mpc_shell import select_actions as select_actions_mpc
+from .trajectory import EpisodeTrajectoryRecorder, export_trajectory_artifacts
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CHAPTER3_ROOT = Path(__file__).resolve().parents[2]
 CHAPTER3_RESULTS = CHAPTER3_ROOT / "results"
+CHAPTER3_TRAJECTORIES = CHAPTER3_RESULTS / "trajectories"
 
 
 def _find_chapter4_package_dir(search_root: Path) -> Path:
@@ -55,7 +59,21 @@ def _ensure_chapter4_package_loaded(repo_root: Path) -> None:
     spec.loader.exec_module(module)
 
 
-def run_experiment(*, seed: int, episodes: int, hard: bool, policy: str = "heuristic") -> dict[str, Any]:
+def _mean(values: list[float]) -> float | None:
+    if not values:
+        return None
+    return sum(values) / len(values)
+
+
+def run_experiment(
+    *,
+    seed: int,
+    episodes: int,
+    hard: bool,
+    policy: str = "heuristic",
+    export_trajectory: bool = True,
+    steps_per_episode: int | None = None,
+) -> dict[str, Any]:
     overrides = {}
     if hard:
         overrides = {
@@ -72,23 +90,111 @@ def run_experiment(*, seed: int, episodes: int, hard: bool, policy: str = "heuri
             "uav_compute_hz": 9.0e9,
             "uav_service_cache_capacity": 2,
         }
-    if policy not in {"heuristic", "mpc"}:
+    if steps_per_episode is not None:
+        overrides["steps_per_episode"] = int(steps_per_episode)
+    if policy not in {"heuristic", "mpc", "fixed_point", "fixed_patrol"}:
         raise ValueError(f"Unsupported Chapter 3 policy: {policy}")
-    policy_fn = select_actions_heuristic if policy == "heuristic" else select_actions_mpc
-    result = run_short_experiment(
-        env_factory=Chapter3Env,
-        policy_fn=policy_fn,
-        overrides=overrides,
-        episodes=episodes,
-        seed=seed,
-    )
+    policy_map = {
+        "heuristic": select_actions_heuristic,
+        "mpc": select_actions_mpc,
+        "fixed_point": select_actions_fixed_point,
+        "fixed_patrol": select_actions_fixed_patrol,
+    }
+    policy_fn = policy_map[policy]
+    episode_summaries: list[dict[str, Any]] = []
+    episode_logs: list[dict[str, Any]] = []
+    aggregate_metrics: list[dict[str, float | None]] = []
+    trajectory_exports: list[dict[str, Any]] = []
+    log_schema: dict[str, Any] | None = None
+    base_profile = "hard" if hard else "default"
+    profile = f"{base_profile}_s{int(steps_per_episode)}" if steps_per_episode is not None else base_profile
+
+    for episode_idx in range(episodes):
+        env = Chapter3Env(overrides)
+        episode_seed = seed + episode_idx
+        reset_result = env.reset(seed=episode_seed)
+        log_schema = env.get_episode_log_schema()
+        observations = reset_result["observations"]
+        recorder = (
+            EpisodeTrajectoryRecorder(
+                env=env,
+                episode_index=episode_idx,
+                seed=episode_seed,
+                policy=policy,
+                profile=profile,
+            )
+            if export_trajectory
+            else None
+        )
+        last_step = None
+        step_index = 0
+        while True:
+            try:
+                actions = policy_fn(observations, env)
+            except TypeError:
+                actions = policy_fn(observations)
+            last_step = env.step(actions)
+            step_index += 1
+            if recorder is not None:
+                recorder.record_step(step_index=step_index, metrics=last_step["metrics"])
+            observations = last_step["observations"]
+            if last_step["terminated"] or last_step["truncated"]:
+                break
+
+        summary = env.export_episode_summary()
+        episode_log = env.export_episode_log(episode_index=episode_idx, seed=episode_seed)
+        episode_summaries.append(
+            {
+                "episode": episode_idx,
+                "seed": episode_seed,
+                "metrics": summary["metrics"],
+                "last_info": last_step["info"] if last_step else {},
+            }
+        )
+        episode_logs.append(episode_log)
+        aggregate_metrics.append(summary["metrics"])
+        if recorder is not None:
+            exported = export_trajectory_artifacts(
+                recorder=recorder,
+                summary_metrics=summary["metrics"],
+                output_dir=CHAPTER3_TRAJECTORIES,
+            )
+            trajectory_exports.append(
+                {
+                    "episode": episode_idx,
+                    "seed": episode_seed,
+                    "policy": policy,
+                    "profile": profile,
+                    **exported,
+                }
+            )
+
+    metric_keys = aggregate_metrics[0].keys() if aggregate_metrics else []
+    averaged_metrics: dict[str, float | None] = {}
+    for key in metric_keys:
+        numeric_values = [metrics[key] for metrics in aggregate_metrics if metrics[key] is not None]
+        averaged_metrics[key] = _mean([float(value) for value in numeric_values]) if numeric_values else None
+
+    result = {
+        "episodes": episodes,
+        "seed": seed,
+        "overrides": overrides,
+        "averaged_metrics": averaged_metrics,
+        "episode_summaries": episode_summaries,
+        "episode_log_schema": log_schema,
+        "episode_logs": episode_logs,
+        "trajectory_exports": trajectory_exports,
+    }
     result["chapter"] = "chapter3"
-    result["profile"] = "hard" if hard else "default"
+    result["profile"] = profile
     result["policy"] = policy
-    if policy == "mpc":
+    if policy == "heuristic" and steps_per_episode is None:
+        output_name = "experiment_hard.json" if hard else "experiment_short.json"
+    elif policy == "mpc" and steps_per_episode is None:
         output_name = "experiment_hard_mpc.json" if hard else "experiment_short_mpc.json"
     else:
-        output_name = "experiment_hard.json" if hard else "experiment_short.json"
+        step_suffix = f"_s{int(steps_per_episode)}" if steps_per_episode is not None else ""
+        output_name = f"experiment_{base_profile}_{policy}{step_suffix}.json"
     write_json(CHAPTER3_RESULTS / output_name, result)
     return result
 

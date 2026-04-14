@@ -359,60 +359,89 @@ def _aggregate_training_curve(logs: list[list[dict[str, Any]]], metric: str) -> 
     return episodes, means, stds
 
 
-def _plot_training_curve(training_logs: dict[str, list[list[dict[str, Any]]]], output_path: Path) -> None:
+def _style_axis(axis: Any) -> None:
+    axis.grid(alpha=0.25, linestyle="--", linewidth=0.7)
+    axis.spines["top"].set_visible(False)
+    axis.spines["right"].set_visible(False)
+
+
+def _plot_training_metric_curves(
+    training_logs: dict[str, list[list[dict[str, Any]]]],
+    *,
+    metric: str,
+    ylabel: str,
+    title: str,
+    output_path: Path,
+) -> None:
     plt = _load_matplotlib()
-    figure, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+    figure, axis = plt.subplots(figsize=(8.8, 5.0))
     colors = {
         "main": "#2E86AB",
         "no_energy_shaped_reward": "#E67E22",
         "no_movement_budget": "#C0392B",
     }
+    label_map = {
+        "main": "Main PPO",
+        "no_energy_shaped_reward": "No energy shaping",
+        "no_movement_budget": "No movement budget",
+    }
     for variant, logs in training_logs.items():
-        episodes, mean_return, std_return = _aggregate_training_curve(logs, "team_return")
-        _, mean_energy, std_energy = _aggregate_training_curve(logs, "total_energy")
+        episodes, means, stds = _aggregate_training_curve(logs, metric)
         color = colors.get(variant, "#555555")
-        axes[0].plot(episodes, mean_return, label=variant, color=color, linewidth=2.0)
-        axes[0].fill_between(
+        axis.plot(episodes, means, label=label_map.get(variant, variant), color=color, linewidth=2.2)
+        axis.fill_between(
             episodes,
-            [value - delta for value, delta in zip(mean_return, std_return)],
-            [value + delta for value, delta in zip(mean_return, std_return)],
+            [value - delta for value, delta in zip(means, stds)],
+            [value + delta for value, delta in zip(means, stds)],
             color=color,
-            alpha=0.18,
+            alpha=0.14,
         )
-        axes[1].plot(episodes, mean_energy, label=variant, color=color, linewidth=2.0)
-        axes[1].fill_between(
-            episodes,
-            [value - delta for value, delta in zip(mean_energy, std_energy)],
-            [value + delta for value, delta in zip(mean_energy, std_energy)],
-            color=color,
-            alpha=0.18,
-        )
-    axes[0].set_ylabel("Team Return")
-    axes[0].set_title("Final PPO Training Curves (mean ± std over 3 seeds)")
-    axes[0].grid(alpha=0.3)
-    axes[0].legend()
-    axes[1].set_xlabel("Episode")
-    axes[1].set_ylabel("Total Energy")
-    axes[1].grid(alpha=0.3)
-    axes[1].legend()
+    axis.set_xlabel("Training Episode")
+    axis.set_ylabel(ylabel)
+    axis.set_title(title)
+    _style_axis(axis)
+    axis.legend(frameon=False)
     figure.tight_layout()
     figure.savefig(output_path, dpi=220, bbox_inches="tight")
     plt.close(figure)
 
 
-def _plot_comparison_bars(
+def _plot_ppo_vs_heuristic(
     main_rows: list[dict[str, Any]],
-    assignment_rows: list[dict[str, Any]],
-    ablation_rows: list[dict[str, Any]],
     output_path: Path,
 ) -> None:
     plt = _load_matplotlib()
-    figure, axes = plt.subplots(3, 1, figsize=(11, 12))
+    figure, axes = plt.subplots(1, 2, figsize=(10.5, 4.6))
 
-    main_labels = [f"u{row['num_uavs']}" for row in main_rows]
-    positions = list(range(len(main_labels)))
-    width = 0.35
+    labels = [f"{int(row['num_uavs'])} UAVs" for row in main_rows]
+    positions = list(range(len(labels)))
+    width = 0.34
+
     axes[0].bar(
+        [index - width / 2 for index in positions],
+        [row["ppo_average_latency_mean"] for row in main_rows],
+        width=width,
+        yerr=[row["ppo_average_latency_std"] for row in main_rows],
+        label="PPO",
+        color="#2E86AB",
+        capsize=4,
+    )
+    axes[0].bar(
+        [index + width / 2 for index in positions],
+        [row["heuristic_average_latency_mean"] for row in main_rows],
+        width=width,
+        yerr=[row["heuristic_average_latency_std"] for row in main_rows],
+        label="Heuristic",
+        color="#E76F51",
+        capsize=4,
+    )
+    axes[0].set_title("Average Latency")
+    axes[0].set_ylabel("Latency")
+    axes[0].set_xticks(positions, labels)
+    _style_axis(axes[0])
+    axes[0].legend(frameon=False)
+
+    axes[1].bar(
         [index - width / 2 for index in positions],
         [row["ppo_total_energy_mean"] for row in main_rows],
         width=width,
@@ -421,46 +450,222 @@ def _plot_comparison_bars(
         color="#2E86AB",
         capsize=4,
     )
-    axes[0].bar(
+    axes[1].bar(
         [index + width / 2 for index in positions],
         [row["heuristic_total_energy_mean"] for row in main_rows],
         width=width,
         yerr=[row["heuristic_total_energy_std"] for row in main_rows],
-        label="heuristic",
-        color="#E74C3C",
+        label="Heuristic",
+        color="#E76F51",
         capsize=4,
     )
-    axes[0].set_title("PPO vs heuristic energy")
-    axes[0].set_ylabel("Total Energy")
-    axes[0].set_xticks(positions, main_labels)
-    axes[0].grid(axis="y", alpha=0.3)
-    axes[0].legend()
+    axes[1].set_title("Total Energy")
+    axes[1].set_ylabel("Energy")
+    axes[1].set_xticks(positions, labels)
+    _style_axis(axes[1])
+    axes[1].legend(frameon=False)
 
-    assignment_labels = [f"u{row['num_uavs']}-{row['assignment_rule']}" for row in assignment_rows]
+    figure.suptitle("PPO vs Heuristic under Final Configuration", y=1.02)
+    figure.tight_layout()
+    figure.savefig(output_path, dpi=220, bbox_inches="tight")
+    plt.close(figure)
+
+
+def _plot_assignment_comparison(
+    main_rows: list[dict[str, Any]],
+    assignment_rows: list[dict[str, Any]],
+    output_path: Path,
+) -> None:
+    plt = _load_matplotlib()
+    figure, axes = plt.subplots(1, 2, figsize=(10.5, 4.6))
+    width = 0.35
+    nearest_rows = [row for row in assignment_rows if row["assignment_rule"] == "nearest_uav"]
+    balanced_rows = [row for row in assignment_rows if row["assignment_rule"] == "least_loaded_uav"]
+    labels = [f"{int(row['num_uavs'])} UAVs" for row in nearest_rows]
+    positions = list(range(len(labels)))
+
+    axes[0].bar(
+        [index - width / 2 for index in positions],
+        [row["average_latency_mean"] for row in nearest_rows],
+        width=width,
+        yerr=[row["average_latency_std"] for row in nearest_rows],
+        label="nearest_uav",
+        color="#4C78A8",
+        capsize=4,
+    )
+    axes[0].bar(
+        [index + width / 2 for index in positions],
+        [row["average_latency_mean"] for row in balanced_rows],
+        width=width,
+        yerr=[row["average_latency_std"] for row in balanced_rows],
+        label="least_loaded_uav",
+        color="#59A14F",
+        capsize=4,
+    )
+    axes[0].set_title("Average Latency")
+    axes[0].set_ylabel("Latency")
+    axes[0].set_xticks(positions, labels)
+    _style_axis(axes[0])
+    axes[0].legend(frameon=False)
+
     axes[1].bar(
-        list(range(len(assignment_labels))),
-        [row["fairness_uav_load_mean"] for row in assignment_rows],
-        yerr=[row["fairness_uav_load_std"] for row in assignment_rows],
-        color="#27AE60",
+        [index - width / 2 for index in positions],
+        [row["fairness_uav_load_mean"] for row in nearest_rows],
+        width=width,
+        yerr=[row["fairness_uav_load_std"] for row in nearest_rows],
+        label="nearest_uav",
+        color="#4C78A8",
         capsize=4,
     )
-    axes[1].set_title("Assignment fairness (sensitive profile)")
-    axes[1].set_ylabel("Fairness")
-    axes[1].set_xticks(list(range(len(assignment_labels))), assignment_labels, rotation=20)
-    axes[1].grid(axis="y", alpha=0.3)
+    axes[1].bar(
+        [index + width / 2 for index in positions],
+        [row["fairness_uav_load_mean"] for row in balanced_rows],
+        width=width,
+        yerr=[row["fairness_uav_load_std"] for row in balanced_rows],
+        label="least_loaded_uav",
+        color="#59A14F",
+        capsize=4,
+    )
+    axes[1].set_title("Load Fairness")
+    axes[1].set_ylabel("Jain Fairness")
+    axes[1].set_xticks(positions, labels)
+    _style_axis(axes[1])
+    axes[1].legend(frameon=False)
 
-    ablation_labels = [row["variant"] for row in ablation_rows]
-    axes[2].bar(
-        list(range(len(ablation_labels))),
+    figure.suptitle("Assignment Rule Comparison under Sensitive Profile", y=1.02)
+    figure.tight_layout()
+    figure.savefig(output_path, dpi=220, bbox_inches="tight")
+    plt.close(figure)
+
+
+def _plot_ablation_energy(
+    ablation_rows: list[dict[str, Any]],
+    output_path: Path,
+) -> None:
+    plt = _load_matplotlib()
+    figure, axes = plt.subplots(1, 2, figsize=(10.2, 4.6))
+    labels = [str(row["variant"]) for row in ablation_rows]
+    positions = list(range(len(labels)))
+    colors = ["#2E86AB", "#F39C12", "#C0392B"]
+
+    axes[0].bar(
+        positions,
         [row["total_energy_mean"] for row in ablation_rows],
         yerr=[row["total_energy_std"] for row in ablation_rows],
-        color=["#2E86AB", "#F39C12", "#C0392B"],
+        color=colors[: len(labels)],
         capsize=4,
     )
-    axes[2].set_title("Ablation energy on u2 nearest_uav")
-    axes[2].set_ylabel("Total Energy")
-    axes[2].set_xticks(list(range(len(ablation_labels))), ablation_labels, rotation=15)
-    axes[2].grid(axis="y", alpha=0.3)
+    axes[0].set_title("Energy")
+    axes[0].set_ylabel("Total Energy")
+    axes[0].set_xticks(positions, labels, rotation=12)
+    _style_axis(axes[0])
+
+    axes[1].bar(
+        positions,
+        [row["delta_total_energy_mean"] for row in ablation_rows],
+        yerr=[row["delta_total_energy_std"] for row in ablation_rows],
+        color=colors[: len(labels)],
+        capsize=4,
+    )
+    axes[1].axhline(0.0, color="#444444", linewidth=1.0, linestyle="--")
+    axes[1].set_title("Energy Gap vs Heuristic")
+    axes[1].set_ylabel("Delta Energy")
+    axes[1].set_xticks(positions, labels, rotation=12)
+    _style_axis(axes[1])
+
+    figure.suptitle("Ablation Study on 2-UAV nearest_uav Setting", y=1.02)
+    figure.tight_layout()
+    figure.savefig(output_path, dpi=220, bbox_inches="tight")
+    plt.close(figure)
+
+
+def _plot_summary_panel(
+    main_rows: list[dict[str, Any]],
+    assignment_rows: list[dict[str, Any]],
+    ablation_rows: list[dict[str, Any]],
+    output_path: Path,
+) -> None:
+    plt = _load_matplotlib()
+    figure, axes = plt.subplots(2, 2, figsize=(11, 8.4))
+
+    labels = [f"{int(row['num_uavs'])} UAVs" for row in main_rows]
+    positions = list(range(len(labels)))
+    width = 0.34
+    axes[0, 0].bar(
+        [index - width / 2 for index in positions],
+        [row["ppo_total_energy_mean"] for row in main_rows],
+        width=width,
+        yerr=[row["ppo_total_energy_std"] for row in main_rows],
+        label="PPO",
+        color="#2E86AB",
+        capsize=4,
+    )
+    axes[0, 0].bar(
+        [index + width / 2 for index in positions],
+        [row["heuristic_total_energy_mean"] for row in main_rows],
+        width=width,
+        yerr=[row["heuristic_total_energy_std"] for row in main_rows],
+        label="Heuristic",
+        color="#E76F51",
+        capsize=4,
+    )
+    axes[0, 0].set_title("PPO vs Heuristic Energy")
+    axes[0, 0].set_ylabel("Energy")
+    axes[0, 0].set_xticks(positions, labels)
+    _style_axis(axes[0, 0])
+    axes[0, 0].legend(frameon=False)
+
+    nearest_rows = [row for row in assignment_rows if row["assignment_rule"] == "nearest_uav"]
+    balanced_rows = [row for row in assignment_rows if row["assignment_rule"] == "least_loaded_uav"]
+    axes[0, 1].bar(
+        [index - width / 2 for index in positions],
+        [row["fairness_uav_load_mean"] for row in nearest_rows],
+        width=width,
+        yerr=[row["fairness_uav_load_std"] for row in nearest_rows],
+        label="nearest_uav",
+        color="#4C78A8",
+        capsize=4,
+    )
+    axes[0, 1].bar(
+        [index + width / 2 for index in positions],
+        [row["fairness_uav_load_mean"] for row in balanced_rows],
+        width=width,
+        yerr=[row["fairness_uav_load_std"] for row in balanced_rows],
+        label="least_loaded_uav",
+        color="#59A14F",
+        capsize=4,
+    )
+    axes[0, 1].set_title("Assignment Fairness")
+    axes[0, 1].set_ylabel("Jain Fairness")
+    axes[0, 1].set_xticks(positions, labels)
+    _style_axis(axes[0, 1])
+    axes[0, 1].legend(frameon=False)
+
+    variant_positions = list(range(len(ablation_rows)))
+    variant_labels = [str(row["variant"]) for row in ablation_rows]
+    axes[1, 0].bar(
+        variant_positions,
+        [row["total_energy_mean"] for row in ablation_rows],
+        yerr=[row["total_energy_std"] for row in ablation_rows],
+        color=["#2E86AB", "#F39C12", "#C0392B"][: len(ablation_rows)],
+        capsize=4,
+    )
+    axes[1, 0].set_title("Ablation Energy")
+    axes[1, 0].set_ylabel("Energy")
+    axes[1, 0].set_xticks(variant_positions, variant_labels, rotation=12)
+    _style_axis(axes[1, 0])
+
+    axes[1, 1].bar(
+        positions,
+        [row["ppo_average_latency_mean"] for row in main_rows],
+        yerr=[row["ppo_average_latency_std"] for row in main_rows],
+        color="#2E86AB",
+        capsize=4,
+    )
+    axes[1, 1].set_title("PPO Latency")
+    axes[1, 1].set_ylabel("Latency")
+    axes[1, 1].set_xticks(positions, labels)
+    _style_axis(axes[1, 1])
 
     figure.tight_layout()
     figure.savefig(output_path, dpi=220, bbox_inches="tight")
@@ -565,17 +770,35 @@ def run_final_paper_package(*, seeds: list[int] | None = None, eval_episodes: in
     main_raw, main_agg, main_training_logs = _run_main_multiseed(seeds, eval_episodes=eval_episodes)
     ablation_raw, ablation_agg, ablation_training_logs = _run_ablation_multiseed(seeds, eval_episodes=eval_episodes)
 
-    training_curve_path = FIGURES_DIR / "final_training_curve_mean_std.png"
-    comparison_bar_path = FIGURES_DIR / "final_comparison_bars.png"
-    _plot_training_curve(
-        {
-            "main": ablation_training_logs["main"],
-            "no_energy_shaped_reward": ablation_training_logs["no_energy_shaped_reward"],
-            "no_movement_budget": ablation_training_logs["no_movement_budget"],
-        },
-        training_curve_path,
+    training_return_path = FIGURES_DIR / "final_training_return_curve.png"
+    training_energy_path = FIGURES_DIR / "final_training_energy_curve.png"
+    ppo_vs_heuristic_path = FIGURES_DIR / "final_ppo_vs_heuristic.png"
+    assignment_path = FIGURES_DIR / "final_assignment_comparison.png"
+    ablation_path = FIGURES_DIR / "final_ablation_energy.png"
+    summary_panel_path = FIGURES_DIR / "final_comparison_bars.png"
+    training_logs = {
+        "main": ablation_training_logs["main"],
+        "no_energy_shaped_reward": ablation_training_logs["no_energy_shaped_reward"],
+        "no_movement_budget": ablation_training_logs["no_movement_budget"],
+    }
+    _plot_training_metric_curves(
+        training_logs,
+        metric="team_return",
+        ylabel="Team Return",
+        title="PPO Training Return (mean ± std over 3 seeds)",
+        output_path=training_return_path,
     )
-    _plot_comparison_bars(main_agg, assignment_agg, ablation_agg, comparison_bar_path)
+    _plot_training_metric_curves(
+        training_logs,
+        metric="total_energy",
+        ylabel="Total Energy",
+        title="PPO Training Energy (mean ± std over 3 seeds)",
+        output_path=training_energy_path,
+    )
+    _plot_ppo_vs_heuristic(main_agg, ppo_vs_heuristic_path)
+    _plot_assignment_comparison(main_agg, assignment_agg, assignment_path)
+    _plot_ablation_energy(ablation_agg, ablation_path)
+    _plot_summary_panel(main_agg, assignment_agg, ablation_agg, summary_panel_path)
 
     tables = _write_tables(
         compare_rows=compare_agg,
@@ -601,8 +824,12 @@ def run_final_paper_package(*, seeds: list[int] | None = None, eval_episodes: in
         },
         "tables": tables,
         "figures": {
-            "training_curve": str(training_curve_path),
-            "comparison_bars": str(comparison_bar_path),
+            "training_return_curve": str(training_return_path),
+            "training_energy_curve": str(training_energy_path),
+            "ppo_vs_heuristic": str(ppo_vs_heuristic_path),
+            "assignment_comparison": str(assignment_path),
+            "ablation_energy": str(ablation_path),
+            "summary_panel": str(summary_panel_path),
         },
     }
 
@@ -625,8 +852,12 @@ def run_final_paper_package(*, seeds: list[int] | None = None, eval_episodes: in
         "ablation_summary_path": str(FINAL_DIR / "ablation_multiseed_summary.json"),
         "tables": tables,
         "figures": {
-            "training_curve": str(training_curve_path),
-            "comparison_bars": str(comparison_bar_path),
+            "training_return_curve": str(training_return_path),
+            "training_energy_curve": str(training_energy_path),
+            "ppo_vs_heuristic": str(ppo_vs_heuristic_path),
+            "assignment_comparison": str(assignment_path),
+            "ablation_energy": str(ablation_path),
+            "summary_panel": str(summary_panel_path),
         },
         "package_manifest_path": str(FINAL_DIR / "reproducibility_package.json"),
     }

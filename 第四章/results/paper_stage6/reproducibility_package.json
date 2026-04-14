@@ -38,7 +38,11 @@
     "ablation_csv": "C:\\Users\\woshinibaba\\Documents\\研究生\\论文\\毕业论文\\论文正式\\第四章\\results\\paper_stage6\\tables\\table_ablation.csv"
   },
   "figures": {
-    "training_curve": "C:\\Users\\woshinibaba\\Documents\\研究生\\论文\\毕业论文\\论文正式\\第四章\\results\\paper_stage6\\figures\\final_training_curve_mean_std.png",
-    "comparison_bars": "C:\\Users\\woshinibaba\\Documents\\研究生\\论文\\毕业论文\\论文正式\\第四章\\results\\paper_stage6\\figures\\final_comparison_bars.png"
+    "training_return_curve": "C:\\Users\\woshinibaba\\Documents\\研究生\\论文\\毕业论文\\论文正式\\第四章\\results\\paper_stage6\\figures\\final_training_return_curve.png",
+    "training_energy_curve": "C:\\Users\\woshinibaba\\Documents\\研究生\\论文\\毕业论文\\论文正式\\第四章\\results\\paper_stage6\\figures\\final_training_energy_curve.png",
+    "ppo_vs_heuristic": "C:\\Users\\woshinibaba\\Documents\\研究生\\论文\\毕业论文\\论文正式\\第四章\\results\\paper_stage6\\figures\\final_ppo_vs_heuristic.png",
+    "assignment_comparison": "C:\\Users\\woshinibaba\\Documents\\研究生\\论文\\毕业论文\\论文正式\\第四章\\results\\paper_stage6\\figures\\final_assignment_comparison.png",
+    "ablation_energy": "C:\\Users\\woshinibaba\\Documents\\研究生\\论文\\毕业论文\\论文正式\\第四章\\results\\paper_stage6\\figures\\final_ablation_energy.png",
+    "summary_panel": "C:\\Users\\woshinibaba\\Documents\\研究生\\论文\\毕业论文\\论文正式\\第四章\\results\\paper_stage6\\figures\\final_comparison_bars.png"
   }
 }
