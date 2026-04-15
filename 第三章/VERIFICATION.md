@@ -216,3 +216,58 @@ python 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42
 - `第三章/results/trajectories/trajectory_default_s20_mpc_seed42_ep0.png`
 - `第三章/results/trajectories/trajectory_default_s20_fixed_point_seed42_ep0.png`
 - `第三章/results/trajectories/trajectory_default_s20_fixed_patrol_seed42_ep0.png`
+
+## 第七阶段统一系统可信度修复：schema v2 与 backlog-driven 第三章
+
+### 运行命令
+
+```powershell
+.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --policy fixed_point --steps-per-episode 4 --seed 42
+.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42
+.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --profile hard --policy fixed_point --steps-per-episode 12 --seed 42
+.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --profile hard --policy fixed_patrol --steps-per-episode 12 --seed 42
+.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --profile hard --policy heuristic --steps-per-episode 12 --seed 42
+.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --profile hard --policy mpc --steps-per-episode 12 --seed 42
+```
+
+### 关键结果
+
+- `schema`:
+  - `observation_schema = observation.v2`
+  - `uav_state_schema = uav_state.v2`
+  - `episode_log_schema = episode_log.v2`
+- `compare-ch4`:
+  - 在 v2 schema 与新 backlog/queue 语义下继续通过
+  - `completion_rate / average_latency / total_energy / cache_hit_rate / energy breakdown` 的 `delta = 0.0`
+- `fixed_point (hard_s12)`:
+  - `completion_rate=0.0`
+  - `average_latency=2.53715414903098`
+  - `total_energy=51.931548561483886`
+  - `cache_hit_rate=0.7454545454545455`
+- `fixed_patrol (hard_s12)`:
+  - `completion_rate=0.0`
+  - `average_latency=2.5245400579306874`
+  - `total_energy=376.24828264204336`
+- `heuristic (hard_s12)`:
+  - `completion_rate=0.0`
+  - `average_latency=2.590691052032494`
+  - `total_energy=179.35356391247493`
+- `mpc (hard_s12)`:
+  - `completion_rate=0.0`
+  - `average_latency=2.605213273468042`
+  - `total_energy=303.62769305280545`
+  - backlog、`tx_queue`、`compute_queue` 已显式进入 episode log
+  - 例如终局 `current_compute_queue_length=7`、`current_backlog_load=2`
+
+### 新增结果文件
+
+- `第三章/results/experiment_hard_fixed_point_s12.json`
+- `第三章/results/experiment_hard_fixed_patrol_s12.json`
+- `第三章/results/experiment_hard_heuristic_s12.json`
+- `第三章/results/experiment_hard_mpc_s12.json`
+- `第三章/results/chapter3_baseline_hard_s12.csv`
+- `第三章/results/chapter3_baseline_hard_s12.md`
+- `第三章/results/trajectories/trajectory_hard_s12_fixed_point_seed42_ep0.png`
+- `第三章/results/trajectories/trajectory_hard_s12_fixed_patrol_seed42_ep0.png`
+- `第三章/results/trajectories/trajectory_hard_s12_heuristic_seed42_ep0.png`
+- `第三章/results/trajectories/trajectory_hard_s12_mpc_seed42_ep0.png`

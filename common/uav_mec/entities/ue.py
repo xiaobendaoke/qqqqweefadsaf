@@ -12,8 +12,12 @@ class UserEquipment:
     user_id: int
     position: list[float]
     compute_hz: float
+    energy_capacity_j: float
+    remaining_energy_j: float
     completed_tasks: int = 0
     generated_tasks: int = 0
+    local_compute_energy_used_j: float = 0.0
+    uplink_energy_used_j: float = 0.0
 
     @classmethod
     def random_init(cls, user_id: int, config: SystemConfig, rng: random.Random) -> "UserEquipment":
@@ -26,6 +30,8 @@ class UserEquipment:
             user_id=user_id,
             position=position,
             compute_hz=config.ue_compute_hz,
+            energy_capacity_j=config.ue_energy_capacity_j,
+            remaining_energy_j=config.ue_energy_capacity_j,
         )
 
     def move(self, config: SystemConfig, rng: random.Random) -> None:
@@ -33,3 +39,19 @@ class UserEquipment:
         delta_y = rng.uniform(-config.ue_move_distance, config.ue_move_distance)
         self.position[0] = min(max(self.position[0] + delta_x, 0.0), config.area_width)
         self.position[1] = min(max(self.position[1] + delta_y, 0.0), config.area_height)
+
+    @property
+    def energy_ratio(self) -> float:
+        if self.energy_capacity_j <= 0:
+            return 0.0
+        return self.remaining_energy_j / self.energy_capacity_j
+
+    def spend_local_compute_energy(self, energy_j: float) -> None:
+        energy = max(0.0, float(energy_j))
+        self.local_compute_energy_used_j += energy
+        self.remaining_energy_j = max(0.0, self.remaining_energy_j - energy)
+
+    def spend_uplink_energy(self, energy_j: float) -> None:
+        energy = max(0.0, float(energy_j))
+        self.uplink_energy_used_j += energy
+        self.remaining_energy_j = max(0.0, self.remaining_energy_j - energy)

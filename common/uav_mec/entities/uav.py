@@ -18,15 +18,24 @@ class UAVNode:
     remaining_energy_j: float
     service_cache_capacity: int
     service_cache: set[int] = field(default_factory=set)
+    cache_request_counts: dict[int, int] = field(default_factory=dict)
+    cache_ema_scores: dict[int, float] = field(default_factory=dict)
+    cache_value_scores: dict[int, float] = field(default_factory=dict)
     served_task_count: int = 0
-    current_queue_length: int = 0
-    current_queue_delay: float = 0.0
+    current_tx_queue_length: int = 0
+    current_tx_queue_delay: float = 0.0
+    current_compute_queue_length: int = 0
+    current_compute_queue_delay: float = 0.0
+    current_backlog_load: int = 0
+    current_coverage_load: int = 0
     assigned_task_count_step: int = 0
     completed_task_count_step: int = 0
     total_assigned_task_count: int = 0
     total_completed_task_count: int = 0
-    cumulative_queue_delay: float = 0.0
-    max_queue_length: int = 0
+    cumulative_tx_queue_delay: float = 0.0
+    cumulative_compute_queue_delay: float = 0.0
+    max_tx_queue_length: int = 0
+    max_compute_queue_length: int = 0
 
     @classmethod
     def random_init(cls, uav_id: int, config: SystemConfig, rng: random.Random) -> "UAVNode":
@@ -66,7 +75,11 @@ class UAVNode:
         return self.remaining_energy_j / self.energy_capacity_j
 
     def reset_step_counters(self) -> None:
-        self.current_queue_length = 0
-        self.current_queue_delay = 0.0
+        self.current_tx_queue_length = 0
+        self.current_tx_queue_delay = 0.0
+        self.current_compute_queue_length = 0
+        self.current_compute_queue_delay = 0.0
+        self.current_backlog_load = 0
+        self.current_coverage_load = 0
         self.assigned_task_count_step = 0
         self.completed_task_count_step = 0

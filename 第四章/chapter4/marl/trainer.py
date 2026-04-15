@@ -41,16 +41,14 @@ def _shape_team_reward(
     previous_total_energy: float,
     actions: list[list[float]],
 ) -> tuple[float, dict[str, float]]:
-    info = step_result["info"]
-    metrics = step_result["metrics"]
-    generated = max(1, int(info["num_generated_tasks"]))
-    completion_rate = float(info["num_completed_tasks"]) / generated
-    cache_hit_rate = float(info["num_cache_hits"]) / generated
-    deadline_violation_rate = float(info["num_deadline_violations"]) / generated
-    reliability_violation_rate = float(info["num_reliability_violations"]) / generated
-    delta_energy = max(0.0, float(metrics["total_energy"]) - previous_total_energy)
+    step_metrics = step_result["step_metrics"]
+    delta_energy = float(step_metrics["total_energy"])
     normalized_energy = delta_energy / _max_step_move_energy(env)
-    latency = float(metrics["average_latency"])
+    completion_rate = float(step_metrics["completion_rate"])
+    cache_hit_rate = float(step_metrics["cache_hit_rate"])
+    deadline_violation_rate = float(step_metrics["deadline_violation_rate"])
+    reliability_violation_rate = float(step_metrics["reliability_violation_rate"])
+    latency = float(step_metrics["average_latency"])
     action_magnitude = _mean_action_norm(actions)
     reward = (
         config.reward_completion_weight * completion_rate
@@ -69,7 +67,7 @@ def _shape_team_reward(
         "step_energy": delta_energy,
         "step_energy_norm": normalized_energy,
         "step_action_magnitude": action_magnitude,
-        "cumulative_average_latency": latency,
+        "step_average_latency": latency,
     }
 
 
@@ -149,6 +147,8 @@ def run_training(config: MinimalMARLConfig) -> dict[str, Any]:
         action_std_decay=config.action_std_decay,
         use_movement_budget=config.use_movement_budget,
         hidden_dim=config.hidden_dim,
+        max_user_blocks=probe_env.config.observation_max_users,
+        user_feature_dim=5,
         device=config.device,
     )
     agent.configure_optimizers(actor_lr=config.actor_lr, critic_lr=config.critic_lr)
@@ -199,17 +199,21 @@ def run_training(config: MinimalMARLConfig) -> dict[str, Any]:
         "training_signal": {
             "type": "shaped_team_reward_v2",
             "terms": [
-                "completion_rate",
-                "cache_hit_rate",
-                "average_latency",
-                "delta_total_energy",
-                "deadline_violation_rate",
-                "reliability_violation_rate",
-                "action_magnitude",
+                "step_completion_rate",
+                "step_cache_hit_rate",
+                "step_average_latency",
+                "step_total_energy",
+                "step_deadline_violation_rate",
+                "step_reliability_violation_rate",
+                "step_action_magnitude",
             ],
         },
         "paper_controls": {
             "use_movement_budget": config.use_movement_budget,
+        },
+        "credit_assignment": {
+            "type": "team_advantage_broadcast",
+            "description": "shared actor and centralized critic with team reward; team advantage is broadcast to each agent sample during PPO updates",
         },
         "interface_contract": agent.tensor_contract(),
         "action_schema": probe_env.get_action_schema(),

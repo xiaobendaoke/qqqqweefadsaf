@@ -7,6 +7,9 @@ ACTION_DIM = 2
 
 def scale_action(action: list[float] | tuple[float, float], config: SystemConfig) -> list[float]:
     clipped = [min(max(float(action[0]), -1.0), 1.0), min(max(float(action[1]), -1.0), 1.0)]
+    norm = (clipped[0] ** 2 + clipped[1] ** 2) ** 0.5
+    if norm > 1.0 and norm > 1e-8:
+        clipped = [clipped[0] / norm, clipped[1] / norm]
     max_distance = config.uav_speed * config.time_slot_duration
     return [clipped[0] * max_distance, clipped[1] * max_distance]
 

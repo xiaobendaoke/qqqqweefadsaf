@@ -5,132 +5,132 @@
       "profile": "sensitive",
       "num_uavs": 2,
       "assignment_rule": "nearest_uav",
-      "completion_rate": 1.0,
-      "average_latency": 0.7925781147317141,
-      "total_energy": 32.8019516306713,
-      "cache_hit_rate": 0.5687624291255209,
-      "fairness_uav_load": 0.9968695357062651
+      "completion_rate": 0.8729967948717948,
+      "average_latency": 0.8296849523529642,
+      "total_energy": 123.05922439512496,
+      "cache_hit_rate": 0.5804487179487179,
+      "fairness_uav_load": 0.9973766089416514
     },
     {
       "seed": 42,
       "profile": "sensitive",
       "num_uavs": 2,
       "assignment_rule": "least_loaded_uav",
-      "completion_rate": 1.0,
-      "average_latency": 0.7925781147317141,
-      "total_energy": 32.8019516306713,
-      "cache_hit_rate": 0.5687624291255209,
-      "fairness_uav_load": 0.9968695357062651
+      "completion_rate": 0.9044871794871795,
+      "average_latency": 0.7941073209972672,
+      "total_energy": 129.5317931978333,
+      "cache_hit_rate": 0.5633814102564103,
+      "fairness_uav_load": 0.9981591409154152
     },
     {
       "seed": 42,
       "profile": "sensitive",
       "num_uavs": 3,
       "assignment_rule": "nearest_uav",
-      "completion_rate": 1.0,
-      "average_latency": 0.7282079454194527,
-      "total_energy": 76.60447629691593,
-      "cache_hit_rate": 0.5428922480208278,
-      "fairness_uav_load": 0.9831126301217914
+      "completion_rate": 0.9169871794871794,
+      "average_latency": 0.7860712181829606,
+      "total_energy": 182.13011695888179,
+      "cache_hit_rate": 0.5447916666666667,
+      "fairness_uav_load": 0.9801948095067599
     },
     {
       "seed": 42,
       "profile": "sensitive",
       "num_uavs": 3,
       "assignment_rule": "least_loaded_uav",
-      "completion_rate": 1.0,
-      "average_latency": 0.7282079454194527,
-      "total_energy": 76.60447629691593,
-      "cache_hit_rate": 0.5428922480208278,
-      "fairness_uav_load": 0.9831126301217914
+      "completion_rate": 0.9342948717948718,
+      "average_latency": 0.7517080350909561,
+      "total_energy": 144.57562612692496,
+      "cache_hit_rate": 0.5311698717948719,
+      "fairness_uav_load": 0.9916904865129297
     },
     {
       "seed": 52,
       "profile": "sensitive",
       "num_uavs": 2,
       "assignment_rule": "nearest_uav",
-      "completion_rate": 1.0,
-      "average_latency": 0.7847582893895523,
-      "total_energy": 33.46896704875775,
-      "cache_hit_rate": 0.622755753018911,
-      "fairness_uav_load": 0.9975102889182041
+      "completion_rate": 0.8899826022362969,
+      "average_latency": 0.8655547696093422,
+      "total_energy": 142.8660763536817,
+      "cache_hit_rate": 0.6172794980060989,
+      "fairness_uav_load": 0.9941766282665705
     },
     {
       "seed": 52,
       "profile": "sensitive",
       "num_uavs": 2,
       "assignment_rule": "least_loaded_uav",
-      "completion_rate": 1.0,
-      "average_latency": 0.7847582893895523,
-      "total_energy": 33.46896704875775,
-      "cache_hit_rate": 0.622755753018911,
-      "fairness_uav_load": 0.9975102889182041
+      "completion_rate": 0.9073314958167175,
+      "average_latency": 0.8360990542389488,
+      "total_energy": 130.53119047125253,
+      "cache_hit_rate": 0.5381558370474626,
+      "fairness_uav_load": 0.9984045722516941
     },
     {
       "seed": 52,
       "profile": "sensitive",
       "num_uavs": 3,
       "assignment_rule": "nearest_uav",
-      "completion_rate": 1.0,
-      "average_latency": 0.7232647694030412,
-      "total_energy": 77.5870539647277,
-      "cache_hit_rate": 0.506815333789018,
-      "fairness_uav_load": 0.9839218001817174
+      "completion_rate": 0.9175903119868637,
+      "average_latency": 0.8150372284523562,
+      "total_energy": 184.32273888410444,
+      "cache_hit_rate": 0.5681747986550942,
+      "fairness_uav_load": 0.9825964372120506
     },
     {
       "seed": 52,
       "profile": "sensitive",
       "num_uavs": 3,
       "assignment_rule": "least_loaded_uav",
-      "completion_rate": 1.0,
-      "average_latency": 0.7232647694030412,
-      "total_energy": 77.5870539647277,
-      "cache_hit_rate": 0.506815333789018,
-      "fairness_uav_load": 0.9839218001817174
+      "completion_rate": 0.9424808429118774,
+      "average_latency": 0.7786611536279415,
+      "total_energy": 152.8184261369835,
+      "cache_hit_rate": 0.5382467354757995,
+      "fairness_uav_load": 0.9836894809403061
     },
     {
       "seed": 62,
       "profile": "sensitive",
       "num_uavs": 2,
       "assignment_rule": "nearest_uav",
-      "completion_rate": 1.0,
-      "average_latency": 0.7854489505609473,
-      "total_energy": 33.996205969176316,
-      "cache_hit_rate": 0.5891418888129414,
-      "fairness_uav_load": 0.9989808771534983
+      "completion_rate": 0.8841291086676069,
+      "average_latency": 0.8838210427426901,
+      "total_energy": 142.78442876609182,
+      "cache_hit_rate": 0.5929622292642909,
+      "fairness_uav_load": 0.9991007468726858
     },
     {
       "seed": 62,
       "profile": "sensitive",
       "num_uavs": 2,
       "assignment_rule": "least_loaded_uav",
-      "completion_rate": 1.0,
-      "average_latency": 0.7854489505609473,
-      "total_energy": 33.996205969176316,
-      "cache_hit_rate": 0.5891418888129414,
-      "fairness_uav_load": 0.9989808771534983
+      "completion_rate": 0.9025030453889735,
+      "average_latency": 0.862007588423653,
+      "total_energy": 130.28915061912645,
+      "cache_hit_rate": 0.6076556690990216,
+      "fairness_uav_load": 0.9995107669419596
     },
     {
       "seed": 62,
       "profile": "sensitive",
       "num_uavs": 3,
       "assignment_rule": "nearest_uav",
-      "completion_rate": 1.0,
-      "average_latency": 0.7223890553270502,
-      "total_energy": 77.7615938018402,
-      "cache_hit_rate": 0.5270277967646388,
-      "fairness_uav_load": 0.9756344637032761
+      "completion_rate": 0.9157533646737757,
+      "average_latency": 0.8376550070211062,
+      "total_energy": 181.34276880530538,
+      "cache_hit_rate": 0.559541400566027,
+      "fairness_uav_load": 0.9916019403922876
     },
     {
       "seed": 62,
       "profile": "sensitive",
       "num_uavs": 3,
       "assignment_rule": "least_loaded_uav",
-      "completion_rate": 1.0,
-      "average_latency": 0.7223890553270502,
-      "total_energy": 77.7615938018402,
-      "cache_hit_rate": 0.5270277967646388,
-      "fairness_uav_load": 0.9756344637032761
+      "completion_rate": 0.9282523171750587,
+      "average_latency": 0.8010640672764382,
+      "total_energy": 151.88946528225767,
+      "cache_hit_rate": 0.5276343648633145,
+      "fairness_uav_load": 0.9821498831496251
     }
   ]
 }

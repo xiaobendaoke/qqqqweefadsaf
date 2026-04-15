@@ -8,3 +8,6 @@ ENV/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+第三章/results/
+第四章/results/
+results/

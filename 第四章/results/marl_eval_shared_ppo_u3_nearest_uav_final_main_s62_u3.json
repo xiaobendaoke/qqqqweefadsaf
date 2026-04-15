@@ -45,11 +45,11 @@
     "observation_batch_shape": [
       "T",
       3,
-      46
+      56
     ],
     "central_state_shape": [
       "T",
-      138
+      168
     ],
     "action_batch_shape": [
       "T",
@@ -89,7 +89,7 @@
     "scaled_max_displacement_per_step": 18.0
   },
   "observation_schema": {
-    "schema_version": "observation.v1",
+    "schema_version": "observation.v2",
     "sections": [
       {
         "name": "own_state",
@@ -97,8 +97,7 @@
           "self_x_norm",
           "self_y_norm",
           "self_energy_ratio",
-          "self_queue_length_norm",
-          "self_queue_delay_norm",
+          "self_coverage_load_norm",
           "self_assigned_task_count_norm",
           "self_completed_task_count_norm",
           "self_cache_usage_ratio"
@@ -110,21 +109,37 @@
         "fields": [
           "neighbor_rel_x_norm",
           "neighbor_rel_y_norm",
-          "neighbor_queue_length_norm",
-          "neighbor_queue_delay_norm",
+          "neighbor_tx_queue_length_norm",
+          "neighbor_tx_queue_delay_norm",
+          "neighbor_compute_queue_length_norm",
+          "neighbor_compute_queue_delay_norm",
+          "neighbor_backlog_norm",
           "neighbor_assigned_task_count_norm",
-          "neighbor_completed_task_count_norm",
           "neighbor_cache_usage_ratio"
         ],
         "repeat": 2
       },
       {
-        "name": "queue_load_summary",
+        "name": "tx_queue_summary",
         "fields": [
-          "queue_length_norm",
-          "queue_delay_norm",
-          "assigned_task_count_norm",
-          "completed_task_count_norm"
+          "tx_queue_length_norm",
+          "tx_queue_delay_norm"
+        ],
+        "repeat": 1
+      },
+      {
+        "name": "compute_queue_summary",
+        "fields": [
+          "compute_queue_length_norm",
+          "compute_queue_delay_norm"
+        ],
+        "repeat": 1
+      },
+      {
+        "name": "task_backlog_summary",
+        "fields": [
+          "backlog_load_norm",
+          "coverage_load_norm"
         ],
         "repeat": 1
       },
@@ -136,6 +151,17 @@
           "cache_service_2",
           "cache_service_3",
           "cache_service_4"
+        ],
+        "repeat": 1
+      },
+      {
+        "name": "cache_score_summary",
+        "fields": [
+          "cache_score_service_0",
+          "cache_score_service_1",
+          "cache_score_service_2",
+          "cache_score_service_3",
+          "cache_score_service_4"
         ],
         "repeat": 1
       },
@@ -155,34 +181,44 @@
       "self_x_norm",
       "self_y_norm",
       "self_energy_ratio",
-      "self_queue_length_norm",
-      "self_queue_delay_norm",
+      "self_coverage_load_norm",
       "self_assigned_task_count_norm",
       "self_completed_task_count_norm",
       "self_cache_usage_ratio",
       "neighbor_uav_states[0].neighbor_rel_x_norm",
       "neighbor_uav_states[0].neighbor_rel_y_norm",
-      "neighbor_uav_states[0].neighbor_queue_length_norm",
-      "neighbor_uav_states[0].neighbor_queue_delay_norm",
+      "neighbor_uav_states[0].neighbor_tx_queue_length_norm",
+      "neighbor_uav_states[0].neighbor_tx_queue_delay_norm",
+      "neighbor_uav_states[0].neighbor_compute_queue_length_norm",
+      "neighbor_uav_states[0].neighbor_compute_queue_delay_norm",
+      "neighbor_uav_states[0].neighbor_backlog_norm",
       "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
-      "neighbor_uav_states[0].neighbor_completed_task_count_norm",
       "neighbor_uav_states[0].neighbor_cache_usage_ratio",
       "neighbor_uav_states[1].neighbor_rel_x_norm",
       "neighbor_uav_states[1].neighbor_rel_y_norm",
-      "neighbor_uav_states[1].neighbor_queue_length_norm",
-      "neighbor_uav_states[1].neighbor_queue_delay_norm",
+      "neighbor_uav_states[1].neighbor_tx_queue_length_norm",
+      "neighbor_uav_states[1].neighbor_tx_queue_delay_norm",
+      "neighbor_uav_states[1].neighbor_compute_queue_length_norm",
+      "neighbor_uav_states[1].neighbor_compute_queue_delay_norm",
+      "neighbor_uav_states[1].neighbor_backlog_norm",
       "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
-      "neighbor_uav_states[1].neighbor_completed_task_count_norm",
       "neighbor_uav_states[1].neighbor_cache_usage_ratio",
-      "queue_length_norm",
-      "queue_delay_norm",
-      "assigned_task_count_norm",
-      "completed_task_count_norm",
+      "tx_queue_length_norm",
+      "tx_queue_delay_norm",
+      "compute_queue_length_norm",
+      "compute_queue_delay_norm",
+      "backlog_load_norm",
+      "coverage_load_norm",
       "cache_service_0",
       "cache_service_1",
       "cache_service_2",
       "cache_service_3",
       "cache_service_4",
+      "cache_score_service_0",
+      "cache_score_service_1",
+      "cache_score_service_2",
+      "cache_score_service_3",
+      "cache_score_service_4",
       "associated_user_state[0].user_rel_x_norm",
       "associated_user_state[0].user_rel_y_norm",
       "associated_user_state[0].user_pending_task_count_norm",
@@ -202,29 +238,41 @@
     "section_slices": {
       "own_state": [
         0,
-        8
+        7
       ],
       "neighbor_uav_states": [
-        8,
-        22
+        7,
+        25
       ],
-      "queue_load_summary": [
-        22,
-        26
+      "tx_queue_summary": [
+        25,
+        27
       ],
-      "local_cache_summary": [
-        26,
+      "compute_queue_summary": [
+        27,
+        29
+      ],
+      "task_backlog_summary": [
+        29,
         31
       ],
-      "associated_user_state": [
+      "local_cache_summary": [
         31,
-        46
+        36
+      ],
+      "cache_score_summary": [
+        36,
+        41
+      ],
+      "associated_user_state": [
+        41,
+        56
       ]
     },
-    "total_length": 46
+    "total_length": 56
   },
   "uav_state_schema": {
-    "schema_version": "uav_state.v1",
+    "schema_version": "uav_state.v2",
     "sections": [
       {
         "name": "own_state",
@@ -232,8 +280,7 @@
           "self_x_norm",
           "self_y_norm",
           "self_energy_ratio",
-          "self_queue_length_norm",
-          "self_queue_delay_norm",
+          "self_coverage_load_norm",
           "self_assigned_task_count_norm",
           "self_completed_task_count_norm",
           "self_cache_usage_ratio"
@@ -245,21 +292,37 @@
         "fields": [
           "neighbor_rel_x_norm",
           "neighbor_rel_y_norm",
-          "neighbor_queue_length_norm",
-          "neighbor_queue_delay_norm",
+          "neighbor_tx_queue_length_norm",
+          "neighbor_tx_queue_delay_norm",
+          "neighbor_compute_queue_length_norm",
+          "neighbor_compute_queue_delay_norm",
+          "neighbor_backlog_norm",
           "neighbor_assigned_task_count_norm",
-          "neighbor_completed_task_count_norm",
           "neighbor_cache_usage_ratio"
         ],
         "repeat": 2
       },
       {
-        "name": "queue_load_summary",
+        "name": "tx_queue_summary",
         "fields": [
-          "queue_length_norm",
-          "queue_delay_norm",
-          "assigned_task_count_norm",
-          "completed_task_count_norm"
+          "tx_queue_length_norm",
+          "tx_queue_delay_norm"
+        ],
+        "repeat": 1
+      },
+      {
+        "name": "compute_queue_summary",
+        "fields": [
+          "compute_queue_length_norm",
+          "compute_queue_delay_norm"
+        ],
+        "repeat": 1
+      },
+      {
+        "name": "task_backlog_summary",
+        "fields": [
+          "backlog_load_norm",
+          "coverage_load_norm"
         ],
         "repeat": 1
       },
@@ -273,63 +336,96 @@
           "cache_service_4"
         ],
         "repeat": 1
+      },
+      {
+        "name": "cache_score_summary",
+        "fields": [
+          "cache_score_service_0",
+          "cache_score_service_1",
+          "cache_score_service_2",
+          "cache_score_service_3",
+          "cache_score_service_4"
+        ],
+        "repeat": 1
       }
     ],
     "flat_fields": [
       "self_x_norm",
       "self_y_norm",
       "self_energy_ratio",
-      "self_queue_length_norm",
-      "self_queue_delay_norm",
+      "self_coverage_load_norm",
       "self_assigned_task_count_norm",
       "self_completed_task_count_norm",
       "self_cache_usage_ratio",
       "neighbor_uav_states[0].neighbor_rel_x_norm",
       "neighbor_uav_states[0].neighbor_rel_y_norm",
-      "neighbor_uav_states[0].neighbor_queue_length_norm",
-      "neighbor_uav_states[0].neighbor_queue_delay_norm",
+      "neighbor_uav_states[0].neighbor_tx_queue_length_norm",
+      "neighbor_uav_states[0].neighbor_tx_queue_delay_norm",
+      "neighbor_uav_states[0].neighbor_compute_queue_length_norm",
+      "neighbor_uav_states[0].neighbor_compute_queue_delay_norm",
+      "neighbor_uav_states[0].neighbor_backlog_norm",
       "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
-      "neighbor_uav_states[0].neighbor_completed_task_count_norm",
       "neighbor_uav_states[0].neighbor_cache_usage_ratio",
       "neighbor_uav_states[1].neighbor_rel_x_norm",
       "neighbor_uav_states[1].neighbor_rel_y_norm",
-      "neighbor_uav_states[1].neighbor_queue_length_norm",
-      "neighbor_uav_states[1].neighbor_queue_delay_norm",
+      "neighbor_uav_states[1].neighbor_tx_queue_length_norm",
+      "neighbor_uav_states[1].neighbor_tx_queue_delay_norm",
+      "neighbor_uav_states[1].neighbor_compute_queue_length_norm",
+      "neighbor_uav_states[1].neighbor_compute_queue_delay_norm",
+      "neighbor_uav_states[1].neighbor_backlog_norm",
       "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
-      "neighbor_uav_states[1].neighbor_completed_task_count_norm",
       "neighbor_uav_states[1].neighbor_cache_usage_ratio",
-      "queue_length_norm",
-      "queue_delay_norm",
-      "assigned_task_count_norm",
-      "completed_task_count_norm",
+      "tx_queue_length_norm",
+      "tx_queue_delay_norm",
+      "compute_queue_length_norm",
+      "compute_queue_delay_norm",
+      "backlog_load_norm",
+      "coverage_load_norm",
       "cache_service_0",
       "cache_service_1",
       "cache_service_2",
       "cache_service_3",
-      "cache_service_4"
+      "cache_service_4",
+      "cache_score_service_0",
+      "cache_score_service_1",
+      "cache_score_service_2",
+      "cache_score_service_3",
+      "cache_score_service_4"
     ],
     "section_slices": {
       "own_state": [
         0,
-        8
+        7
       ],
       "neighbor_uav_states": [
-        8,
-        22
+        7,
+        25
       ],
-      "queue_load_summary": [
-        22,
-        26
+      "tx_queue_summary": [
+        25,
+        27
+      ],
+      "compute_queue_summary": [
+        27,
+        29
+      ],
+      "task_backlog_summary": [
+        29,
+        31
       ],
       "local_cache_summary": [
-        26,
-        31
+        31,
+        36
+      ],
+      "cache_score_summary": [
+        36,
+        41
       ]
     },
-    "total_length": 31
+    "total_length": 41
   },
   "episode_log_schema": {
-    "schema_version": "episode_log.v1",
+    "schema_version": "episode_log.v2",
     "top_level_fields": [
       "chapter_name",
       "episode_index",
@@ -341,7 +437,12 @@
       "per_uav_metrics",
       "action_schema",
       "observation_schema",
-      "uav_state_schema"
+      "uav_state_schema",
+      "step_metrics",
+      "energy_breakdown",
+      "queue_breakdown",
+      "cache_events",
+      "task_lifecycle_counts"
     ],
     "action_schema": {
       "schema_version": "action.v1",
@@ -366,7 +467,7 @@
       "scaled_max_displacement_per_step": 18.0
     },
     "observation_schema": {
-      "schema_version": "observation.v1",
+      "schema_version": "observation.v2",
       "sections": [
         {
           "name": "own_state",
@@ -374,8 +475,7 @@
             "self_x_norm",
             "self_y_norm",
             "self_energy_ratio",
-            "self_queue_length_norm",
-            "self_queue_delay_norm",
+            "self_coverage_load_norm",
             "self_assigned_task_count_norm",
             "self_completed_task_count_norm",
             "self_cache_usage_ratio"
@@ -387,21 +487,37 @@
           "fields": [
             "neighbor_rel_x_norm",
             "neighbor_rel_y_norm",
-            "neighbor_queue_length_norm",
-            "neighbor_queue_delay_norm",
+            "neighbor_tx_queue_length_norm",
+            "neighbor_tx_queue_delay_norm",
+            "neighbor_compute_queue_length_norm",
+            "neighbor_compute_queue_delay_norm",
+            "neighbor_backlog_norm",
             "neighbor_assigned_task_count_norm",
-            "neighbor_completed_task_count_norm",
             "neighbor_cache_usage_ratio"
           ],
           "repeat": 2
         },
         {
-          "name": "queue_load_summary",
+          "name": "tx_queue_summary",
           "fields": [
-            "queue_length_norm",
-            "queue_delay_norm",
-            "assigned_task_count_norm",
-            "completed_task_count_norm"
+            "tx_queue_length_norm",
+            "tx_queue_delay_norm"
+          ],
+          "repeat": 1
+        },
+        {
+          "name": "compute_queue_summary",
+          "fields": [
+            "compute_queue_length_norm",
+            "compute_queue_delay_norm"
+          ],
+          "repeat": 1
+        },
+        {
+          "name": "task_backlog_summary",
+          "fields": [
+            "backlog_load_norm",
+            "coverage_load_norm"
           ],
           "repeat": 1
         },
@@ -413,6 +529,17 @@
             "cache_service_2",
             "cache_service_3",
             "cache_service_4"
+          ],
+          "repeat": 1
+        },
+        {
+          "name": "cache_score_summary",
+          "fields": [
+            "cache_score_service_0",
+            "cache_score_service_1",
+            "cache_score_service_2",
+            "cache_score_service_3",
+            "cache_score_service_4"
           ],
           "repeat": 1
         },
@@ -432,34 +559,44 @@
         "self_x_norm",
         "self_y_norm",
         "self_energy_ratio",
-        "self_queue_length_norm",
-        "self_queue_delay_norm",
+        "self_coverage_load_norm",
         "self_assigned_task_count_norm",
         "self_completed_task_count_norm",
         "self_cache_usage_ratio",
         "neighbor_uav_states[0].neighbor_rel_x_norm",
         "neighbor_uav_states[0].neighbor_rel_y_norm",
-        "neighbor_uav_states[0].neighbor_queue_length_norm",
-        "neighbor_uav_states[0].neighbor_queue_delay_norm",
+        "neighbor_uav_states[0].neighbor_tx_queue_length_norm",
+        "neighbor_uav_states[0].neighbor_tx_queue_delay_norm",
+        "neighbor_uav_states[0].neighbor_compute_queue_length_norm",
+        "neighbor_uav_states[0].neighbor_compute_queue_delay_norm",
+        "neighbor_uav_states[0].neighbor_backlog_norm",
         "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
-        "neighbor_uav_states[0].neighbor_completed_task_count_norm",
         "neighbor_uav_states[0].neighbor_cache_usage_ratio",
         "neighbor_uav_states[1].neighbor_rel_x_norm",
         "neighbor_uav_states[1].neighbor_rel_y_norm",
-        "neighbor_uav_states[1].neighbor_queue_length_norm",
-        "neighbor_uav_states[1].neighbor_queue_delay_norm",
+        "neighbor_uav_states[1].neighbor_tx_queue_length_norm",
+        "neighbor_uav_states[1].neighbor_tx_queue_delay_norm",
+        "neighbor_uav_states[1].neighbor_compute_queue_length_norm",
+        "neighbor_uav_states[1].neighbor_compute_queue_delay_norm",
+        "neighbor_uav_states[1].neighbor_backlog_norm",
         "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
-        "neighbor_uav_states[1].neighbor_completed_task_count_norm",
         "neighbor_uav_states[1].neighbor_cache_usage_ratio",
-        "queue_length_norm",
-        "queue_delay_norm",
-        "assigned_task_count_norm",
-        "completed_task_count_norm",
+        "tx_queue_length_norm",
+        "tx_queue_delay_norm",
+        "compute_queue_length_norm",
+        "compute_queue_delay_norm",
+        "backlog_load_norm",
+        "coverage_load_norm",
         "cache_service_0",
         "cache_service_1",
         "cache_service_2",
         "cache_service_3",
         "cache_service_4",
+        "cache_score_service_0",
+        "cache_score_service_1",
+        "cache_score_service_2",
+        "cache_score_service_3",
+        "cache_score_service_4",
         "associated_user_state[0].user_rel_x_norm",
         "associated_user_state[0].user_rel_y_norm",
         "associated_user_state[0].user_pending_task_count_norm",
@@ -479,29 +616,41 @@
       "section_slices": {
         "own_state": [
           0,
-          8
+          7
         ],
         "neighbor_uav_states": [
-          8,
-          22
+          7,
+          25
         ],
-        "queue_load_summary": [
-          22,
-          26
+        "tx_queue_summary": [
+          25,
+          27
         ],
-        "local_cache_summary": [
-          26,
+        "compute_queue_summary": [
+          27,
+          29
+        ],
+        "task_backlog_summary": [
+          29,
           31
         ],
-        "associated_user_state": [
+        "local_cache_summary": [
           31,
-          46
+          36
+        ],
+        "cache_score_summary": [
+          36,
+          41
+        ],
+        "associated_user_state": [
+          41,
+          56
         ]
       },
-      "total_length": 46
+      "total_length": 56
     },
     "uav_state_schema": {
-      "schema_version": "uav_state.v1",
+      "schema_version": "uav_state.v2",
       "sections": [
         {
           "name": "own_state",
@@ -509,8 +658,7 @@
             "self_x_norm",
             "self_y_norm",
             "self_energy_ratio",
-            "self_queue_length_norm",
-            "self_queue_delay_norm",
+            "self_coverage_load_norm",
             "self_assigned_task_count_norm",
             "self_completed_task_count_norm",
             "self_cache_usage_ratio"
@@ -522,21 +670,37 @@
           "fields": [
             "neighbor_rel_x_norm",
             "neighbor_rel_y_norm",
-            "neighbor_queue_length_norm",
-            "neighbor_queue_delay_norm",
+            "neighbor_tx_queue_length_norm",
+            "neighbor_tx_queue_delay_norm",
+            "neighbor_compute_queue_length_norm",
+            "neighbor_compute_queue_delay_norm",
+            "neighbor_backlog_norm",
             "neighbor_assigned_task_count_norm",
-            "neighbor_completed_task_count_norm",
             "neighbor_cache_usage_ratio"
           ],
           "repeat": 2
         },
         {
-          "name": "queue_load_summary",
+          "name": "tx_queue_summary",
           "fields": [
-            "queue_length_norm",
-            "queue_delay_norm",
-            "assigned_task_count_norm",
-            "completed_task_count_norm"
+            "tx_queue_length_norm",
+            "tx_queue_delay_norm"
+          ],
+          "repeat": 1
+        },
+        {
+          "name": "compute_queue_summary",
+          "fields": [
+            "compute_queue_length_norm",
+            "compute_queue_delay_norm"
+          ],
+          "repeat": 1
+        },
+        {
+          "name": "task_backlog_summary",
+          "fields": [
+            "backlog_load_norm",
+            "coverage_load_norm"
           ],
           "repeat": 1
         },
@@ -550,60 +714,93 @@
             "cache_service_4"
           ],
           "repeat": 1
+        },
+        {
+          "name": "cache_score_summary",
+          "fields": [
+            "cache_score_service_0",
+            "cache_score_service_1",
+            "cache_score_service_2",
+            "cache_score_service_3",
+            "cache_score_service_4"
+          ],
+          "repeat": 1
         }
       ],
       "flat_fields": [
         "self_x_norm",
         "self_y_norm",
         "self_energy_ratio",
-        "self_queue_length_norm",
-        "self_queue_delay_norm",
+        "self_coverage_load_norm",
         "self_assigned_task_count_norm",
         "self_completed_task_count_norm",
         "self_cache_usage_ratio",
         "neighbor_uav_states[0].neighbor_rel_x_norm",
         "neighbor_uav_states[0].neighbor_rel_y_norm",
-        "neighbor_uav_states[0].neighbor_queue_length_norm",
-        "neighbor_uav_states[0].neighbor_queue_delay_norm",
+        "neighbor_uav_states[0].neighbor_tx_queue_length_norm",
+        "neighbor_uav_states[0].neighbor_tx_queue_delay_norm",
+        "neighbor_uav_states[0].neighbor_compute_queue_length_norm",
+        "neighbor_uav_states[0].neighbor_compute_queue_delay_norm",
+        "neighbor_uav_states[0].neighbor_backlog_norm",
         "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
-        "neighbor_uav_states[0].neighbor_completed_task_count_norm",
         "neighbor_uav_states[0].neighbor_cache_usage_ratio",
         "neighbor_uav_states[1].neighbor_rel_x_norm",
         "neighbor_uav_states[1].neighbor_rel_y_norm",
-        "neighbor_uav_states[1].neighbor_queue_length_norm",
-        "neighbor_uav_states[1].neighbor_queue_delay_norm",
+        "neighbor_uav_states[1].neighbor_tx_queue_length_norm",
+        "neighbor_uav_states[1].neighbor_tx_queue_delay_norm",
+        "neighbor_uav_states[1].neighbor_compute_queue_length_norm",
+        "neighbor_uav_states[1].neighbor_compute_queue_delay_norm",
+        "neighbor_uav_states[1].neighbor_backlog_norm",
         "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
-        "neighbor_uav_states[1].neighbor_completed_task_count_norm",
         "neighbor_uav_states[1].neighbor_cache_usage_ratio",
-        "queue_length_norm",
-        "queue_delay_norm",
-        "assigned_task_count_norm",
-        "completed_task_count_norm",
+        "tx_queue_length_norm",
+        "tx_queue_delay_norm",
+        "compute_queue_length_norm",
+        "compute_queue_delay_norm",
+        "backlog_load_norm",
+        "coverage_load_norm",
         "cache_service_0",
         "cache_service_1",
         "cache_service_2",
         "cache_service_3",
-        "cache_service_4"
+        "cache_service_4",
+        "cache_score_service_0",
+        "cache_score_service_1",
+        "cache_score_service_2",
+        "cache_score_service_3",
+        "cache_score_service_4"
       ],
       "section_slices": {
         "own_state": [
           0,
-          8
+          7
         ],
         "neighbor_uav_states": [
-          8,
-          22
+          7,
+          25
         ],
-        "queue_load_summary": [
-          22,
-          26
+        "tx_queue_summary": [
+          25,
+          27
+        ],
+        "compute_queue_summary": [
+          27,
+          29
+        ],
+        "task_backlog_summary": [
+          29,
+          31
         ],
         "local_cache_summary": [
-          26,
-          31
+          31,
+          36
+        ],
+        "cache_score_summary": [
+          36,
+          41
         ]
       },
-      "total_length": 31
+      "total_length": 41
     },
     "per_uav_metrics_fields": [
       "agent_id",
@@ -611,50 +808,74 @@
       "served_task_count_total",
       "assigned_task_count_total",
       "completed_task_count_total",
-      "current_queue_length",
-      "current_queue_delay",
-      "cumulative_queue_delay",
-      "max_queue_length",
+      "current_tx_queue_length",
+      "current_tx_queue_delay",
+      "current_compute_queue_length",
+      "current_compute_queue_delay",
+      "current_backlog_load",
+      "current_coverage_load",
+      "cumulative_tx_queue_delay",
+      "cumulative_compute_queue_delay",
+      "max_tx_queue_length",
+      "max_compute_queue_length",
       "remaining_energy_j",
       "energy_used_j",
       "cache_usage_ratio",
-      "cache_services"
+      "cache_services",
+      "cache_scores"
     ]
   },
   "marl_metrics": {
-    "completion_rate": 1.0,
-    "average_latency": 0.27024813467021724,
-    "total_energy": 147.6521428648702,
-    "cache_hit_rate": 0.9103535353535355,
-    "fairness_user_completion": 1.0,
-    "fairness_uav_load": 0.47413793103448276,
+    "completion_rate": 0.9791666666666666,
+    "average_latency": 0.40630061089026165,
+    "total_energy": 104.31493111169733,
+    "cache_hit_rate": 0.7182938965059709,
+    "fairness_user_completion": 0.9950000000000001,
+    "fairness_uav_load": 0.6917244170871456,
     "deadline_violation_rate": 0.0,
-    "reliability_violation_rate": 0.0
+    "reliability_violation_rate": 0.020833333333333332,
+    "uav_move_energy": 100.8367549116151,
+    "uav_compute_energy": 1.5354774586922177,
+    "ue_local_energy": 0.12397793290366324,
+    "ue_uplink_energy": 0.5134024011903489,
+    "bs_compute_energy": 1.1596733434477784,
+    "relay_fetch_energy": 0.1456450638482208
   },
   "heuristic_metrics": {
-    "completion_rate": 1.0,
-    "average_latency": 0.2703095263274998,
-    "total_energy": 149.16403423673358,
-    "cache_hit_rate": 0.9103535353535354,
-    "fairness_user_completion": 1.0,
-    "fairness_uav_load": 0.47413793103448276,
+    "completion_rate": 0.9791666666666666,
+    "average_latency": 0.4052230673891422,
+    "total_energy": 16.93395805145135,
+    "cache_hit_rate": 0.7109409553295002,
+    "fairness_user_completion": 0.9950000000000001,
+    "fairness_uav_load": 0.7072550469404674,
     "deadline_violation_rate": 0.0,
-    "reliability_violation_rate": 0.0
+    "reliability_violation_rate": 0.020833333333333332,
+    "uav_move_energy": 13.456315916752459,
+    "uav_compute_energy": 1.531510387105227,
+    "ue_local_energy": 0.12397793290366324,
+    "ue_uplink_energy": 0.5102311587100717,
+    "bs_compute_energy": 1.162053586399973,
+    "relay_fetch_energy": 0.14986906957995305
   },
   "comparison": {
     "average_latency": {
-      "left": 0.27024813467021724,
-      "right": 0.2703095263274998,
-      "delta": -6.139165728258345e-05
+      "left": 0.40630061089026165,
+      "right": 0.4052230673891422,
+      "delta": 0.0010775435011194379
+    },
+    "bs_compute_energy": {
+      "left": 1.1596733434477784,
+      "right": 1.162053586399973,
+      "delta": -0.0023802429521946333
     },
     "cache_hit_rate": {
-      "left": 0.9103535353535355,
-      "right": 0.9103535353535354,
-      "delta": 1.1102230246251565e-16
+      "left": 0.7182938965059709,
+      "right": 0.7109409553295002,
+      "delta": 0.007352941176470673
     },
     "completion_rate": {
-      "left": 1.0,
-      "right": 1.0,
+      "left": 0.9791666666666666,
+      "right": 0.9791666666666666,
       "delta": 0.0
     },
     "deadline_violation_rate": {
@@ -663,24 +884,49 @@
       "delta": 0.0
     },
     "fairness_uav_load": {
-      "left": 0.47413793103448276,
-      "right": 0.47413793103448276,
-      "delta": 0.0
+      "left": 0.6917244170871456,
+      "right": 0.7072550469404674,
+      "delta": -0.015530629853321765
     },
     "fairness_user_completion": {
-      "left": 1.0,
-      "right": 1.0,
+      "left": 0.9950000000000001,
+      "right": 0.9950000000000001,
       "delta": 0.0
     },
+    "relay_fetch_energy": {
+      "left": 0.1456450638482208,
+      "right": 0.14986906957995305,
+      "delta": -0.004224005731732261
+    },
     "reliability_violation_rate": {
-      "left": 0.0,
-      "right": 0.0,
+      "left": 0.020833333333333332,
+      "right": 0.020833333333333332,
       "delta": 0.0
     },
     "total_energy": {
-      "left": 147.6521428648702,
-      "right": 149.16403423673358,
-      "delta": -1.5118913718633848
+      "left": 104.31493111169733,
+      "right": 16.93395805145135,
+      "delta": 87.38097306024599
+    },
+    "uav_compute_energy": {
+      "left": 1.5354774586922177,
+      "right": 1.531510387105227,
+      "delta": 0.0039670715869908335
+    },
+    "uav_move_energy": {
+      "left": 100.8367549116151,
+      "right": 13.456315916752459,
+      "delta": 87.38043899486264
+    },
+    "ue_local_energy": {
+      "left": 0.12397793290366324,
+      "right": 0.12397793290366324,
+      "delta": 0.0
+    },
+    "ue_uplink_energy": {
+      "left": 0.5134024011903489,
+      "right": 0.5102311587100717,
+      "delta": 0.0031712424802771144
     }
   },
   "marl_episode_logs": [
@@ -693,61 +939,106 @@
       "assignment_rule": "nearest_uav",
       "global_metrics": {
         "completion_rate": 1.0,
-        "average_latency": 0.2721770534419102,
-        "total_energy": 115.59454374748199,
-        "cache_hit_rate": 0.9545454545454546,
+        "average_latency": 0.3631470465161456,
+        "total_energy": 78.128816780812,
+        "cache_hit_rate": 0.631578947368421,
         "fairness_user_completion": 1.0,
-        "fairness_uav_load": 0.3333333333333333,
+        "fairness_uav_load": 0.9310344827586207,
         "deadline_violation_rate": 0.0,
-        "reliability_violation_rate": 0.0
+        "reliability_violation_rate": 0.0,
+        "uav_move_energy": 74.86928848041435,
+        "uav_compute_energy": 1.5703299256356062,
+        "ue_local_energy": 0.0,
+        "ue_uplink_energy": 0.4586541003383162,
+        "bs_compute_energy": 1.1017084492137978,
+        "relay_fetch_energy": 0.12883582520992964
       },
       "per_uav_metrics": [
         {
           "agent_id": "uav_0",
           "uav_id": 0,
-          "served_task_count_total": 1,
-          "assigned_task_count_total": 1,
-          "completed_task_count_total": 1,
-          "current_queue_length": 1,
-          "current_queue_delay": 0.0,
-          "cumulative_queue_delay": 0.01919403065457015,
-          "max_queue_length": 1,
-          "remaining_energy_j": 4953.753628052629,
-          "energy_used_j": 46.24637194737079,
-          "cache_usage_ratio": 0.3333333333333333,
+          "served_task_count_total": 4,
+          "assigned_task_count_total": 6,
+          "completed_task_count_total": 4,
+          "current_tx_queue_length": 0,
+          "current_tx_queue_delay": 0.0,
+          "current_compute_queue_length": 0,
+          "current_compute_queue_delay": 0.0,
+          "current_backlog_load": 0,
+          "current_coverage_load": 3,
+          "cumulative_tx_queue_delay": 0.0,
+          "cumulative_compute_queue_delay": 0.0,
+          "max_tx_queue_length": 0,
+          "max_compute_queue_length": 0,
+          "remaining_energy_j": 4972.666777515775,
+          "energy_used_j": 27.33322248422519,
+          "cache_usage_ratio": 0.6666666666666666,
           "cache_services": [
-            4
-          ]
+            1,
+            3
+          ],
+          "cache_scores": {
+            "1": 1.5861111111111111e-06,
+            "3": 1.098076923076923e-06
+          }
         },
         {
           "agent_id": "uav_1",
           "uav_id": 1,
-          "served_task_count_total": 0,
-          "assigned_task_count_total": 0,
-          "completed_task_count_total": 0,
-          "current_queue_length": 0,
-          "current_queue_delay": 0.0,
-          "cumulative_queue_delay": 0.0,
-          "max_queue_length": 0,
-          "remaining_energy_j": 4965.959207707919,
-          "energy_used_j": 34.04079229208128,
-          "cache_usage_ratio": 0.0,
-          "cache_services": []
+          "served_task_count_total": 3,
+          "assigned_task_count_total": 6,
+          "completed_task_count_total": 3,
+          "current_tx_queue_length": 0,
+          "current_tx_queue_delay": 0.0,
+          "current_compute_queue_length": 0,
+          "current_compute_queue_delay": 0.0,
+          "current_backlog_load": 0,
+          "current_coverage_load": 3,
+          "cumulative_tx_queue_delay": 0.0,
+          "cumulative_compute_queue_delay": 0.0,
+          "max_tx_queue_length": 0,
+          "max_compute_queue_length": 0,
+          "remaining_energy_j": 4980.813272787716,
+          "energy_used_j": 19.186727212283586,
+          "cache_usage_ratio": 1.0,
+          "cache_services": [
+            2,
+            3,
+            4
+          ],
+          "cache_scores": {
+            "2": 1e-06,
+            "3": 1e-06,
+            "4": 1e-06
+          }
         },
         {
           "agent_id": "uav_2",
           "uav_id": 2,
-          "served_task_count_total": 0,
-          "assigned_task_count_total": 0,
-          "completed_task_count_total": 0,
-          "current_queue_length": 0,
-          "current_queue_delay": 0.0,
-          "cumulative_queue_delay": 0.0,
-          "max_queue_length": 0,
-          "remaining_energy_j": 4964.692620491972,
-          "energy_used_j": 35.307379508028134,
-          "cache_usage_ratio": 0.0,
-          "cache_services": []
+          "served_task_count_total": 2,
+          "assigned_task_count_total": 3,
+          "completed_task_count_total": 2,
+          "current_tx_queue_length": 0,
+          "current_tx_queue_delay": 0.0,
+          "current_compute_queue_length": 0,
+          "current_compute_queue_delay": 0.0,
+          "current_backlog_load": 0,
+          "current_coverage_load": 4,
+          "cumulative_tx_queue_delay": 0.0,
+          "cumulative_compute_queue_delay": 0.0,
+          "max_tx_queue_length": 0,
+          "max_compute_queue_length": 0,
+          "remaining_energy_j": 4970.080331290461,
+          "energy_used_j": 29.91966870953911,
+          "cache_usage_ratio": 0.6666666666666666,
+          "cache_services": [
+            2,
+            3
+          ],
+          "cache_scores": {
+            "2": 1e-06,
+            "3": 1e-06
+          }
         }
       ],
       "action_schema": {
@@ -773,7 +1064,7 @@
         "scaled_max_displacement_per_step": 18.0
       },
       "observation_schema": {
-        "schema_version": "observation.v1",
+        "schema_version": "observation.v2",
         "sections": [
           {
             "name": "own_state",
@@ -781,8 +1072,7 @@
               "self_x_norm",
               "self_y_norm",
               "self_energy_ratio",
-              "self_queue_length_norm",
-              "self_queue_delay_norm",
+              "self_coverage_load_norm",
               "self_assigned_task_count_norm",
               "self_completed_task_count_norm",
               "self_cache_usage_ratio"
@@ -794,21 +1084,37 @@
             "fields": [
               "neighbor_rel_x_norm",
               "neighbor_rel_y_norm",
-              "neighbor_queue_length_norm",
-              "neighbor_queue_delay_norm",
+              "neighbor_tx_queue_length_norm",
+              "neighbor_tx_queue_delay_norm",
+              "neighbor_compute_queue_length_norm",
+              "neighbor_compute_queue_delay_norm",
+              "neighbor_backlog_norm",
               "neighbor_assigned_task_count_norm",
-              "neighbor_completed_task_count_norm",
               "neighbor_cache_usage_ratio"
             ],
             "repeat": 2
           },
           {
-            "name": "queue_load_summary",
+            "name": "tx_queue_summary",
             "fields": [
-              "queue_length_norm",
-              "queue_delay_norm",
-              "assigned_task_count_norm",
-              "completed_task_count_norm"
+              "tx_queue_length_norm",
+              "tx_queue_delay_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "compute_queue_summary",
+            "fields": [
+              "compute_queue_length_norm",
+              "compute_queue_delay_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "task_backlog_summary",
+            "fields": [
+              "backlog_load_norm",
+              "coverage_load_norm"
             ],
             "repeat": 1
           },
@@ -820,6 +1126,17 @@
               "cache_service_2",
               "cache_service_3",
               "cache_service_4"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "cache_score_summary",
+            "fields": [
+              "cache_score_service_0",
+              "cache_score_service_1",
+              "cache_score_service_2",
+              "cache_score_service_3",
+              "cache_score_service_4"
             ],
             "repeat": 1
           },
@@ -839,34 +1156,44 @@
           "self_x_norm",
           "self_y_norm",
           "self_energy_ratio",
-          "self_queue_length_norm",
-          "self_queue_delay_norm",
+          "self_coverage_load_norm",
           "self_assigned_task_count_norm",
           "self_completed_task_count_norm",
           "self_cache_usage_ratio",
           "neighbor_uav_states[0].neighbor_rel_x_norm",
           "neighbor_uav_states[0].neighbor_rel_y_norm",
-          "neighbor_uav_states[0].neighbor_queue_length_norm",
-          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_tx_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_tx_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_compute_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_compute_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_backlog_norm",
           "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
-          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
           "neighbor_uav_states[0].neighbor_cache_usage_ratio",
           "neighbor_uav_states[1].neighbor_rel_x_norm",
           "neighbor_uav_states[1].neighbor_rel_y_norm",
-          "neighbor_uav_states[1].neighbor_queue_length_norm",
-          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_tx_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_tx_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_compute_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_compute_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_backlog_norm",
           "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
-          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
           "neighbor_uav_states[1].neighbor_cache_usage_ratio",
-          "queue_length_norm",
-          "queue_delay_norm",
-          "assigned_task_count_norm",
-          "completed_task_count_norm",
+          "tx_queue_length_norm",
+          "tx_queue_delay_norm",
+          "compute_queue_length_norm",
+          "compute_queue_delay_norm",
+          "backlog_load_norm",
+          "coverage_load_norm",
           "cache_service_0",
           "cache_service_1",
           "cache_service_2",
           "cache_service_3",
           "cache_service_4",
+          "cache_score_service_0",
+          "cache_score_service_1",
+          "cache_score_service_2",
+          "cache_score_service_3",
+          "cache_score_service_4",
           "associated_user_state[0].user_rel_x_norm",
           "associated_user_state[0].user_rel_y_norm",
           "associated_user_state[0].user_pending_task_count_norm",
@@ -886,29 +1213,41 @@
         "section_slices": {
           "own_state": [
             0,
-            8
+            7
           ],
           "neighbor_uav_states": [
-            8,
-            22
+            7,
+            25
           ],
-          "queue_load_summary": [
-            22,
-            26
+          "tx_queue_summary": [
+            25,
+            27
           ],
-          "local_cache_summary": [
-            26,
+          "compute_queue_summary": [
+            27,
+            29
+          ],
+          "task_backlog_summary": [
+            29,
             31
           ],
-          "associated_user_state": [
+          "local_cache_summary": [
             31,
-            46
+            36
+          ],
+          "cache_score_summary": [
+            36,
+            41
+          ],
+          "associated_user_state": [
+            41,
+            56
           ]
         },
-        "total_length": 46
+        "total_length": 56
       },
       "uav_state_schema": {
-        "schema_version": "uav_state.v1",
+        "schema_version": "uav_state.v2",
         "sections": [
           {
             "name": "own_state",
@@ -916,8 +1255,7 @@
               "self_x_norm",
               "self_y_norm",
               "self_energy_ratio",
-              "self_queue_length_norm",
-              "self_queue_delay_norm",
+              "self_coverage_load_norm",
               "self_assigned_task_count_norm",
               "self_completed_task_count_norm",
               "self_cache_usage_ratio"
@@ -929,21 +1267,37 @@
             "fields": [
               "neighbor_rel_x_norm",
               "neighbor_rel_y_norm",
-              "neighbor_queue_length_norm",
-              "neighbor_queue_delay_norm",
+              "neighbor_tx_queue_length_norm",
+              "neighbor_tx_queue_delay_norm",
+              "neighbor_compute_queue_length_norm",
+              "neighbor_compute_queue_delay_norm",
+              "neighbor_backlog_norm",
               "neighbor_assigned_task_count_norm",
-              "neighbor_completed_task_count_norm",
               "neighbor_cache_usage_ratio"
             ],
             "repeat": 2
           },
           {
-            "name": "queue_load_summary",
+            "name": "tx_queue_summary",
             "fields": [
-              "queue_length_norm",
-              "queue_delay_norm",
-              "assigned_task_count_norm",
-              "completed_task_count_norm"
+              "tx_queue_length_norm",
+              "tx_queue_delay_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "compute_queue_summary",
+            "fields": [
+              "compute_queue_length_norm",
+              "compute_queue_delay_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "task_backlog_summary",
+            "fields": [
+              "backlog_load_norm",
+              "coverage_load_norm"
             ],
             "repeat": 1
           },
@@ -957,61 +1311,706 @@
               "cache_service_4"
             ],
             "repeat": 1
+          },
+          {
+            "name": "cache_score_summary",
+            "fields": [
+              "cache_score_service_0",
+              "cache_score_service_1",
+              "cache_score_service_2",
+              "cache_score_service_3",
+              "cache_score_service_4"
+            ],
+            "repeat": 1
           }
         ],
         "flat_fields": [
           "self_x_norm",
           "self_y_norm",
           "self_energy_ratio",
-          "self_queue_length_norm",
-          "self_queue_delay_norm",
+          "self_coverage_load_norm",
           "self_assigned_task_count_norm",
           "self_completed_task_count_norm",
           "self_cache_usage_ratio",
           "neighbor_uav_states[0].neighbor_rel_x_norm",
           "neighbor_uav_states[0].neighbor_rel_y_norm",
-          "neighbor_uav_states[0].neighbor_queue_length_norm",
-          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_tx_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_tx_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_compute_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_compute_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_backlog_norm",
           "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
-          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
           "neighbor_uav_states[0].neighbor_cache_usage_ratio",
           "neighbor_uav_states[1].neighbor_rel_x_norm",
           "neighbor_uav_states[1].neighbor_rel_y_norm",
-          "neighbor_uav_states[1].neighbor_queue_length_norm",
-          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_tx_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_tx_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_compute_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_compute_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_backlog_norm",
           "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
-          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
           "neighbor_uav_states[1].neighbor_cache_usage_ratio",
-          "queue_length_norm",
-          "queue_delay_norm",
-          "assigned_task_count_norm",
-          "completed_task_count_norm",
+          "tx_queue_length_norm",
+          "tx_queue_delay_norm",
+          "compute_queue_length_norm",
+          "compute_queue_delay_norm",
+          "backlog_load_norm",
+          "coverage_load_norm",
           "cache_service_0",
           "cache_service_1",
           "cache_service_2",
           "cache_service_3",
-          "cache_service_4"
+          "cache_service_4",
+          "cache_score_service_0",
+          "cache_score_service_1",
+          "cache_score_service_2",
+          "cache_score_service_3",
+          "cache_score_service_4"
         ],
         "section_slices": {
           "own_state": [
             0,
-            8
+            7
           ],
           "neighbor_uav_states": [
-            8,
-            22
+            7,
+            25
           ],
-          "queue_load_summary": [
-            22,
-            26
+          "tx_queue_summary": [
+            25,
+            27
+          ],
+          "compute_queue_summary": [
+            27,
+            29
+          ],
+          "task_backlog_summary": [
+            29,
+            31
           ],
           "local_cache_summary": [
-            26,
-            31
+            31,
+            36
+          ],
+          "cache_score_summary": [
+            36,
+            41
           ]
         },
-        "total_length": 31
-      }
+        "total_length": 41
+      },
+      "step_metrics": [
+        {
+          "step": 1,
+          "generated_tasks": 3.0,
+          "finalized_tasks": 3.0,
+          "completed_tasks": 3.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.33158481911126897,
+          "cache_hit_rate": 0.6666666666666666,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 12.802726552359063,
+          "uav_move_energy": 12.37320853046238,
+          "uav_compute_energy": 0.1245145604343073,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.08214986169605526,
+          "bs_compute_energy": 0.20785359976632015,
+          "relay_fetch_energy": 0.015000000000000001
+        },
+        {
+          "step": 2,
+          "generated_tasks": 6.0,
+          "finalized_tasks": 6.0,
+          "completed_tasks": 6.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.4255608624954405,
+          "cache_hit_rate": 0.3333333333333333,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 18.196627517627483,
+          "uav_move_energy": 17.059456881827636,
+          "uav_compute_energy": 0.7224445637578714,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.11550752081127716,
+          "bs_compute_energy": 0.22529590941177582,
+          "relay_fetch_energy": 0.07392264181892177
+        },
+        {
+          "step": 3,
+          "generated_tasks": 3.0,
+          "finalized_tasks": 3.0,
+          "completed_tasks": 3.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.4325890417577461,
+          "cache_hit_rate": 0.6666666666666666,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 9.844576751512191,
+          "uav_move_energy": 9.170998919341898,
+          "uav_compute_energy": 0.4557594608520154,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.057840333825906545,
+          "bs_compute_energy": 0.14897803749237135,
+          "relay_fetch_energy": 0.011000000000000001
+        },
+        {
+          "step": 4,
+          "generated_tasks": 2.0,
+          "finalized_tasks": 2.0,
+          "completed_tasks": 2.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.30391512500793616,
+          "cache_hit_rate": 1.0,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 7.867333965279272,
+          "uav_move_energy": 7.6258136433550705,
+          "uav_compute_energy": 0.0,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.042956245341515265,
+          "bs_compute_energy": 0.19856407658268643,
+          "relay_fetch_energy": 0.0
+        },
+        {
+          "step": 5,
+          "generated_tasks": 1.0,
+          "finalized_tasks": 1.0,
+          "completed_tasks": 1.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.29330560492883073,
+          "cache_hit_rate": 1.0,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 8.126971151131693,
+          "uav_move_energy": 7.971652730817014,
+          "uav_compute_energy": 0.0,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.036329324872101484,
+          "bs_compute_energy": 0.118989095442578,
+          "relay_fetch_energy": 0.0
+        },
+        {
+          "step": 6,
+          "generated_tasks": 1.0,
+          "finalized_tasks": 1.0,
+          "completed_tasks": 1.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.23711575940342922,
+          "cache_hit_rate": 1.0,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 8.260222263023628,
+          "uav_move_energy": 8.128437902933802,
+          "uav_compute_energy": 0.0,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.04492198894045075,
+          "bs_compute_energy": 0.0868623711493755,
+          "relay_fetch_energy": 0.0
+        },
+        {
+          "step": 7,
+          "generated_tasks": 3.0,
+          "finalized_tasks": 3.0,
+          "completed_tasks": 3.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.3052185039596485,
+          "cache_hit_rate": 0.6666666666666666,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 8.516394374933084,
+          "uav_move_energy": 8.025755666730964,
+          "uav_compute_energy": 0.26761134059141223,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.07894882485100974,
+          "bs_compute_energy": 0.11516535936869057,
+          "relay_fetch_energy": 0.028913183391007884
+        },
+        {
+          "step": 8,
+          "generated_tasks": 0.0,
+          "finalized_tasks": 0.0,
+          "completed_tasks": 0.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.0,
+          "cache_hit_rate": 0.0,
+          "completion_rate": 0.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 4.513964204945598,
+          "uav_move_energy": 4.513964204945598,
+          "uav_compute_energy": 0.0,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.0,
+          "bs_compute_energy": 0.0,
+          "relay_fetch_energy": 0.0
+        }
+      ],
+      "energy_breakdown": {
+        "episode_totals": {
+          "uav_move_energy": 74.86928848041435,
+          "uav_compute_energy": 1.5703299256356062,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.4586541003383162,
+          "bs_compute_energy": 1.1017084492137978,
+          "relay_fetch_energy": 0.12883582520992964
+        },
+        "step_breakdown": [
+          {
+            "step": 1,
+            "uav_move_energy": 12.37320853046238,
+            "uav_compute_energy": 0.1245145604343073,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.08214986169605526,
+            "bs_compute_energy": 0.20785359976632015,
+            "relay_fetch_energy": 0.015000000000000001
+          },
+          {
+            "step": 2,
+            "uav_move_energy": 17.059456881827636,
+            "uav_compute_energy": 0.7224445637578714,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.11550752081127716,
+            "bs_compute_energy": 0.22529590941177582,
+            "relay_fetch_energy": 0.07392264181892177
+          },
+          {
+            "step": 3,
+            "uav_move_energy": 9.170998919341898,
+            "uav_compute_energy": 0.4557594608520154,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.057840333825906545,
+            "bs_compute_energy": 0.14897803749237135,
+            "relay_fetch_energy": 0.011000000000000001
+          },
+          {
+            "step": 4,
+            "uav_move_energy": 7.6258136433550705,
+            "uav_compute_energy": 0.0,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.042956245341515265,
+            "bs_compute_energy": 0.19856407658268643,
+            "relay_fetch_energy": 0.0
+          },
+          {
+            "step": 5,
+            "uav_move_energy": 7.971652730817014,
+            "uav_compute_energy": 0.0,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.036329324872101484,
+            "bs_compute_energy": 0.118989095442578,
+            "relay_fetch_energy": 0.0
+          },
+          {
+            "step": 6,
+            "uav_move_energy": 8.128437902933802,
+            "uav_compute_energy": 0.0,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.04492198894045075,
+            "bs_compute_energy": 0.0868623711493755,
+            "relay_fetch_energy": 0.0
+          },
+          {
+            "step": 7,
+            "uav_move_energy": 8.025755666730964,
+            "uav_compute_energy": 0.26761134059141223,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.07894882485100974,
+            "bs_compute_energy": 0.11516535936869057,
+            "relay_fetch_energy": 0.028913183391007884
+          },
+          {
+            "step": 8,
+            "uav_move_energy": 4.513964204945598,
+            "uav_compute_energy": 0.0,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.0,
+            "bs_compute_energy": 0.0,
+            "relay_fetch_energy": 0.0
+          }
+        ]
+      },
+      "queue_breakdown": [
+        {
+          "step": 1,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        },
+        {
+          "step": 2,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        },
+        {
+          "step": 3,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        },
+        {
+          "step": 4,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        },
+        {
+          "step": 5,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        },
+        {
+          "step": 6,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        },
+        {
+          "step": 7,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        },
+        {
+          "step": 8,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        }
+      ],
+      "cache_events": [
+        {
+          "step": 1,
+          "uav_id": 1,
+          "action": "admit",
+          "service_type": 4,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 2,
+          "uav_id": 1,
+          "action": "admit",
+          "service_type": 3,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 2,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 2,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 2,
+          "uav_id": 0,
+          "action": "admit",
+          "service_type": 3,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 2,
+          "uav_id": 0,
+          "action": "admit",
+          "service_type": 1,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 3,
+          "uav_id": 1,
+          "action": "admit",
+          "service_type": 2,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 7,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 3,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        }
+      ],
+      "task_lifecycle_counts": [
+        {
+          "step": 1,
+          "new_tasks": 3,
+          "pending_tasks": 0,
+          "completed_tasks": 3,
+          "expired_tasks": 0
+        },
+        {
+          "step": 2,
+          "new_tasks": 6,
+          "pending_tasks": 0,
+          "completed_tasks": 6,
+          "expired_tasks": 0
+        },
+        {
+          "step": 3,
+          "new_tasks": 3,
+          "pending_tasks": 0,
+          "completed_tasks": 3,
+          "expired_tasks": 0
+        },
+        {
+          "step": 4,
+          "new_tasks": 2,
+          "pending_tasks": 0,
+          "completed_tasks": 2,
+          "expired_tasks": 0
+        },
+        {
+          "step": 5,
+          "new_tasks": 1,
+          "pending_tasks": 0,
+          "completed_tasks": 1,
+          "expired_tasks": 0
+        },
+        {
+          "step": 6,
+          "new_tasks": 1,
+          "pending_tasks": 0,
+          "completed_tasks": 1,
+          "expired_tasks": 0
+        },
+        {
+          "step": 7,
+          "new_tasks": 3,
+          "pending_tasks": 0,
+          "completed_tasks": 3,
+          "expired_tasks": 0
+        },
+        {
+          "step": 8,
+          "new_tasks": 0,
+          "pending_tasks": 0,
+          "completed_tasks": 0,
+          "expired_tasks": 0
+        }
+      ]
     },
     {
       "chapter_name": "chapter4",
@@ -1021,66 +2020,91 @@
       "num_users": 6,
       "assignment_rule": "nearest_uav",
       "global_metrics": {
-        "completion_rate": 1.0,
-        "average_latency": 0.27647147758259905,
-        "total_energy": 188.11383099983414,
-        "cache_hit_rate": 0.8333333333333334,
-        "fairness_user_completion": 1.0,
-        "fairness_uav_load": 0.5632183908045977,
+        "completion_rate": 0.9166666666666666,
+        "average_latency": 0.5639899678713496,
+        "total_energy": 149.95604476227965,
+        "cache_hit_rate": 0.9166666666666666,
+        "fairness_user_completion": 0.9800000000000002,
+        "fairness_uav_load": 0.3333333333333333,
         "deadline_violation_rate": 0.0,
-        "reliability_violation_rate": 0.0
+        "reliability_violation_rate": 0.08333333333333333,
+        "uav_move_energy": 148.04120926081174,
+        "uav_compute_energy": 0.15482879358439555,
+        "ue_local_energy": 0.49591173161465296,
+        "ue_uplink_energy": 0.25553230065055443,
+        "bs_compute_energy": 0.9975626756183233,
+        "relay_fetch_energy": 0.011000000000000001
       },
       "per_uav_metrics": [
         {
           "agent_id": "uav_0",
           "uav_id": 0,
-          "served_task_count_total": 2,
-          "assigned_task_count_total": 2,
-          "completed_task_count_total": 2,
-          "current_queue_length": 2,
-          "current_queue_delay": 0.019163017499533197,
-          "cumulative_queue_delay": 0.04165503812512883,
-          "max_queue_length": 2,
-          "remaining_energy_j": 4939.366085150442,
-          "energy_used_j": 60.633914849558096,
-          "cache_usage_ratio": 0.6666666666666666,
-          "cache_services": [
-            0,
-            3
-          ]
+          "served_task_count_total": 0,
+          "assigned_task_count_total": 0,
+          "completed_task_count_total": 0,
+          "current_tx_queue_length": 0,
+          "current_tx_queue_delay": 0.0,
+          "current_compute_queue_length": 0,
+          "current_compute_queue_delay": 0.0,
+          "current_backlog_load": 0,
+          "current_coverage_load": 3,
+          "cumulative_tx_queue_delay": 0.0,
+          "cumulative_compute_queue_delay": 0.0,
+          "max_tx_queue_length": 0,
+          "max_compute_queue_length": 0,
+          "remaining_energy_j": 4948.160992611628,
+          "energy_used_j": 51.83900738837201,
+          "cache_usage_ratio": 0.0,
+          "cache_services": [],
+          "cache_scores": {}
         },
         {
           "agent_id": "uav_1",
           "uav_id": 1,
-          "served_task_count_total": 0,
-          "assigned_task_count_total": 0,
-          "completed_task_count_total": 0,
-          "current_queue_length": 0,
-          "current_queue_delay": 0.0,
-          "cumulative_queue_delay": 0.0,
-          "max_queue_length": 0,
-          "remaining_energy_j": 4971.097379084307,
-          "energy_used_j": 28.90262091569275,
-          "cache_usage_ratio": 0.0,
-          "cache_services": []
+          "served_task_count_total": 1,
+          "assigned_task_count_total": 4,
+          "completed_task_count_total": 1,
+          "current_tx_queue_length": 0,
+          "current_tx_queue_delay": 0.0,
+          "current_compute_queue_length": 0,
+          "current_compute_queue_delay": 0.0,
+          "current_backlog_load": 0,
+          "current_coverage_load": 3,
+          "cumulative_tx_queue_delay": 0.0,
+          "cumulative_compute_queue_delay": 0.0,
+          "max_tx_queue_length": 0,
+          "max_compute_queue_length": 0,
+          "remaining_energy_j": 4955.285397586506,
+          "energy_used_j": 44.714602413493594,
+          "cache_usage_ratio": 0.3333333333333333,
+          "cache_services": [
+            2
+          ],
+          "cache_scores": {
+            "2": 1e-06
+          }
         },
         {
           "agent_id": "uav_2",
           "uav_id": 2,
-          "served_task_count_total": 5,
-          "assigned_task_count_total": 5,
-          "completed_task_count_total": 5,
-          "current_queue_length": 5,
-          "current_queue_delay": 0.022832992530226193,
-          "cumulative_queue_delay": 0.15070886332154307,
-          "max_queue_length": 5,
-          "remaining_energy_j": 4901.422704765413,
-          "energy_used_j": 98.57729523458693,
-          "cache_usage_ratio": 0.6666666666666666,
-          "cache_services": [
-            2,
-            3
-          ]
+          "served_task_count_total": 0,
+          "assigned_task_count_total": 2,
+          "completed_task_count_total": 0,
+          "current_tx_queue_length": 0,
+          "current_tx_queue_delay": 0.0,
+          "current_compute_queue_length": 0,
+          "current_compute_queue_delay": 0.0,
+          "current_backlog_load": 0,
+          "current_coverage_load": 3,
+          "cumulative_tx_queue_delay": 0.0,
+          "cumulative_compute_queue_delay": 0.0,
+          "max_tx_queue_length": 0,
+          "max_compute_queue_length": 0,
+          "remaining_energy_j": 4948.357571747467,
+          "energy_used_j": 51.642428252533136,
+          "cache_usage_ratio": 0.0,
+          "cache_services": [],
+          "cache_scores": {}
         }
       ],
       "action_schema": {
@@ -1106,7 +2130,7 @@
         "scaled_max_displacement_per_step": 18.0
       },
       "observation_schema": {
-        "schema_version": "observation.v1",
+        "schema_version": "observation.v2",
         "sections": [
           {
             "name": "own_state",
@@ -1114,8 +2138,7 @@
               "self_x_norm",
               "self_y_norm",
               "self_energy_ratio",
-              "self_queue_length_norm",
-              "self_queue_delay_norm",
+              "self_coverage_load_norm",
               "self_assigned_task_count_norm",
               "self_completed_task_count_norm",
               "self_cache_usage_ratio"
@@ -1127,21 +2150,37 @@
             "fields": [
               "neighbor_rel_x_norm",
               "neighbor_rel_y_norm",
-              "neighbor_queue_length_norm",
-              "neighbor_queue_delay_norm",
+              "neighbor_tx_queue_length_norm",
+              "neighbor_tx_queue_delay_norm",
+              "neighbor_compute_queue_length_norm",
+              "neighbor_compute_queue_delay_norm",
+              "neighbor_backlog_norm",
               "neighbor_assigned_task_count_norm",
-              "neighbor_completed_task_count_norm",
               "neighbor_cache_usage_ratio"
             ],
             "repeat": 2
           },
           {
-            "name": "queue_load_summary",
+            "name": "tx_queue_summary",
             "fields": [
-              "queue_length_norm",
-              "queue_delay_norm",
-              "assigned_task_count_norm",
-              "completed_task_count_norm"
+              "tx_queue_length_norm",
+              "tx_queue_delay_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "compute_queue_summary",
+            "fields": [
+              "compute_queue_length_norm",
+              "compute_queue_delay_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "task_backlog_summary",
+            "fields": [
+              "backlog_load_norm",
+              "coverage_load_norm"
             ],
             "repeat": 1
           },
@@ -1153,6 +2192,17 @@
               "cache_service_2",
               "cache_service_3",
               "cache_service_4"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "cache_score_summary",
+            "fields": [
+              "cache_score_service_0",
+              "cache_score_service_1",
+              "cache_score_service_2",
+              "cache_score_service_3",
+              "cache_score_service_4"
             ],
             "repeat": 1
           },
@@ -1172,34 +2222,44 @@
           "self_x_norm",
           "self_y_norm",
           "self_energy_ratio",
-          "self_queue_length_norm",
-          "self_queue_delay_norm",
+          "self_coverage_load_norm",
           "self_assigned_task_count_norm",
           "self_completed_task_count_norm",
           "self_cache_usage_ratio",
           "neighbor_uav_states[0].neighbor_rel_x_norm",
           "neighbor_uav_states[0].neighbor_rel_y_norm",
-          "neighbor_uav_states[0].neighbor_queue_length_norm",
-          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_tx_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_tx_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_compute_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_compute_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_backlog_norm",
           "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
-          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
           "neighbor_uav_states[0].neighbor_cache_usage_ratio",
           "neighbor_uav_states[1].neighbor_rel_x_norm",
           "neighbor_uav_states[1].neighbor_rel_y_norm",
-          "neighbor_uav_states[1].neighbor_queue_length_norm",
-          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_tx_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_tx_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_compute_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_compute_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_backlog_norm",
           "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
-          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
           "neighbor_uav_states[1].neighbor_cache_usage_ratio",
-          "queue_length_norm",
-          "queue_delay_norm",
-          "assigned_task_count_norm",
-          "completed_task_count_norm",
+          "tx_queue_length_norm",
+          "tx_queue_delay_norm",
+          "compute_queue_length_norm",
+          "compute_queue_delay_norm",
+          "backlog_load_norm",
+          "coverage_load_norm",
           "cache_service_0",
           "cache_service_1",
           "cache_service_2",
           "cache_service_3",
           "cache_service_4",
+          "cache_score_service_0",
+          "cache_score_service_1",
+          "cache_score_service_2",
+          "cache_score_service_3",
+          "cache_score_service_4",
           "associated_user_state[0].user_rel_x_norm",
           "associated_user_state[0].user_rel_y_norm",
           "associated_user_state[0].user_pending_task_count_norm",
@@ -1219,29 +2279,41 @@
         "section_slices": {
           "own_state": [
             0,
-            8
+            7
           ],
           "neighbor_uav_states": [
-            8,
-            22
+            7,
+            25
           ],
-          "queue_load_summary": [
-            22,
-            26
+          "tx_queue_summary": [
+            25,
+            27
           ],
-          "local_cache_summary": [
-            26,
+          "compute_queue_summary": [
+            27,
+            29
+          ],
+          "task_backlog_summary": [
+            29,
             31
           ],
-          "associated_user_state": [
+          "local_cache_summary": [
             31,
-            46
+            36
+          ],
+          "cache_score_summary": [
+            36,
+            41
+          ],
+          "associated_user_state": [
+            41,
+            56
           ]
         },
-        "total_length": 46
+        "total_length": 56
       },
       "uav_state_schema": {
-        "schema_version": "uav_state.v1",
+        "schema_version": "uav_state.v2",
         "sections": [
           {
             "name": "own_state",
@@ -1249,8 +2321,7 @@
               "self_x_norm",
               "self_y_norm",
               "self_energy_ratio",
-              "self_queue_length_norm",
-              "self_queue_delay_norm",
+              "self_coverage_load_norm",
               "self_assigned_task_count_norm",
               "self_completed_task_count_norm",
               "self_cache_usage_ratio"
@@ -1262,21 +2333,37 @@
             "fields": [
               "neighbor_rel_x_norm",
               "neighbor_rel_y_norm",
-              "neighbor_queue_length_norm",
-              "neighbor_queue_delay_norm",
+              "neighbor_tx_queue_length_norm",
+              "neighbor_tx_queue_delay_norm",
+              "neighbor_compute_queue_length_norm",
+              "neighbor_compute_queue_delay_norm",
+              "neighbor_backlog_norm",
               "neighbor_assigned_task_count_norm",
-              "neighbor_completed_task_count_norm",
               "neighbor_cache_usage_ratio"
             ],
             "repeat": 2
           },
           {
-            "name": "queue_load_summary",
+            "name": "tx_queue_summary",
             "fields": [
-              "queue_length_norm",
-              "queue_delay_norm",
-              "assigned_task_count_norm",
-              "completed_task_count_norm"
+              "tx_queue_length_norm",
+              "tx_queue_delay_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "compute_queue_summary",
+            "fields": [
+              "compute_queue_length_norm",
+              "compute_queue_delay_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "task_backlog_summary",
+            "fields": [
+              "backlog_load_norm",
+              "coverage_load_norm"
             ],
             "repeat": 1
           },
@@ -1290,61 +2377,658 @@
               "cache_service_4"
             ],
             "repeat": 1
+          },
+          {
+            "name": "cache_score_summary",
+            "fields": [
+              "cache_score_service_0",
+              "cache_score_service_1",
+              "cache_score_service_2",
+              "cache_score_service_3",
+              "cache_score_service_4"
+            ],
+            "repeat": 1
           }
         ],
         "flat_fields": [
           "self_x_norm",
           "self_y_norm",
           "self_energy_ratio",
-          "self_queue_length_norm",
-          "self_queue_delay_norm",
+          "self_coverage_load_norm",
           "self_assigned_task_count_norm",
           "self_completed_task_count_norm",
           "self_cache_usage_ratio",
           "neighbor_uav_states[0].neighbor_rel_x_norm",
           "neighbor_uav_states[0].neighbor_rel_y_norm",
-          "neighbor_uav_states[0].neighbor_queue_length_norm",
-          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_tx_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_tx_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_compute_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_compute_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_backlog_norm",
           "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
-          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
           "neighbor_uav_states[0].neighbor_cache_usage_ratio",
           "neighbor_uav_states[1].neighbor_rel_x_norm",
           "neighbor_uav_states[1].neighbor_rel_y_norm",
-          "neighbor_uav_states[1].neighbor_queue_length_norm",
-          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_tx_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_tx_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_compute_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_compute_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_backlog_norm",
           "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
-          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
           "neighbor_uav_states[1].neighbor_cache_usage_ratio",
-          "queue_length_norm",
-          "queue_delay_norm",
-          "assigned_task_count_norm",
-          "completed_task_count_norm",
+          "tx_queue_length_norm",
+          "tx_queue_delay_norm",
+          "compute_queue_length_norm",
+          "compute_queue_delay_norm",
+          "backlog_load_norm",
+          "coverage_load_norm",
           "cache_service_0",
           "cache_service_1",
           "cache_service_2",
           "cache_service_3",
-          "cache_service_4"
+          "cache_service_4",
+          "cache_score_service_0",
+          "cache_score_service_1",
+          "cache_score_service_2",
+          "cache_score_service_3",
+          "cache_score_service_4"
         ],
         "section_slices": {
           "own_state": [
             0,
-            8
+            7
           ],
           "neighbor_uav_states": [
-            8,
-            22
+            7,
+            25
           ],
-          "queue_load_summary": [
-            22,
-            26
+          "tx_queue_summary": [
+            25,
+            27
+          ],
+          "compute_queue_summary": [
+            27,
+            29
+          ],
+          "task_backlog_summary": [
+            29,
+            31
           ],
           "local_cache_summary": [
-            26,
-            31
+            31,
+            36
+          ],
+          "cache_score_summary": [
+            36,
+            41
           ]
         },
-        "total_length": 31
-      }
+        "total_length": 41
+      },
+      "step_metrics": [
+        {
+          "step": 1,
+          "generated_tasks": 1.0,
+          "finalized_tasks": 1.0,
+          "completed_tasks": 1.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.29613372923929576,
+          "cache_hit_rate": 1.0,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 12.52017511863137,
+          "uav_move_energy": 12.364688999599199,
+          "uav_compute_energy": 0.0,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.03335482249327187,
+          "bs_compute_energy": 0.12213129653889884,
+          "relay_fetch_energy": 0.0
+        },
+        {
+          "step": 2,
+          "generated_tasks": 1.0,
+          "finalized_tasks": 1.0,
+          "completed_tasks": 1.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.30870185685535234,
+          "cache_hit_rate": 1.0,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 17.608901728280035,
+          "uav_move_energy": 17.45072201611237,
+          "uav_compute_energy": 0.0,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.025007052192737418,
+          "bs_compute_energy": 0.1331726599749267,
+          "relay_fetch_energy": 0.0
+        },
+        {
+          "step": 3,
+          "generated_tasks": 0.0,
+          "finalized_tasks": 0.0,
+          "completed_tasks": 0.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.0,
+          "cache_hit_rate": 0.0,
+          "completion_rate": 0.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 17.34726508703911,
+          "uav_move_energy": 17.34726508703911,
+          "uav_compute_energy": 0.0,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.0,
+          "bs_compute_energy": 0.0,
+          "relay_fetch_energy": 0.0
+        },
+        {
+          "step": 4,
+          "generated_tasks": 3.0,
+          "finalized_tasks": 1.0,
+          "completed_tasks": 1.0,
+          "pending_tasks": 2.0,
+          "average_latency": 0.14976097293102386,
+          "cache_hit_rate": 1.0,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 18.014930796309077,
+          "uav_move_energy": 17.43424679771634,
+          "uav_compute_energy": 0.0,
+          "ue_local_energy": 0.49591173161465296,
+          "ue_uplink_energy": 0.03221749992797593,
+          "bs_compute_energy": 0.05255476705010591,
+          "relay_fetch_energy": 0.0
+        },
+        {
+          "step": 5,
+          "generated_tasks": 1.0,
+          "finalized_tasks": 3.0,
+          "completed_tasks": 3.0,
+          "pending_tasks": 0.0,
+          "average_latency": 1.2149118307028484,
+          "cache_hit_rate": 1.0,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 39.391884298231275,
+          "uav_move_energy": 39.215137251362194,
+          "uav_compute_energy": 0.0,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.03547887955967197,
+          "bs_compute_energy": 0.14126816730940905,
+          "relay_fetch_energy": 0.0
+        },
+        {
+          "step": 6,
+          "generated_tasks": 3.0,
+          "finalized_tasks": 3.0,
+          "completed_tasks": 2.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.4068070979044978,
+          "cache_hit_rate": 0.6666666666666666,
+          "completion_rate": 0.6666666666666666,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.3333333333333333,
+          "total_energy": 17.743329005639005,
+          "uav_move_energy": 17.245535034066116,
+          "uav_compute_energy": 0.15482879358439555,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.05421617985697674,
+          "bs_compute_energy": 0.2777489981315179,
+          "relay_fetch_energy": 0.011000000000000001
+        },
+        {
+          "step": 7,
+          "generated_tasks": 3.0,
+          "finalized_tasks": 3.0,
+          "completed_tasks": 3.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.3827087565361615,
+          "cache_hit_rate": 1.0,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 13.75655186964553,
+          "uav_move_energy": 13.410607216412146,
+          "uav_compute_energy": 0.0,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.07525786661992051,
+          "bs_compute_energy": 0.27068678661346496,
+          "relay_fetch_energy": 0.0
+        },
+        {
+          "step": 8,
+          "generated_tasks": 0.0,
+          "finalized_tasks": 0.0,
+          "completed_tasks": 0.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.0,
+          "cache_hit_rate": 0.0,
+          "completion_rate": 0.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 13.57300685850425,
+          "uav_move_energy": 13.57300685850425,
+          "uav_compute_energy": 0.0,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.0,
+          "bs_compute_energy": 0.0,
+          "relay_fetch_energy": 0.0
+        }
+      ],
+      "energy_breakdown": {
+        "episode_totals": {
+          "uav_move_energy": 148.04120926081174,
+          "uav_compute_energy": 0.15482879358439555,
+          "ue_local_energy": 0.49591173161465296,
+          "ue_uplink_energy": 0.25553230065055443,
+          "bs_compute_energy": 0.9975626756183233,
+          "relay_fetch_energy": 0.011000000000000001
+        },
+        "step_breakdown": [
+          {
+            "step": 1,
+            "uav_move_energy": 12.364688999599199,
+            "uav_compute_energy": 0.0,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.03335482249327187,
+            "bs_compute_energy": 0.12213129653889884,
+            "relay_fetch_energy": 0.0
+          },
+          {
+            "step": 2,
+            "uav_move_energy": 17.45072201611237,
+            "uav_compute_energy": 0.0,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.025007052192737418,
+            "bs_compute_energy": 0.1331726599749267,
+            "relay_fetch_energy": 0.0
+          },
+          {
+            "step": 3,
+            "uav_move_energy": 17.34726508703911,
+            "uav_compute_energy": 0.0,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.0,
+            "bs_compute_energy": 0.0,
+            "relay_fetch_energy": 0.0
+          },
+          {
+            "step": 4,
+            "uav_move_energy": 17.43424679771634,
+            "uav_compute_energy": 0.0,
+            "ue_local_energy": 0.49591173161465296,
+            "ue_uplink_energy": 0.03221749992797593,
+            "bs_compute_energy": 0.05255476705010591,
+            "relay_fetch_energy": 0.0
+          },
+          {
+            "step": 5,
+            "uav_move_energy": 39.215137251362194,
+            "uav_compute_energy": 0.0,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.03547887955967197,
+            "bs_compute_energy": 0.14126816730940905,
+            "relay_fetch_energy": 0.0
+          },
+          {
+            "step": 6,
+            "uav_move_energy": 17.245535034066116,
+            "uav_compute_energy": 0.15482879358439555,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.05421617985697674,
+            "bs_compute_energy": 0.2777489981315179,
+            "relay_fetch_energy": 0.011000000000000001
+          },
+          {
+            "step": 7,
+            "uav_move_energy": 13.410607216412146,
+            "uav_compute_energy": 0.0,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.07525786661992051,
+            "bs_compute_energy": 0.27068678661346496,
+            "relay_fetch_energy": 0.0
+          },
+          {
+            "step": 8,
+            "uav_move_energy": 13.57300685850425,
+            "uav_compute_energy": 0.0,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.0,
+            "bs_compute_energy": 0.0,
+            "relay_fetch_energy": 0.0
+          }
+        ]
+      },
+      "queue_breakdown": [
+        {
+          "step": 1,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            }
+          ]
+        },
+        {
+          "step": 2,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            }
+          ]
+        },
+        {
+          "step": 3,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            }
+          ]
+        },
+        {
+          "step": 4,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            }
+          ]
+        },
+        {
+          "step": 5,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            }
+          ]
+        },
+        {
+          "step": 6,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            }
+          ]
+        },
+        {
+          "step": 7,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            }
+          ]
+        },
+        {
+          "step": 8,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            }
+          ]
+        }
+      ],
+      "cache_events": [
+        {
+          "step": 6,
+          "uav_id": 1,
+          "action": "admit",
+          "service_type": 2,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        }
+      ],
+      "task_lifecycle_counts": [
+        {
+          "step": 1,
+          "new_tasks": 1,
+          "pending_tasks": 0,
+          "completed_tasks": 1,
+          "expired_tasks": 0
+        },
+        {
+          "step": 2,
+          "new_tasks": 1,
+          "pending_tasks": 0,
+          "completed_tasks": 1,
+          "expired_tasks": 0
+        },
+        {
+          "step": 3,
+          "new_tasks": 0,
+          "pending_tasks": 0,
+          "completed_tasks": 0,
+          "expired_tasks": 0
+        },
+        {
+          "step": 4,
+          "new_tasks": 3,
+          "pending_tasks": 2,
+          "completed_tasks": 1,
+          "expired_tasks": 0
+        },
+        {
+          "step": 5,
+          "new_tasks": 1,
+          "pending_tasks": 0,
+          "completed_tasks": 3,
+          "expired_tasks": 0
+        },
+        {
+          "step": 6,
+          "new_tasks": 3,
+          "pending_tasks": 0,
+          "completed_tasks": 2,
+          "expired_tasks": 1
+        },
+        {
+          "step": 7,
+          "new_tasks": 3,
+          "pending_tasks": 0,
+          "completed_tasks": 3,
+          "expired_tasks": 0
+        },
+        {
+          "step": 8,
+          "new_tasks": 0,
+          "pending_tasks": 0,
+          "completed_tasks": 0,
+          "expired_tasks": 0
+        }
+      ]
     },
     {
       "chapter_name": "chapter4",
@@ -1355,61 +3039,104 @@
       "assignment_rule": "nearest_uav",
       "global_metrics": {
         "completion_rate": 1.0,
-        "average_latency": 0.2777031260176929,
-        "total_energy": 133.60380081961665,
-        "cache_hit_rate": 0.9444444444444444,
+        "average_latency": 0.31337543939804663,
+        "total_energy": 92.40083199567792,
+        "cache_hit_rate": 0.6190476190476191,
         "fairness_user_completion": 1.0,
-        "fairness_uav_load": 0.3333333333333333,
+        "fairness_uav_load": 0.6172839506172839,
         "deadline_violation_rate": 0.0,
-        "reliability_violation_rate": 0.0
+        "reliability_violation_rate": 0.0,
+        "uav_move_energy": 89.35990793971247,
+        "uav_compute_energy": 1.3320378799513903,
+        "ue_local_energy": 0.0,
+        "ue_uplink_energy": 0.5083888711521221,
+        "bs_compute_energy": 1.036418888997007,
+        "relay_fetch_energy": 0.1640784158649256
       },
       "per_uav_metrics": [
         {
           "agent_id": "uav_0",
           "uav_id": 0,
-          "served_task_count_total": 0,
-          "assigned_task_count_total": 0,
-          "completed_task_count_total": 0,
-          "current_queue_length": 0,
-          "current_queue_delay": 0.0,
-          "cumulative_queue_delay": 0.0,
-          "max_queue_length": 0,
-          "remaining_energy_j": 4954.895647385248,
-          "energy_used_j": 45.104352614752315,
-          "cache_usage_ratio": 0.0,
-          "cache_services": []
+          "served_task_count_total": 2,
+          "assigned_task_count_total": 3,
+          "completed_task_count_total": 2,
+          "current_tx_queue_length": 0,
+          "current_tx_queue_delay": 0.0,
+          "current_compute_queue_length": 0,
+          "current_compute_queue_delay": 0.0,
+          "current_backlog_load": 0,
+          "current_coverage_load": 2,
+          "cumulative_tx_queue_delay": 0.0,
+          "cumulative_compute_queue_delay": 0.0,
+          "max_tx_queue_length": 0,
+          "max_compute_queue_length": 0,
+          "remaining_energy_j": 4965.53789517012,
+          "energy_used_j": 34.462104829880445,
+          "cache_usage_ratio": 0.3333333333333333,
+          "cache_services": [
+            3
+          ],
+          "cache_scores": {
+            "3": 1.098076923076923e-06
+          }
         },
         {
           "agent_id": "uav_1",
           "uav_id": 1,
-          "served_task_count_total": 0,
+          "served_task_count_total": 1,
           "assigned_task_count_total": 0,
-          "completed_task_count_total": 0,
-          "current_queue_length": 0,
-          "current_queue_delay": 0.0,
-          "cumulative_queue_delay": 0.0,
-          "max_queue_length": 0,
-          "remaining_energy_j": 4958.781921128166,
-          "energy_used_j": 41.21807887183422,
-          "cache_usage_ratio": 0.0,
-          "cache_services": []
+          "completed_task_count_total": 1,
+          "current_tx_queue_length": 0,
+          "current_tx_queue_delay": 0.0,
+          "current_compute_queue_length": 0,
+          "current_compute_queue_delay": 0.0,
+          "current_backlog_load": 0,
+          "current_coverage_load": 2,
+          "cumulative_tx_queue_delay": 0.0,
+          "cumulative_compute_queue_delay": 0.0,
+          "max_tx_queue_length": 0,
+          "max_compute_queue_length": 0,
+          "remaining_energy_j": 4967.350330677838,
+          "energy_used_j": 32.64966932216157,
+          "cache_usage_ratio": 0.3333333333333333,
+          "cache_services": [
+            1
+          ],
+          "cache_scores": {
+            "1": 1e-06
+          }
         },
         {
           "agent_id": "uav_2",
           "uav_id": 2,
-          "served_task_count_total": 1,
-          "assigned_task_count_total": 1,
-          "completed_task_count_total": 1,
-          "current_queue_length": 1,
-          "current_queue_delay": 0.0,
-          "cumulative_queue_delay": 0.029738499517677014,
-          "max_queue_length": 1,
-          "remaining_energy_j": 4952.718630666968,
-          "energy_used_j": 47.28136933303176,
-          "cache_usage_ratio": 0.3333333333333333,
+          "served_task_count_total": 7,
+          "assigned_task_count_total": 14,
+          "completed_task_count_total": 7,
+          "current_tx_queue_length": 0,
+          "current_tx_queue_delay": 0.0,
+          "current_compute_queue_length": 0,
+          "current_compute_queue_delay": 0.0,
+          "current_backlog_load": 0,
+          "current_coverage_load": 4,
+          "cumulative_tx_queue_delay": 0.0,
+          "cumulative_compute_queue_delay": 0.0,
+          "max_tx_queue_length": 0,
+          "max_compute_queue_length": 0,
+          "remaining_energy_j": 4976.419828332377,
+          "energy_used_j": 23.58017166762329,
+          "cache_usage_ratio": 1.0,
           "cache_services": [
-            1
-          ]
+            0,
+            1,
+            4
+          ],
+          "cache_scores": {
+            "0": 2.039285714285714e-06,
+            "1": 1e-06,
+            "2": 1e-06,
+            "3": 1e-06,
+            "4": 1e-06
+          }
         }
       ],
       "action_schema": {
@@ -1435,7 +3162,7 @@
         "scaled_max_displacement_per_step": 18.0
       },
       "observation_schema": {
-        "schema_version": "observation.v1",
+        "schema_version": "observation.v2",
         "sections": [
           {
             "name": "own_state",
@@ -1443,8 +3170,7 @@
               "self_x_norm",
               "self_y_norm",
               "self_energy_ratio",
-              "self_queue_length_norm",
-              "self_queue_delay_norm",
+              "self_coverage_load_norm",
               "self_assigned_task_count_norm",
               "self_completed_task_count_norm",
               "self_cache_usage_ratio"
@@ -1456,21 +3182,37 @@
             "fields": [
               "neighbor_rel_x_norm",
               "neighbor_rel_y_norm",
-              "neighbor_queue_length_norm",
-              "neighbor_queue_delay_norm",
+              "neighbor_tx_queue_length_norm",
+              "neighbor_tx_queue_delay_norm",
+              "neighbor_compute_queue_length_norm",
+              "neighbor_compute_queue_delay_norm",
+              "neighbor_backlog_norm",
               "neighbor_assigned_task_count_norm",
-              "neighbor_completed_task_count_norm",
               "neighbor_cache_usage_ratio"
             ],
             "repeat": 2
           },
           {
-            "name": "queue_load_summary",
+            "name": "tx_queue_summary",
             "fields": [
-              "queue_length_norm",
-              "queue_delay_norm",
-              "assigned_task_count_norm",
-              "completed_task_count_norm"
+              "tx_queue_length_norm",
+              "tx_queue_delay_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "compute_queue_summary",
+            "fields": [
+              "compute_queue_length_norm",
+              "compute_queue_delay_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "task_backlog_summary",
+            "fields": [
+              "backlog_load_norm",
+              "coverage_load_norm"
             ],
             "repeat": 1
           },
@@ -1482,6 +3224,17 @@
               "cache_service_2",
               "cache_service_3",
               "cache_service_4"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "cache_score_summary",
+            "fields": [
+              "cache_score_service_0",
+              "cache_score_service_1",
+              "cache_score_service_2",
+              "cache_score_service_3",
+              "cache_score_service_4"
             ],
             "repeat": 1
           },
@@ -1501,34 +3254,44 @@
           "self_x_norm",
           "self_y_norm",
           "self_energy_ratio",
-          "self_queue_length_norm",
-          "self_queue_delay_norm",
+          "self_coverage_load_norm",
           "self_assigned_task_count_norm",
           "self_completed_task_count_norm",
           "self_cache_usage_ratio",
           "neighbor_uav_states[0].neighbor_rel_x_norm",
           "neighbor_uav_states[0].neighbor_rel_y_norm",
-          "neighbor_uav_states[0].neighbor_queue_length_norm",
-          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_tx_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_tx_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_compute_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_compute_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_backlog_norm",
           "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
-          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
           "neighbor_uav_states[0].neighbor_cache_usage_ratio",
           "neighbor_uav_states[1].neighbor_rel_x_norm",
           "neighbor_uav_states[1].neighbor_rel_y_norm",
-          "neighbor_uav_states[1].neighbor_queue_length_norm",
-          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_tx_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_tx_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_compute_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_compute_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_backlog_norm",
           "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
-          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
           "neighbor_uav_states[1].neighbor_cache_usage_ratio",
-          "queue_length_norm",
-          "queue_delay_norm",
-          "assigned_task_count_norm",
-          "completed_task_count_norm",
+          "tx_queue_length_norm",
+          "tx_queue_delay_norm",
+          "compute_queue_length_norm",
+          "compute_queue_delay_norm",
+          "backlog_load_norm",
+          "coverage_load_norm",
           "cache_service_0",
           "cache_service_1",
           "cache_service_2",
           "cache_service_3",
           "cache_service_4",
+          "cache_score_service_0",
+          "cache_score_service_1",
+          "cache_score_service_2",
+          "cache_score_service_3",
+          "cache_score_service_4",
           "associated_user_state[0].user_rel_x_norm",
           "associated_user_state[0].user_rel_y_norm",
           "associated_user_state[0].user_pending_task_count_norm",
@@ -1548,29 +3311,41 @@
         "section_slices": {
           "own_state": [
             0,
-            8
+            7
           ],
           "neighbor_uav_states": [
-            8,
-            22
+            7,
+            25
           ],
-          "queue_load_summary": [
-            22,
-            26
+          "tx_queue_summary": [
+            25,
+            27
           ],
-          "local_cache_summary": [
-            26,
+          "compute_queue_summary": [
+            27,
+            29
+          ],
+          "task_backlog_summary": [
+            29,
             31
           ],
-          "associated_user_state": [
+          "local_cache_summary": [
             31,
-            46
+            36
+          ],
+          "cache_score_summary": [
+            36,
+            41
+          ],
+          "associated_user_state": [
+            41,
+            56
           ]
         },
-        "total_length": 46
+        "total_length": 56
       },
       "uav_state_schema": {
-        "schema_version": "uav_state.v1",
+        "schema_version": "uav_state.v2",
         "sections": [
           {
             "name": "own_state",
@@ -1578,8 +3353,7 @@
               "self_x_norm",
               "self_y_norm",
               "self_energy_ratio",
-              "self_queue_length_norm",
-              "self_queue_delay_norm",
+              "self_coverage_load_norm",
               "self_assigned_task_count_norm",
               "self_completed_task_count_norm",
               "self_cache_usage_ratio"
@@ -1591,21 +3365,37 @@
             "fields": [
               "neighbor_rel_x_norm",
               "neighbor_rel_y_norm",
-              "neighbor_queue_length_norm",
-              "neighbor_queue_delay_norm",
+              "neighbor_tx_queue_length_norm",
+              "neighbor_tx_queue_delay_norm",
+              "neighbor_compute_queue_length_norm",
+              "neighbor_compute_queue_delay_norm",
+              "neighbor_backlog_norm",
               "neighbor_assigned_task_count_norm",
-              "neighbor_completed_task_count_norm",
               "neighbor_cache_usage_ratio"
             ],
             "repeat": 2
           },
           {
-            "name": "queue_load_summary",
+            "name": "tx_queue_summary",
             "fields": [
-              "queue_length_norm",
-              "queue_delay_norm",
-              "assigned_task_count_norm",
-              "completed_task_count_norm"
+              "tx_queue_length_norm",
+              "tx_queue_delay_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "compute_queue_summary",
+            "fields": [
+              "compute_queue_length_norm",
+              "compute_queue_delay_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "task_backlog_summary",
+            "fields": [
+              "backlog_load_norm",
+              "coverage_load_norm"
             ],
             "repeat": 1
           },
@@ -1619,61 +3409,786 @@
               "cache_service_4"
             ],
             "repeat": 1
+          },
+          {
+            "name": "cache_score_summary",
+            "fields": [
+              "cache_score_service_0",
+              "cache_score_service_1",
+              "cache_score_service_2",
+              "cache_score_service_3",
+              "cache_score_service_4"
+            ],
+            "repeat": 1
           }
         ],
         "flat_fields": [
           "self_x_norm",
           "self_y_norm",
           "self_energy_ratio",
-          "self_queue_length_norm",
-          "self_queue_delay_norm",
+          "self_coverage_load_norm",
           "self_assigned_task_count_norm",
           "self_completed_task_count_norm",
           "self_cache_usage_ratio",
           "neighbor_uav_states[0].neighbor_rel_x_norm",
           "neighbor_uav_states[0].neighbor_rel_y_norm",
-          "neighbor_uav_states[0].neighbor_queue_length_norm",
-          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_tx_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_tx_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_compute_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_compute_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_backlog_norm",
           "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
-          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
           "neighbor_uav_states[0].neighbor_cache_usage_ratio",
           "neighbor_uav_states[1].neighbor_rel_x_norm",
           "neighbor_uav_states[1].neighbor_rel_y_norm",
-          "neighbor_uav_states[1].neighbor_queue_length_norm",
-          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_tx_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_tx_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_compute_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_compute_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_backlog_norm",
           "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
-          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
           "neighbor_uav_states[1].neighbor_cache_usage_ratio",
-          "queue_length_norm",
-          "queue_delay_norm",
-          "assigned_task_count_norm",
-          "completed_task_count_norm",
+          "tx_queue_length_norm",
+          "tx_queue_delay_norm",
+          "compute_queue_length_norm",
+          "compute_queue_delay_norm",
+          "backlog_load_norm",
+          "coverage_load_norm",
           "cache_service_0",
           "cache_service_1",
           "cache_service_2",
           "cache_service_3",
-          "cache_service_4"
+          "cache_service_4",
+          "cache_score_service_0",
+          "cache_score_service_1",
+          "cache_score_service_2",
+          "cache_score_service_3",
+          "cache_score_service_4"
         ],
         "section_slices": {
           "own_state": [
             0,
-            8
+            7
           ],
           "neighbor_uav_states": [
-            8,
-            22
+            7,
+            25
           ],
-          "queue_load_summary": [
-            22,
-            26
+          "tx_queue_summary": [
+            25,
+            27
+          ],
+          "compute_queue_summary": [
+            27,
+            29
+          ],
+          "task_backlog_summary": [
+            29,
+            31
           ],
           "local_cache_summary": [
-            26,
-            31
+            31,
+            36
+          ],
+          "cache_score_summary": [
+            36,
+            41
           ]
         },
-        "total_length": 31
-      }
+        "total_length": 41
+      },
+      "step_metrics": [
+        {
+          "step": 1,
+          "generated_tasks": 4.0,
+          "finalized_tasks": 4.0,
+          "completed_tasks": 4.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.42636048252127157,
+          "cache_hit_rate": 0.75,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 12.072813328532986,
+          "uav_move_energy": 11.554193419876299,
+          "uav_compute_energy": 0.1377567788386089,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.1024929105439504,
+          "bs_compute_energy": 0.26537021927412713,
+          "relay_fetch_energy": 0.013000000000000001
+        },
+        {
+          "step": 2,
+          "generated_tasks": 5.0,
+          "finalized_tasks": 5.0,
+          "completed_tasks": 5.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.35751711937339936,
+          "cache_hit_rate": 0.4,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 16.545261853948947,
+          "uav_move_energy": 15.678661475404489,
+          "uav_compute_energy": 0.4435449997588702,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.13292848662153617,
+          "bs_compute_energy": 0.19911116108362537,
+          "relay_fetch_energy": 0.0910157310804247
+        },
+        {
+          "step": 3,
+          "generated_tasks": 3.0,
+          "finalized_tasks": 3.0,
+          "completed_tasks": 3.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.3227347141122758,
+          "cache_hit_rate": 0.6666666666666666,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 11.530988090986686,
+          "uav_move_energy": 11.022827163080372,
+          "uav_compute_energy": 0.2860279478232742,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.05775097470487554,
+          "bs_compute_energy": 0.1393193205936624,
+          "relay_fetch_energy": 0.025062684784500893
+        },
+        {
+          "step": 4,
+          "generated_tasks": 2.0,
+          "finalized_tasks": 2.0,
+          "completed_tasks": 2.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.2194722694991864,
+          "cache_hit_rate": 0.5,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 10.692941023042321,
+          "uav_move_energy": 10.456073143710963,
+          "uav_compute_energy": 0.0988548620618647,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.03698121135680105,
+          "bs_compute_energy": 0.0920318059126927,
+          "relay_fetch_energy": 0.009000000000000001
+        },
+        {
+          "step": 5,
+          "generated_tasks": 2.0,
+          "finalized_tasks": 2.0,
+          "completed_tasks": 2.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.16296699501825618,
+          "cache_hit_rate": 1.0,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 10.676786740445424,
+          "uav_move_energy": 10.500110922871933,
+          "uav_compute_energy": 0.08368539136233742,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.04220021675367742,
+          "bs_compute_energy": 0.05079020945747598,
+          "relay_fetch_energy": 0.0
+        },
+        {
+          "step": 6,
+          "generated_tasks": 2.0,
+          "finalized_tasks": 2.0,
+          "completed_tasks": 2.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.23714817638250008,
+          "cache_hit_rate": 0.5,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 10.219330328389145,
+          "uav_move_energy": 9.958097768454955,
+          "uav_compute_energy": 0.15034506791899183,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.049826369947977775,
+          "bs_compute_energy": 0.05006112206722062,
+          "relay_fetch_energy": 0.011000000000000001
+        },
+        {
+          "step": 7,
+          "generated_tasks": 1.0,
+          "finalized_tasks": 1.0,
+          "completed_tasks": 1.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.29898938192144087,
+          "cache_hit_rate": 1.0,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 10.519337304366687,
+          "uav_move_energy": 10.368167808068499,
+          "uav_compute_energy": 0.0,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.01913648243973894,
+          "bs_compute_energy": 0.13203301385844804,
+          "relay_fetch_energy": 0.0
+        },
+        {
+          "step": 8,
+          "generated_tasks": 2.0,
+          "finalized_tasks": 2.0,
+          "completed_tasks": 2.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.29074414717437147,
+          "cache_hit_rate": 0.5,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 10.143373325965728,
+          "uav_move_energy": 9.821776238244965,
+          "uav_compute_energy": 0.13182283218744337,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.06707221878356483,
+          "bs_compute_energy": 0.10770203674975484,
+          "relay_fetch_energy": 0.015000000000000001
+        }
+      ],
+      "energy_breakdown": {
+        "episode_totals": {
+          "uav_move_energy": 89.35990793971247,
+          "uav_compute_energy": 1.3320378799513903,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.5083888711521221,
+          "bs_compute_energy": 1.036418888997007,
+          "relay_fetch_energy": 0.1640784158649256
+        },
+        "step_breakdown": [
+          {
+            "step": 1,
+            "uav_move_energy": 11.554193419876299,
+            "uav_compute_energy": 0.1377567788386089,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.1024929105439504,
+            "bs_compute_energy": 0.26537021927412713,
+            "relay_fetch_energy": 0.013000000000000001
+          },
+          {
+            "step": 2,
+            "uav_move_energy": 15.678661475404489,
+            "uav_compute_energy": 0.4435449997588702,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.13292848662153617,
+            "bs_compute_energy": 0.19911116108362537,
+            "relay_fetch_energy": 0.0910157310804247
+          },
+          {
+            "step": 3,
+            "uav_move_energy": 11.022827163080372,
+            "uav_compute_energy": 0.2860279478232742,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.05775097470487554,
+            "bs_compute_energy": 0.1393193205936624,
+            "relay_fetch_energy": 0.025062684784500893
+          },
+          {
+            "step": 4,
+            "uav_move_energy": 10.456073143710963,
+            "uav_compute_energy": 0.0988548620618647,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.03698121135680105,
+            "bs_compute_energy": 0.0920318059126927,
+            "relay_fetch_energy": 0.009000000000000001
+          },
+          {
+            "step": 5,
+            "uav_move_energy": 10.500110922871933,
+            "uav_compute_energy": 0.08368539136233742,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.04220021675367742,
+            "bs_compute_energy": 0.05079020945747598,
+            "relay_fetch_energy": 0.0
+          },
+          {
+            "step": 6,
+            "uav_move_energy": 9.958097768454955,
+            "uav_compute_energy": 0.15034506791899183,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.049826369947977775,
+            "bs_compute_energy": 0.05006112206722062,
+            "relay_fetch_energy": 0.011000000000000001
+          },
+          {
+            "step": 7,
+            "uav_move_energy": 10.368167808068499,
+            "uav_compute_energy": 0.0,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.01913648243973894,
+            "bs_compute_energy": 0.13203301385844804,
+            "relay_fetch_energy": 0.0
+          },
+          {
+            "step": 8,
+            "uav_move_energy": 9.821776238244965,
+            "uav_compute_energy": 0.13182283218744337,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.06707221878356483,
+            "bs_compute_energy": 0.10770203674975484,
+            "relay_fetch_energy": 0.015000000000000001
+          }
+        ]
+      },
+      "queue_breakdown": [
+        {
+          "step": 1,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        },
+        {
+          "step": 2,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        },
+        {
+          "step": 3,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        },
+        {
+          "step": 4,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        },
+        {
+          "step": 5,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        },
+        {
+          "step": 6,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        },
+        {
+          "step": 7,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 2
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        },
+        {
+          "step": 8,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 2
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 2
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        }
+      ],
+      "cache_events": [
+        {
+          "step": 1,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 3,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 2,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 4,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 2,
+          "uav_id": 1,
+          "action": "admit",
+          "service_type": 1,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 2,
+          "uav_id": 0,
+          "action": "admit",
+          "service_type": 3,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 3,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 0,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 4,
+          "uav_id": 2,
+          "action": "evict",
+          "service_type": 0,
+          "value_score": 1e-06,
+          "reason": "low_value"
+        },
+        {
+          "step": 4,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 1,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 4,
+          "uav_id": 2,
+          "action": "evict",
+          "service_type": 4,
+          "value_score": 1e-06,
+          "reason": "refresh"
+        },
+        {
+          "step": 4,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 0,
+          "value_score": 1e-06,
+          "reason": "refresh"
+        },
+        {
+          "step": 6,
+          "uav_id": 2,
+          "action": "evict",
+          "service_type": 1,
+          "value_score": 1e-06,
+          "reason": "low_value"
+        },
+        {
+          "step": 6,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 2,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 6,
+          "uav_id": 2,
+          "action": "evict",
+          "service_type": 3,
+          "value_score": 1e-06,
+          "reason": "refresh"
+        },
+        {
+          "step": 6,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 1,
+          "value_score": 1e-06,
+          "reason": "refresh"
+        },
+        {
+          "step": 8,
+          "uav_id": 2,
+          "action": "evict",
+          "service_type": 1,
+          "value_score": 1e-06,
+          "reason": "low_value"
+        },
+        {
+          "step": 8,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 4,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 8,
+          "uav_id": 2,
+          "action": "evict",
+          "service_type": 2,
+          "value_score": 1e-06,
+          "reason": "refresh"
+        },
+        {
+          "step": 8,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 1,
+          "value_score": 1e-06,
+          "reason": "refresh"
+        }
+      ],
+      "task_lifecycle_counts": [
+        {
+          "step": 1,
+          "new_tasks": 4,
+          "pending_tasks": 0,
+          "completed_tasks": 4,
+          "expired_tasks": 0
+        },
+        {
+          "step": 2,
+          "new_tasks": 5,
+          "pending_tasks": 0,
+          "completed_tasks": 5,
+          "expired_tasks": 0
+        },
+        {
+          "step": 3,
+          "new_tasks": 3,
+          "pending_tasks": 0,
+          "completed_tasks": 3,
+          "expired_tasks": 0
+        },
+        {
+          "step": 4,
+          "new_tasks": 2,
+          "pending_tasks": 0,
+          "completed_tasks": 2,
+          "expired_tasks": 0
+        },
+        {
+          "step": 5,
+          "new_tasks": 2,
+          "pending_tasks": 0,
+          "completed_tasks": 2,
+          "expired_tasks": 0
+        },
+        {
+          "step": 6,
+          "new_tasks": 2,
+          "pending_tasks": 0,
+          "completed_tasks": 2,
+          "expired_tasks": 0
+        },
+        {
+          "step": 7,
+          "new_tasks": 1,
+          "pending_tasks": 0,
+          "completed_tasks": 1,
+          "expired_tasks": 0
+        },
+        {
+          "step": 8,
+          "new_tasks": 2,
+          "pending_tasks": 0,
+          "completed_tasks": 2,
+          "expired_tasks": 0
+        }
+      ]
     },
     {
       "chapter_name": "chapter4",
@@ -1684,63 +4199,110 @@
       "assignment_rule": "nearest_uav",
       "global_metrics": {
         "completion_rate": 1.0,
-        "average_latency": 0.25464088163866666,
-        "total_energy": 153.29639589254793,
-        "cache_hit_rate": 0.9090909090909091,
+        "average_latency": 0.38468998977550467,
+        "total_energy": 96.77403090801975,
+        "cache_hit_rate": 0.7058823529411765,
         "fairness_user_completion": 1.0,
-        "fairness_uav_load": 0.6666666666666666,
+        "fairness_uav_load": 0.8852459016393442,
         "deadline_violation_rate": 0.0,
-        "reliability_violation_rate": 0.0
+        "reliability_violation_rate": 0.0,
+        "uav_move_energy": 91.07661396552186,
+        "uav_compute_energy": 3.0847132355974796,
+        "ue_local_energy": 0.0,
+        "ue_uplink_energy": 0.8310343326204027,
+        "bs_compute_energy": 1.5030033599619854,
+        "relay_fetch_energy": 0.2786660143180279
       },
       "per_uav_metrics": [
         {
           "agent_id": "uav_0",
           "uav_id": 0,
-          "served_task_count_total": 0,
-          "assigned_task_count_total": 0,
-          "completed_task_count_total": 0,
-          "current_queue_length": 0,
-          "current_queue_delay": 0.0,
-          "cumulative_queue_delay": 0.0,
-          "max_queue_length": 0,
-          "remaining_energy_j": 4949.455631368684,
-          "energy_used_j": 50.54436863131559,
-          "cache_usage_ratio": 0.0,
-          "cache_services": []
+          "served_task_count_total": 7,
+          "assigned_task_count_total": 1,
+          "completed_task_count_total": 7,
+          "current_tx_queue_length": 0,
+          "current_tx_queue_delay": 0.0,
+          "current_compute_queue_length": 0,
+          "current_compute_queue_delay": 0.0,
+          "current_backlog_load": 0,
+          "current_coverage_load": 3,
+          "cumulative_tx_queue_delay": 0.0,
+          "cumulative_compute_queue_delay": 0.0,
+          "max_tx_queue_length": 0,
+          "max_compute_queue_length": 0,
+          "remaining_energy_j": 4980.990148453553,
+          "energy_used_j": 19.009851546446953,
+          "cache_usage_ratio": 1.0,
+          "cache_services": [
+            0,
+            1,
+            2
+          ],
+          "cache_scores": {
+            "0": 1e-06,
+            "1": 1.5861111111111111e-06,
+            "2": 2.184431818181818e-06,
+            "4": 1e-06
+          }
         },
         {
           "agent_id": "uav_1",
           "uav_id": 1,
-          "served_task_count_total": 1,
-          "assigned_task_count_total": 1,
-          "completed_task_count_total": 1,
-          "current_queue_length": 1,
-          "current_queue_delay": 0.018250829843914573,
-          "cumulative_queue_delay": 0.018250829843914573,
-          "max_queue_length": 1,
-          "remaining_energy_j": 4945.391812551834,
-          "energy_used_j": 54.60818744816606,
-          "cache_usage_ratio": 0.3333333333333333,
+          "served_task_count_total": 3,
+          "assigned_task_count_total": 2,
+          "completed_task_count_total": 3,
+          "current_tx_queue_length": 0,
+          "current_tx_queue_delay": 0.0,
+          "current_compute_queue_length": 0,
+          "current_compute_queue_delay": 0.0,
+          "current_backlog_load": 0,
+          "current_coverage_load": 2,
+          "cumulative_tx_queue_delay": 0.0,
+          "cumulative_compute_queue_delay": 0.0,
+          "max_tx_queue_length": 0,
+          "max_compute_queue_length": 0,
+          "remaining_energy_j": 4956.167670677804,
+          "energy_used_j": 43.83232932219562,
+          "cache_usage_ratio": 0.6666666666666666,
           "cache_services": [
-            0
-          ]
+            3,
+            4
+          ],
+          "cache_scores": {
+            "3": 1.098076923076923e-06,
+            "4": 1e-06
+          }
         },
         {
           "agent_id": "uav_2",
           "uav_id": 2,
-          "served_task_count_total": 1,
-          "assigned_task_count_total": 1,
-          "completed_task_count_total": 1,
-          "current_queue_length": 1,
-          "current_queue_delay": 0.0,
-          "cumulative_queue_delay": 0.030571061191014635,
-          "max_queue_length": 1,
-          "remaining_energy_j": 4951.856160186933,
-          "energy_used_j": 48.143839813066734,
-          "cache_usage_ratio": 0.3333333333333333,
+          "served_task_count_total": 8,
+          "assigned_task_count_total": 17,
+          "completed_task_count_total": 8,
+          "current_tx_queue_length": 0,
+          "current_tx_queue_delay": 0.0,
+          "current_compute_queue_length": 0,
+          "current_compute_queue_delay": 0.0,
+          "current_backlog_load": 0,
+          "current_coverage_load": 3,
+          "cumulative_tx_queue_delay": 0.0,
+          "cumulative_compute_queue_delay": 0.0,
+          "max_tx_queue_length": 0,
+          "max_compute_queue_length": 0,
+          "remaining_energy_j": 4968.680853667524,
+          "energy_used_j": 31.31914633247561,
+          "cache_usage_ratio": 1.0,
           "cache_services": [
-            4
-          ]
+            0,
+            1,
+            2
+          ],
+          "cache_scores": {
+            "0": 4.963383928571429e-06,
+            "1": 1e-06,
+            "2": 1.2977272727272728e-06,
+            "4": 1e-06
+          }
         }
       ],
       "action_schema": {
@@ -1766,7 +4328,7 @@
         "scaled_max_displacement_per_step": 18.0
       },
       "observation_schema": {
-        "schema_version": "observation.v1",
+        "schema_version": "observation.v2",
         "sections": [
           {
             "name": "own_state",
@@ -1774,8 +4336,7 @@
               "self_x_norm",
               "self_y_norm",
               "self_energy_ratio",
-              "self_queue_length_norm",
-              "self_queue_delay_norm",
+              "self_coverage_load_norm",
               "self_assigned_task_count_norm",
               "self_completed_task_count_norm",
               "self_cache_usage_ratio"
@@ -1787,21 +4348,37 @@
             "fields": [
               "neighbor_rel_x_norm",
               "neighbor_rel_y_norm",
-              "neighbor_queue_length_norm",
-              "neighbor_queue_delay_norm",
+              "neighbor_tx_queue_length_norm",
+              "neighbor_tx_queue_delay_norm",
+              "neighbor_compute_queue_length_norm",
+              "neighbor_compute_queue_delay_norm",
+              "neighbor_backlog_norm",
               "neighbor_assigned_task_count_norm",
-              "neighbor_completed_task_count_norm",
               "neighbor_cache_usage_ratio"
             ],
             "repeat": 2
           },
           {
-            "name": "queue_load_summary",
+            "name": "tx_queue_summary",
             "fields": [
-              "queue_length_norm",
-              "queue_delay_norm",
-              "assigned_task_count_norm",
-              "completed_task_count_norm"
+              "tx_queue_length_norm",
+              "tx_queue_delay_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "compute_queue_summary",
+            "fields": [
+              "compute_queue_length_norm",
+              "compute_queue_delay_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "task_backlog_summary",
+            "fields": [
+              "backlog_load_norm",
+              "coverage_load_norm"
             ],
             "repeat": 1
           },
@@ -1813,6 +4390,17 @@
               "cache_service_2",
               "cache_service_3",
               "cache_service_4"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "cache_score_summary",
+            "fields": [
+              "cache_score_service_0",
+              "cache_score_service_1",
+              "cache_score_service_2",
+              "cache_score_service_3",
+              "cache_score_service_4"
             ],
             "repeat": 1
           },
@@ -1832,34 +4420,44 @@
           "self_x_norm",
           "self_y_norm",
           "self_energy_ratio",
-          "self_queue_length_norm",
-          "self_queue_delay_norm",
+          "self_coverage_load_norm",
           "self_assigned_task_count_norm",
           "self_completed_task_count_norm",
           "self_cache_usage_ratio",
           "neighbor_uav_states[0].neighbor_rel_x_norm",
           "neighbor_uav_states[0].neighbor_rel_y_norm",
-          "neighbor_uav_states[0].neighbor_queue_length_norm",
-          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_tx_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_tx_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_compute_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_compute_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_backlog_norm",
           "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
-          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
           "neighbor_uav_states[0].neighbor_cache_usage_ratio",
           "neighbor_uav_states[1].neighbor_rel_x_norm",
           "neighbor_uav_states[1].neighbor_rel_y_norm",
-          "neighbor_uav_states[1].neighbor_queue_length_norm",
-          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_tx_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_tx_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_compute_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_compute_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_backlog_norm",
           "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
-          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
           "neighbor_uav_states[1].neighbor_cache_usage_ratio",
-          "queue_length_norm",
-          "queue_delay_norm",
-          "assigned_task_count_norm",
-          "completed_task_count_norm",
+          "tx_queue_length_norm",
+          "tx_queue_delay_norm",
+          "compute_queue_length_norm",
+          "compute_queue_delay_norm",
+          "backlog_load_norm",
+          "coverage_load_norm",
           "cache_service_0",
           "cache_service_1",
           "cache_service_2",
           "cache_service_3",
           "cache_service_4",
+          "cache_score_service_0",
+          "cache_score_service_1",
+          "cache_score_service_2",
+          "cache_score_service_3",
+          "cache_score_service_4",
           "associated_user_state[0].user_rel_x_norm",
           "associated_user_state[0].user_rel_y_norm",
           "associated_user_state[0].user_pending_task_count_norm",
@@ -1879,29 +4477,41 @@
         "section_slices": {
           "own_state": [
             0,
-            8
+            7
           ],
           "neighbor_uav_states": [
-            8,
-            22
+            7,
+            25
           ],
-          "queue_load_summary": [
-            22,
-            26
+          "tx_queue_summary": [
+            25,
+            27
           ],
-          "local_cache_summary": [
-            26,
+          "compute_queue_summary": [
+            27,
+            29
+          ],
+          "task_backlog_summary": [
+            29,
             31
           ],
-          "associated_user_state": [
+          "local_cache_summary": [
             31,
-            46
+            36
+          ],
+          "cache_score_summary": [
+            36,
+            41
+          ],
+          "associated_user_state": [
+            41,
+            56
           ]
         },
-        "total_length": 46
+        "total_length": 56
       },
       "uav_state_schema": {
-        "schema_version": "uav_state.v1",
+        "schema_version": "uav_state.v2",
         "sections": [
           {
             "name": "own_state",
@@ -1909,8 +4519,7 @@
               "self_x_norm",
               "self_y_norm",
               "self_energy_ratio",
-              "self_queue_length_norm",
-              "self_queue_delay_norm",
+              "self_coverage_load_norm",
               "self_assigned_task_count_norm",
               "self_completed_task_count_norm",
               "self_cache_usage_ratio"
@@ -1922,21 +4531,37 @@
             "fields": [
               "neighbor_rel_x_norm",
               "neighbor_rel_y_norm",
-              "neighbor_queue_length_norm",
-              "neighbor_queue_delay_norm",
+              "neighbor_tx_queue_length_norm",
+              "neighbor_tx_queue_delay_norm",
+              "neighbor_compute_queue_length_norm",
+              "neighbor_compute_queue_delay_norm",
+              "neighbor_backlog_norm",
               "neighbor_assigned_task_count_norm",
-              "neighbor_completed_task_count_norm",
               "neighbor_cache_usage_ratio"
             ],
             "repeat": 2
           },
           {
-            "name": "queue_load_summary",
+            "name": "tx_queue_summary",
             "fields": [
-              "queue_length_norm",
-              "queue_delay_norm",
-              "assigned_task_count_norm",
-              "completed_task_count_norm"
+              "tx_queue_length_norm",
+              "tx_queue_delay_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "compute_queue_summary",
+            "fields": [
+              "compute_queue_length_norm",
+              "compute_queue_delay_norm"
+            ],
+            "repeat": 1
+          },
+          {
+            "name": "task_backlog_summary",
+            "fields": [
+              "backlog_load_norm",
+              "coverage_load_norm"
             ],
             "repeat": 1
           },
@@ -1950,61 +4575,762 @@
               "cache_service_4"
             ],
             "repeat": 1
+          },
+          {
+            "name": "cache_score_summary",
+            "fields": [
+              "cache_score_service_0",
+              "cache_score_service_1",
+              "cache_score_service_2",
+              "cache_score_service_3",
+              "cache_score_service_4"
+            ],
+            "repeat": 1
           }
         ],
         "flat_fields": [
           "self_x_norm",
           "self_y_norm",
           "self_energy_ratio",
-          "self_queue_length_norm",
-          "self_queue_delay_norm",
+          "self_coverage_load_norm",
           "self_assigned_task_count_norm",
           "self_completed_task_count_norm",
           "self_cache_usage_ratio",
           "neighbor_uav_states[0].neighbor_rel_x_norm",
           "neighbor_uav_states[0].neighbor_rel_y_norm",
-          "neighbor_uav_states[0].neighbor_queue_length_norm",
-          "neighbor_uav_states[0].neighbor_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_tx_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_tx_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_compute_queue_length_norm",
+          "neighbor_uav_states[0].neighbor_compute_queue_delay_norm",
+          "neighbor_uav_states[0].neighbor_backlog_norm",
           "neighbor_uav_states[0].neighbor_assigned_task_count_norm",
-          "neighbor_uav_states[0].neighbor_completed_task_count_norm",
           "neighbor_uav_states[0].neighbor_cache_usage_ratio",
           "neighbor_uav_states[1].neighbor_rel_x_norm",
           "neighbor_uav_states[1].neighbor_rel_y_norm",
-          "neighbor_uav_states[1].neighbor_queue_length_norm",
-          "neighbor_uav_states[1].neighbor_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_tx_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_tx_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_compute_queue_length_norm",
+          "neighbor_uav_states[1].neighbor_compute_queue_delay_norm",
+          "neighbor_uav_states[1].neighbor_backlog_norm",
           "neighbor_uav_states[1].neighbor_assigned_task_count_norm",
-          "neighbor_uav_states[1].neighbor_completed_task_count_norm",
           "neighbor_uav_states[1].neighbor_cache_usage_ratio",
-          "queue_length_norm",
-          "queue_delay_norm",
-          "assigned_task_count_norm",
-          "completed_task_count_norm",
+          "tx_queue_length_norm",
+          "tx_queue_delay_norm",
+          "compute_queue_length_norm",
+          "compute_queue_delay_norm",
+          "backlog_load_norm",
+          "coverage_load_norm",
           "cache_service_0",
           "cache_service_1",
           "cache_service_2",
           "cache_service_3",
-          "cache_service_4"
+          "cache_service_4",
+          "cache_score_service_0",
+          "cache_score_service_1",
+          "cache_score_service_2",
+          "cache_score_service_3",
+          "cache_score_service_4"
         ],
         "section_slices": {
           "own_state": [
             0,
-            8
+            7
           ],
           "neighbor_uav_states": [
-            8,
-            22
+            7,
+            25
           ],
-          "queue_load_summary": [
-            22,
-            26
+          "tx_queue_summary": [
+            25,
+            27
+          ],
+          "compute_queue_summary": [
+            27,
+            29
+          ],
+          "task_backlog_summary": [
+            29,
+            31
           ],
           "local_cache_summary": [
-            26,
-            31
+            31,
+            36
+          ],
+          "cache_score_summary": [
+            36,
+            41
           ]
         },
-        "total_length": 31
-      }
+        "total_length": 41
+      },
+      "step_metrics": [
+        {
+          "step": 1,
+          "generated_tasks": 2.0,
+          "finalized_tasks": 2.0,
+          "completed_tasks": 2.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.19501069789141331,
+          "cache_hit_rate": 0.5,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 14.436194705154762,
+          "uav_move_energy": 14.225320208700872,
+          "uav_compute_energy": 0.11008175881648763,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.02893549131883166,
+          "bs_compute_energy": 0.060857246318569896,
+          "relay_fetch_energy": 0.011000000000000001
+        },
+        {
+          "step": 2,
+          "generated_tasks": 4.0,
+          "finalized_tasks": 4.0,
+          "completed_tasks": 4.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.36499171893572085,
+          "cache_hit_rate": 0.5,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 15.91452275595552,
+          "uav_move_energy": 15.28682524534481,
+          "uav_compute_energy": 0.2663118119304519,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.08788593169681251,
+          "bs_compute_energy": 0.2412077968479262,
+          "relay_fetch_energy": 0.03229197013551942
+        },
+        {
+          "step": 3,
+          "generated_tasks": 3.0,
+          "finalized_tasks": 3.0,
+          "completed_tasks": 3.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.2660334675929099,
+          "cache_hit_rate": 1.0,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 13.596420036615415,
+          "uav_move_energy": 13.231565881483771,
+          "uav_compute_energy": 0.18561310722780888,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.06721677949648114,
+          "bs_compute_energy": 0.11202426840735322,
+          "relay_fetch_energy": 0.0
+        },
+        {
+          "step": 4,
+          "generated_tasks": 3.0,
+          "finalized_tasks": 3.0,
+          "completed_tasks": 3.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.3691246377103445,
+          "cache_hit_rate": 1.0,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 13.532350008571642,
+          "uav_move_energy": 13.05130559548795,
+          "uav_compute_energy": 0.21307064849188884,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.08371298042496557,
+          "bs_compute_energy": 0.1842607841668379,
+          "relay_fetch_energy": 0.0
+        },
+        {
+          "step": 5,
+          "generated_tasks": 3.0,
+          "finalized_tasks": 3.0,
+          "completed_tasks": 3.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.3759287387298273,
+          "cache_hit_rate": 0.6666666666666666,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 12.059726560576518,
+          "uav_move_energy": 11.458781743104598,
+          "uav_compute_energy": 0.38767458438578195,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.09212724419920906,
+          "bs_compute_energy": 0.08930630617644716,
+          "relay_fetch_energy": 0.03183668271048118
+        },
+        {
+          "step": 6,
+          "generated_tasks": 7.0,
+          "finalized_tasks": 7.0,
+          "completed_tasks": 7.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.4636554578588904,
+          "cache_hit_rate": 0.5714285714285714,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 9.736448923669657,
+          "uav_move_energy": 8.476877996516981,
+          "uav_compute_energy": 0.7384237519638268,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.1578102006668447,
+          "bs_compute_energy": 0.30866341825130333,
+          "relay_fetch_energy": 0.05467355627070117
+        },
+        {
+          "step": 7,
+          "generated_tasks": 7.0,
+          "finalized_tasks": 7.0,
+          "completed_tasks": 7.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.4513574437867208,
+          "cache_hit_rate": 0.7142857142857143,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 9.58303082483998,
+          "uav_move_energy": 8.303834881162397,
+          "uav_compute_energy": 0.7049892112568152,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.17724704958384507,
+          "bs_compute_energy": 0.2825878747971203,
+          "relay_fetch_energy": 0.1143718080398039
+        },
+        {
+          "step": 8,
+          "generated_tasks": 5.0,
+          "finalized_tasks": 5.0,
+          "completed_tasks": 5.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.3582241074445854,
+          "cache_hit_rate": 0.8,
+          "completion_rate": 1.0,
+          "deadline_violation_rate": 0.0,
+          "reliability_violation_rate": 0.0,
+          "total_energy": 7.915337092636268,
+          "uav_move_energy": 7.042102413720487,
+          "uav_compute_energy": 0.4785483615244182,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.136098655233413,
+          "bs_compute_energy": 0.2240956649964274,
+          "relay_fetch_energy": 0.03449199716152225
+        }
+      ],
+      "energy_breakdown": {
+        "episode_totals": {
+          "uav_move_energy": 91.07661396552186,
+          "uav_compute_energy": 3.0847132355974796,
+          "ue_local_energy": 0.0,
+          "ue_uplink_energy": 0.8310343326204027,
+          "bs_compute_energy": 1.5030033599619854,
+          "relay_fetch_energy": 0.2786660143180279
+        },
+        "step_breakdown": [
+          {
+            "step": 1,
+            "uav_move_energy": 14.225320208700872,
+            "uav_compute_energy": 0.11008175881648763,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.02893549131883166,
+            "bs_compute_energy": 0.060857246318569896,
+            "relay_fetch_energy": 0.011000000000000001
+          },
+          {
+            "step": 2,
+            "uav_move_energy": 15.28682524534481,
+            "uav_compute_energy": 0.2663118119304519,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.08788593169681251,
+            "bs_compute_energy": 0.2412077968479262,
+            "relay_fetch_energy": 0.03229197013551942
+          },
+          {
+            "step": 3,
+            "uav_move_energy": 13.231565881483771,
+            "uav_compute_energy": 0.18561310722780888,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.06721677949648114,
+            "bs_compute_energy": 0.11202426840735322,
+            "relay_fetch_energy": 0.0
+          },
+          {
+            "step": 4,
+            "uav_move_energy": 13.05130559548795,
+            "uav_compute_energy": 0.21307064849188884,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.08371298042496557,
+            "bs_compute_energy": 0.1842607841668379,
+            "relay_fetch_energy": 0.0
+          },
+          {
+            "step": 5,
+            "uav_move_energy": 11.458781743104598,
+            "uav_compute_energy": 0.38767458438578195,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.09212724419920906,
+            "bs_compute_energy": 0.08930630617644716,
+            "relay_fetch_energy": 0.03183668271048118
+          },
+          {
+            "step": 6,
+            "uav_move_energy": 8.476877996516981,
+            "uav_compute_energy": 0.7384237519638268,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.1578102006668447,
+            "bs_compute_energy": 0.30866341825130333,
+            "relay_fetch_energy": 0.05467355627070117
+          },
+          {
+            "step": 7,
+            "uav_move_energy": 8.303834881162397,
+            "uav_compute_energy": 0.7049892112568152,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.17724704958384507,
+            "bs_compute_energy": 0.2825878747971203,
+            "relay_fetch_energy": 0.1143718080398039
+          },
+          {
+            "step": 8,
+            "uav_move_energy": 7.042102413720487,
+            "uav_compute_energy": 0.4785483615244182,
+            "ue_local_energy": 0.0,
+            "ue_uplink_energy": 0.136098655233413,
+            "bs_compute_energy": 0.2240956649964274,
+            "relay_fetch_energy": 0.03449199716152225
+          }
+        ]
+      },
+      "queue_breakdown": [
+        {
+          "step": 1,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 2
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        },
+        {
+          "step": 2,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        },
+        {
+          "step": 3,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 4
+            }
+          ]
+        },
+        {
+          "step": 4,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 2
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            }
+          ]
+        },
+        {
+          "step": 5,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 2
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            }
+          ]
+        },
+        {
+          "step": 6,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 2
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            }
+          ]
+        },
+        {
+          "step": 7,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 2
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            }
+          ]
+        },
+        {
+          "step": 8,
+          "uavs": [
+            {
+              "uav_id": 0,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            },
+            {
+              "uav_id": 1,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 2
+            },
+            {
+              "uav_id": 2,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
+              "coverage_load": 3
+            }
+          ]
+        }
+      ],
+      "cache_events": [
+        {
+          "step": 1,
+          "uav_id": 0,
+          "action": "admit",
+          "service_type": 2,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 2,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 0,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 2,
+          "uav_id": 0,
+          "action": "admit",
+          "service_type": 0,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 5,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 2,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 6,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 4,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 6,
+          "uav_id": 0,
+          "action": "admit",
+          "service_type": 1,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 6,
+          "uav_id": 1,
+          "action": "admit",
+          "service_type": 3,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 7,
+          "uav_id": 0,
+          "action": "evict",
+          "service_type": 0,
+          "value_score": 1e-06,
+          "reason": "low_value"
+        },
+        {
+          "step": 7,
+          "uav_id": 0,
+          "action": "admit",
+          "service_type": 4,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 7,
+          "uav_id": 1,
+          "action": "admit",
+          "service_type": 4,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 8,
+          "uav_id": 2,
+          "action": "evict",
+          "service_type": 4,
+          "value_score": 1e-06,
+          "reason": "low_value"
+        },
+        {
+          "step": 8,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 1,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 8,
+          "uav_id": 0,
+          "action": "evict",
+          "service_type": 4,
+          "value_score": 1e-06,
+          "reason": "refresh"
+        },
+        {
+          "step": 8,
+          "uav_id": 0,
+          "action": "admit",
+          "service_type": 0,
+          "value_score": 1e-06,
+          "reason": "refresh"
+        }
+      ],
+      "task_lifecycle_counts": [
+        {
+          "step": 1,
+          "new_tasks": 2,
+          "pending_tasks": 0,
+          "completed_tasks": 2,
+          "expired_tasks": 0
+        },
+        {
+          "step": 2,
+          "new_tasks": 4,
+          "pending_tasks": 0,
+          "completed_tasks": 4,
+          "expired_tasks": 0
+        },
+        {
+          "step": 3,
+          "new_tasks": 3,
+          "pending_tasks": 0,
+          "completed_tasks": 3,
+          "expired_tasks": 0
+        },
+        {
+          "step": 4,
+          "new_tasks": 3,
+          "pending_tasks": 0,
+          "completed_tasks": 3,
+          "expired_tasks": 0
+        },
+        {
+          "step": 5,
+          "new_tasks": 3,
+          "pending_tasks": 0,
+          "completed_tasks": 3,
+          "expired_tasks": 0
+        },
+        {
+          "step": 6,
+          "new_tasks": 7,
+          "pending_tasks": 0,
+          "completed_tasks": 7,
+          "expired_tasks": 0
+        },
+        {
+          "step": 7,
+          "new_tasks": 7,
+          "pending_tasks": 0,
+          "completed_tasks": 7,
+          "expired_tasks": 0
+        },
+        {
+          "step": 8,
+          "new_tasks": 5,
+          "pending_tasks": 0,
+          "completed_tasks": 5,
+          "expired_tasks": 0
+        }
+      ]
     }
   ]
 }

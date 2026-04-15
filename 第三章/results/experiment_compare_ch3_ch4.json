@@ -3,33 +3,50 @@
   "episodes": 1,
   "chapter3_metrics": {
     "completion_rate": 1.0,
-    "average_latency": 0.27581806551156124,
-    "total_energy": 28.261742891521894,
-    "cache_hit_rate": 1.0,
+    "average_latency": 0.3193284507413938,
+    "total_energy": 1.6763485955691262,
+    "cache_hit_rate": 0.8461538461538461,
     "fairness_user_completion": 1.0,
     "fairness_uav_load": null,
     "deadline_violation_rate": 0.0,
-    "reliability_violation_rate": 0.0
+    "reliability_violation_rate": 0.0,
+    "uav_move_energy": 0.0,
+    "uav_compute_energy": 0.3450707697683244,
+    "ue_local_energy": 0.0,
+    "ue_uplink_energy": 0.30681097679742814,
+    "bs_compute_energy": 1.0084668490033735,
+    "relay_fetch_energy": 0.016
   },
   "chapter4_metrics": {
     "completion_rate": 1.0,
-    "average_latency": 0.27581806551156124,
-    "total_energy": 28.261742891521894,
-    "cache_hit_rate": 1.0,
+    "average_latency": 0.3193284507413938,
+    "total_energy": 1.6763485955691262,
+    "cache_hit_rate": 0.8461538461538461,
     "fairness_user_completion": 1.0,
     "fairness_uav_load": null,
     "deadline_violation_rate": 0.0,
-    "reliability_violation_rate": 0.0
+    "reliability_violation_rate": 0.0,
+    "uav_move_energy": 0.0,
+    "uav_compute_energy": 0.3450707697683244,
+    "ue_local_energy": 0.0,
+    "ue_uplink_energy": 0.30681097679742814,
+    "bs_compute_energy": 1.0084668490033735,
+    "relay_fetch_energy": 0.016
   },
   "comparison": {
     "average_latency": {
-      "left": 0.27581806551156124,
-      "right": 0.27581806551156124,
+      "left": 0.3193284507413938,
+      "right": 0.3193284507413938,
+      "delta": 0.0
+    },
+    "bs_compute_energy": {
+      "left": 1.0084668490033735,
+      "right": 1.0084668490033735,
       "delta": 0.0
     },
     "cache_hit_rate": {
-      "left": 1.0,
-      "right": 1.0,
+      "left": 0.8461538461538461,
+      "right": 0.8461538461538461,
       "delta": 0.0
     },
     "completion_rate": {
@@ -52,14 +69,39 @@
       "right": 1.0,
       "delta": 0.0
     },
+    "relay_fetch_energy": {
+      "left": 0.016,
+      "right": 0.016,
+      "delta": 0.0
+    },
     "reliability_violation_rate": {
       "left": 0.0,
       "right": 0.0,
       "delta": 0.0
     },
     "total_energy": {
-      "left": 28.261742891521894,
-      "right": 28.261742891521894,
+      "left": 1.6763485955691262,
+      "right": 1.6763485955691262,
+      "delta": 0.0
+    },
+    "uav_compute_energy": {
+      "left": 0.3450707697683244,
+      "right": 0.3450707697683244,
+      "delta": 0.0
+    },
+    "uav_move_energy": {
+      "left": 0.0,
+      "right": 0.0,
+      "delta": 0.0
+    },
+    "ue_local_energy": {
+      "left": 0.0,
+      "right": 0.0,
+      "delta": 0.0
+    },
+    "ue_uplink_energy": {
+      "left": 0.30681097679742814,
+      "right": 0.30681097679742814,
       "delta": 0.0
     }
   }

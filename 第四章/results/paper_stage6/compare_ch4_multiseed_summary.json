@@ -8,6 +8,13 @@
       "delta_mean_std": "0.0000 +/- 0.0000"
     },
     {
+      "metric": "bs_compute_energy",
+      "num_seeds": 3,
+      "delta_mean": 0.0,
+      "delta_std": 0.0,
+      "delta_mean_std": "0.0000 +/- 0.0000"
+    },
+    {
       "metric": "cache_hit_rate",
       "num_seeds": 3,
       "delta_mean": 0.0,
@@ -43,6 +50,13 @@
       "delta_mean_std": "0.0000 +/- 0.0000"
     },
     {
+      "metric": "relay_fetch_energy",
+      "num_seeds": 3,
+      "delta_mean": 0.0,
+      "delta_std": 0.0,
+      "delta_mean_std": "0.0000 +/- 0.0000"
+    },
+    {
       "metric": "reliability_violation_rate",
       "num_seeds": 3,
       "delta_mean": 0.0,
@@ -51,6 +65,34 @@
     },
     {
       "metric": "total_energy",
+      "num_seeds": 3,
+      "delta_mean": 0.0,
+      "delta_std": 0.0,
+      "delta_mean_std": "0.0000 +/- 0.0000"
+    },
+    {
+      "metric": "uav_compute_energy",
+      "num_seeds": 3,
+      "delta_mean": 0.0,
+      "delta_std": 0.0,
+      "delta_mean_std": "0.0000 +/- 0.0000"
+    },
+    {
+      "metric": "uav_move_energy",
+      "num_seeds": 3,
+      "delta_mean": 0.0,
+      "delta_std": 0.0,
+      "delta_mean_std": "0.0000 +/- 0.0000"
+    },
+    {
+      "metric": "ue_local_energy",
+      "num_seeds": 3,
+      "delta_mean": 0.0,
+      "delta_std": 0.0,
+      "delta_mean_std": "0.0000 +/- 0.0000"
+    },
+    {
+      "metric": "ue_uplink_energy",
       "num_seeds": 3,
       "delta_mean": 0.0,
       "delta_std": 0.0,

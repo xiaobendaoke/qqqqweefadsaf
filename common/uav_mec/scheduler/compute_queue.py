@@ -4,15 +4,12 @@ from dataclasses import dataclass, field
 
 
 @dataclass(slots=True)
-class TDMAQueue:
+class ComputeQueue:
     next_available_time_by_queue: dict[str, float] = field(default_factory=dict)
     scheduled_end_times_by_queue: dict[str, list[float]] = field(default_factory=dict)
 
     def _prune(self, current_time: float, queue_id: str) -> None:
         end_times = self.scheduled_end_times_by_queue.get(queue_id, [])
-        if not end_times:
-            self.next_available_time_by_queue[queue_id] = max(0.0, self.next_available_time_by_queue.get(queue_id, 0.0))
-            return
         while end_times and end_times[0] <= current_time:
             end_times.pop(0)
         self.scheduled_end_times_by_queue[queue_id] = end_times
@@ -35,8 +32,8 @@ class TDMAQueue:
         self.next_available_time_by_queue.clear()
         self.scheduled_end_times_by_queue.clear()
 
-    def clone(self) -> "TDMAQueue":
-        return TDMAQueue(
+    def clone(self) -> "ComputeQueue":
+        return ComputeQueue(
             next_available_time_by_queue=dict(self.next_available_time_by_queue),
             scheduled_end_times_by_queue={key: list(value) for key, value in self.scheduled_end_times_by_queue.items()},
         )

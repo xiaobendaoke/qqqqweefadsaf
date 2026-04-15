@@ -10,6 +10,7 @@ class BaseStation:
     position: tuple[float, float]
     height: float
     compute_hz: float
+    cumulative_compute_energy_j: float = 0.0
 
     @classmethod
     def from_config(cls, config: SystemConfig) -> "BaseStation":

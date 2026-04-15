@@ -591,3 +591,71 @@ python -m venv .venv
 - `第四章/results/paper_stage6/figures/final_assignment_comparison.png`
 - `第四章/results/paper_stage6/figures/final_ablation_energy.png`
 - `第四章/results/paper_stage6/figures/final_comparison_bars.png`
+
+## 第七阶段统一系统可信度修复：共享环境 v2 与 PPO 正确性修复
+
+### 运行命令
+
+```powershell
+.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42
+.\.venv\Scripts\python.exe 第四章/run_train_marl.py --seed 42 --train-episodes 2 --num-uavs 2 --assignment-rule nearest_uav
+.\.venv\Scripts\python.exe 第四章/run_eval_marl.py --seed 142 --eval-episodes 1 --num-uavs 2 --assignment-rule nearest_uav --model-path 第四章/results/marl_shared_ppo_u2_nearest_uav.pt
+.\.venv\Scripts\python.exe 第四章/run_finalize_paper.py --seeds 42 52 62 --eval-episodes 4
+```
+
+### 关键结果
+
+- `schema`:
+  - `observation_schema = observation.v2`
+  - `uav_state_schema = uav_state.v2`
+  - `episode_log_schema = episode_log.v2`
+- `compare-ch4`:
+  - 在覆盖约束、backlog、compute queue、system energy 与 cache score 全部接入后继续通过
+  - 新增的 `uav_move_energy / uav_compute_energy / ue_local_energy / ue_uplink_energy / bs_compute_energy / relay_fetch_energy` 多 seed `delta` 仍为 `0.0 +/- 0.0`
+- `PPO 训练 smoke`:
+  - `python 第四章/run_train_marl.py --seed 42 --train-episodes 2 --num-uavs 2 --assignment-rule nearest_uav`
+  - 训练成功
+  - `observation_batch_shape=["T", 2, 56]`
+  - actor 已切换为 `squashed Gaussian + log_prob correction + minibatch PPO`
+- `PPO 评估 smoke`:
+  - `completion_rate=1.0`
+  - `average_latency=0.3384`
+  - `total_energy=15.1212`
+- `assignment rule` 在敏感场景下重新拉开差异:
+  - `u2 nearest_uav total_energy = 136.2366 +/- 11.4120`
+  - `u2 least_loaded_uav total_energy = 130.1174 +/- 0.5214`
+  - `u3 nearest_uav total_energy = 182.5985 +/- 1.5442`
+  - `u3 least_loaded_uav total_energy = 149.7612 +/- 4.5148`
+- `PPO vs heuristic`:
+  - `u2 + nearest_uav`
+    - PPO `completion_rate=0.9846 +/- 0.0137`
+    - PPO `average_latency=0.3975 +/- 0.0523`
+    - PPO `total_energy=45.9111 +/- 13.5810`
+    - heuristic `total_energy=16.5777 +/- 16.3382`
+  - `u3 + nearest_uav`
+    - PPO `completion_rate=0.9896 +/- 0.0104`
+    - PPO `average_latency=0.4141 +/- 0.0163`
+    - PPO `total_energy=78.7638 +/- 23.5569`
+    - heuristic `total_energy=40.6808 +/- 28.0994`
+- `消融`:
+  - `main total_energy=45.9111 +/- 13.5810`
+  - `no_energy_shaped_reward total_energy=48.0319 +/- 17.2182`
+  - `no_movement_budget total_energy=112.3080 +/- 44.1639`
+
+### 新增/更新结果文件
+
+- `第四章/results/marl_train_shared_ppo_u2_nearest_uav.json`
+- `第四章/results/marl_eval_shared_ppo_u2_nearest_uav.json`
+- `第四章/results/paper_stage6/compare_ch4_multiseed_summary.json`
+- `第四章/results/paper_stage6/assignment_multiseed_summary.json`
+- `第四章/results/paper_stage6/ppo_vs_heuristic_multiseed_summary.json`
+- `第四章/results/paper_stage6/ablation_multiseed_summary.json`
+- `第四章/results/paper_stage6/tables/table_main_results.md`
+- `第四章/results/paper_stage6/tables/table_assignment_comparison.md`
+- `第四章/results/paper_stage6/tables/table_ppo_vs_heuristic.md`
+- `第四章/results/paper_stage6/tables/table_ablation.md`
+- `第四章/results/paper_stage6/figures/final_training_return_curve.png`
+- `第四章/results/paper_stage6/figures/final_training_energy_curve.png`
+- `第四章/results/paper_stage6/figures/final_ppo_vs_heuristic.png`
+- `第四章/results/paper_stage6/figures/final_assignment_comparison.png`
+- `第四章/results/paper_stage6/figures/final_ablation_energy.png`
