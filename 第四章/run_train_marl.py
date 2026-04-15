@@ -13,9 +13,11 @@ from chapter4.marl import run_marl_training
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Train the shared-PPO Chapter 4 agent. The CLI defaults are for quick iteration and are not the final paper preset."
+    )
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--train-episodes", type=int, default=24)
+    parser.add_argument("--train-episodes", type=int, default=24, help="Training episodes for this run; final paper runs use the stage-6 pipeline.")
     parser.add_argument("--num-uavs", type=int, default=2)
     parser.add_argument("--assignment-rule", type=str, default="nearest_uav", choices=["nearest_uav", "least_loaded_uav"])
     parser.add_argument("--tag", type=str, default="default")

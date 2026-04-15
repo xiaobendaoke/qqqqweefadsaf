@@ -38,7 +38,6 @@ def _shape_team_reward(
     config: MinimalMARLConfig,
     env: Chapter4Env,
     step_result: dict[str, Any],
-    previous_total_energy: float,
     actions: list[list[float]],
 ) -> tuple[float, dict[str, float]]:
     step_metrics = step_result["step_metrics"]
@@ -89,7 +88,6 @@ def _collect_episode(
     buffer = RolloutBuffer()
     last_step: dict[str, Any] | None = None
     reward_breakdowns: list[dict[str, float]] = []
-    previous_total_energy = 0.0
     while True:
         state = [value for observation in observations for value in observation]
         value = agent.value(state)
@@ -100,11 +98,9 @@ def _collect_episode(
             config=config,
             env=env,
             step_result=last_step,
-            previous_total_energy=previous_total_energy,
             actions=actions,
         )
         reward_breakdowns.append(reward_breakdown)
-        previous_total_energy = float(last_step["metrics"]["total_energy"])
         done = bool(last_step["terminated"] or last_step["truncated"])
         buffer.add(
             state=state,

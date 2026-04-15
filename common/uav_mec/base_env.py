@@ -120,6 +120,8 @@ class BaseEnv:
         terminated = self.current_step >= self.config.steps_per_episode
         return {
             "observations": observations,
+            # This reward is only kept for simple baselines and smoke runs.
+            # The Chapter 4 paper reward is shaped in the MARL trainer.
             "rewards": [float(step_metrics["completion_rate"] - 0.05 * step_metrics["average_latency"]) for _ in self.uavs],
             "terminated": terminated,
             "truncated": False,

@@ -25,8 +25,10 @@ class MetricTracker:
     user_completed: dict[int, int] = field(default_factory=dict)
     uav_loads: dict[int, int] = field(default_factory=dict)
     total_generated: int = 0
+    total_finalized: int = 0
     total_completed: int = 0
     total_latency: float = 0.0
+    total_completed_latency: float = 0.0
     total_energy: float = 0.0
     total_cache_hits: int = 0
     deadline_violations: int = 0
@@ -57,12 +59,14 @@ class MetricTracker:
         energy_breakdown: dict[str, float],
     ) -> dict[str, float | None]:
         self.record_generated(generated_tasks)
+        self.total_finalized += len(finalized_tasks)
         for task in finalized_tasks:
             self.total_latency += float(task.total_latency)
             if task.cache_hit:
                 self.total_cache_hits += 1
             if task.completed:
                 self.total_completed += 1
+                self.total_completed_latency += float(task.total_latency)
                 self.user_completed[task.user_id] = self.user_completed.get(task.user_id, 0) + 1
             else:
                 if task.total_latency > task.slack:
@@ -91,6 +95,11 @@ class MetricTracker:
             "completed_tasks": float(completed_count),
             "pending_tasks": float(len(pending_tasks)),
             "average_latency": step_latency,
+            "average_latency_completed": (
+                sum(float(task.total_latency) for task in finalized_tasks if task.completed) / completed_count
+                if completed_count
+                else 0.0
+            ),
             "cache_hit_rate": (step_cache_hits / finalized_count) if finalized_count else 0.0,
             "completion_rate": (completed_count / finalized_count) if finalized_count else 0.0,
             "deadline_violation_rate": (step_deadline_violations / finalized_count) if finalized_count else 0.0,
@@ -120,7 +129,9 @@ class MetricTracker:
 
     def snapshot(self) -> dict[str, float | None]:
         completion_rate = self.total_completed / self.total_generated if self.total_generated else 0.0
-        average_latency = self.total_latency / self.total_generated if self.total_generated else 0.0
+        average_latency_finalized = self.total_latency / self.total_finalized if self.total_finalized else 0.0
+        average_latency_completed = self.total_completed_latency / self.total_completed if self.total_completed else 0.0
+        latency_per_generated_task = self.total_latency / self.total_generated if self.total_generated else 0.0
         cache_hit_rate = self.total_cache_hits / self.total_generated if self.total_generated else 0.0
         deadline_violation_rate = self.deadline_violations / self.total_generated if self.total_generated else 0.0
         reliability_violation_rate = self.reliability_violations / self.total_generated if self.total_generated else 0.0
@@ -131,7 +142,10 @@ class MetricTracker:
         uav_load_values = [float(self.uav_loads.get(uav_id, 0)) for uav_id in range(self.num_uavs)]
         return {
             "completion_rate": completion_rate,
-            "average_latency": average_latency,
+            "average_latency": average_latency_finalized,
+            "average_latency_finalized": average_latency_finalized,
+            "average_latency_completed": average_latency_completed,
+            "latency_per_generated_task": latency_per_generated_task,
             "total_energy": self.total_energy,
             "cache_hit_rate": cache_hit_rate,
             "fairness_user_completion": _jain(user_ratios),

@@ -47,7 +47,7 @@ def _refresh_runtime_counters(
             1
             for task in pending_tasks
             if task.status in {"pending", "scheduled"}
-            and (task.assigned_uav_id == uav.uav_id or task.associated_uav_id == uav.uav_id)
+            and task.assigned_uav_id == uav.uav_id
         )
         uav.current_coverage_load = sum(
             1
@@ -134,9 +134,6 @@ def run_step(
             coverage_radius=config.uav_coverage_radius,
             rule=config.assignment_rule,
         )
-        if associated_uav is not None:
-            associated_uav.assigned_task_count_step += 1
-            associated_uav.total_assigned_task_count += 1
         decision = decide_offloading(
             task=task,
             ue=ue,
@@ -173,6 +170,10 @@ def run_step(
             bs_compute_energy=decision.bs_compute_energy,
             relay_fetch_energy=decision.relay_fetch_energy,
         )
+        if decision.target in {"uav", "collaborator"} and decision.assigned_uav_id is not None:
+            scheduled_uav = uav_lookup[decision.assigned_uav_id]
+            scheduled_uav.assigned_task_count_step += 1
+            scheduled_uav.total_assigned_task_count += 1
         metrics.record_assignment(task)
         decisions.append(decision)
 

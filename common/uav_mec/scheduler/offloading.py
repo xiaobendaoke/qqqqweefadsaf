@@ -38,6 +38,10 @@ class OffloadingDecision:
     uav_compute_energy: float = 0.0
     bs_compute_energy: float = 0.0
     relay_fetch_energy: float = 0.0
+    ue_tx_wait: float = 0.0
+    ue_tx_delay: float = 0.0
+    relay_wait: float = 0.0
+    relay_delay: float = 0.0
     completion_time: float = 0.0
     cache_events: list[dict[str, object]] | None = None
 
@@ -205,7 +209,7 @@ def decide_offloading(
     options: list[OffloadingDecision] = [local_option]
 
     def build_uav_option(server_uav: UAVNode, *, collaborator_from: UAVNode | None = None) -> OffloadingDecision:
-        tx_delay, tx_wait, tx_prob, ue_uplink_energy = _schedule_serial_link(
+        ue_tx_delay, ue_tx_wait, tx_prob, ue_uplink_energy = _schedule_serial_link(
             sender_position=ue.position,
             receiver_position=associated_uav.position if associated_uav is not None else server_uav.position,
             sender_height=0.0,
@@ -218,11 +222,11 @@ def decide_offloading(
             queue_id=f"uav:{(associated_uav or server_uav).uav_id}",
             tx_power_w=config.ue_uplink_power_w,
         )
-        total_tx_delay = tx_delay
-        total_queue_delay = tx_wait
+        relay_delay = 0.0
+        relay_wait = 0.0
         total_relay_energy = 0.0
         probability = tx_prob
-        tx_end_time = current_time + tx_wait + tx_delay
+        tx_end_time = current_time + ue_tx_wait + ue_tx_delay
 
         if collaborator_from is not None:
             relay_delay, relay_wait, relay_prob, relay_energy = _schedule_serial_link(
@@ -237,8 +241,6 @@ def decide_offloading(
                 current_time=tx_end_time,
                 queue_id=f"relay:uav:{collaborator_from.uav_id}->uav:{server_uav.uav_id}",
             )
-            total_tx_delay += relay_delay
-            total_queue_delay += relay_wait
             total_relay_energy += relay_energy
             probability = min(probability, relay_prob)
             tx_end_time = tx_end_time + relay_wait + relay_delay
@@ -268,10 +270,10 @@ def decide_offloading(
             associated_uav_id=associated_uav.uav_id if associated_uav is not None else server_uav.uav_id,
             assigned_uav_id=server_uav.uav_id,
             cache_hit=cache_hit,
-            queue_delay=total_queue_delay,
+            queue_delay=ue_tx_wait + relay_wait,
             fetch_wait_delay=fetch_wait_delay,
             fetch_delay=fetch_delay,
-            transmission_delay=total_tx_delay,
+            transmission_delay=ue_tx_delay + relay_delay,
             compute_wait_delay=compute_wait_delay,
             compute_delay=compute_delay,
             total_latency=total_latency,
@@ -284,6 +286,10 @@ def decide_offloading(
             ue_uplink_energy=ue_uplink_energy,
             uav_compute_energy=float(task.cpu_cycles * config.uav_compute_energy_per_cycle),
             relay_fetch_energy=total_relay_energy + fetch_energy,
+            ue_tx_wait=ue_tx_wait,
+            ue_tx_delay=ue_tx_delay,
+            relay_wait=relay_wait,
+            relay_delay=relay_delay,
             completion_time=completion_time,
             cache_events=[],
         )
@@ -344,20 +350,34 @@ def decide_offloading(
 
     if decision.target in {"uav", "collaborator"} and decision.assigned_uav_id is not None:
         primary_uav_id = decision.associated_uav_id if decision.associated_uav_id is not None else decision.assigned_uav_id
-        tdma_queue.schedule(current_time, decision.transmission_delay, queue_id=f"uav:{primary_uav_id}")
+        _, stage_end_time, _ = tdma_queue.schedule(
+            current_time,
+            decision.ue_tx_delay,
+            queue_id=f"uav:{primary_uav_id}",
+        )
         if decision.target == "collaborator" and decision.associated_uav_id is not None and decision.associated_uav_id != decision.assigned_uav_id:
-            tdma_queue.schedule(current_time, decision.transmission_delay, queue_id=f"relay:uav:{decision.associated_uav_id}->uav:{decision.assigned_uav_id}")
+            _, stage_end_time, _ = tdma_queue.schedule(
+                stage_end_time,
+                decision.relay_delay,
+                queue_id=f"relay:uav:{decision.associated_uav_id}->uav:{decision.assigned_uav_id}",
+            )
         if decision.fetch_delay > 0.0 and decision.fetch_source is not None:
             if decision.fetch_source == "bs":
-                tdma_queue.schedule(current_time, decision.fetch_wait_delay + decision.fetch_delay, queue_id=f"fetch:bs->uav:{decision.assigned_uav_id}")
+                _, stage_end_time, _ = tdma_queue.schedule(
+                    stage_end_time,
+                    decision.fetch_delay,
+                    queue_id=f"fetch:bs->uav:{decision.assigned_uav_id}",
+                )
             elif decision.fetch_source.startswith("uav:"):
                 peer_id = decision.fetch_source.split(":", 1)[1]
-                tdma_queue.schedule(current_time, decision.fetch_wait_delay + decision.fetch_delay, queue_id=f"fetch:uav:{peer_id}->uav:{decision.assigned_uav_id}")
-        compute_arrival_time = current_time + decision.queue_delay + decision.transmission_delay + decision.fetch_wait_delay + decision.fetch_delay
-        compute_queue.schedule(compute_arrival_time, decision.compute_delay, queue_id=f"uav:{decision.assigned_uav_id}")
+                _, stage_end_time, _ = tdma_queue.schedule(
+                    stage_end_time,
+                    decision.fetch_delay,
+                    queue_id=f"fetch:uav:{peer_id}->uav:{decision.assigned_uav_id}",
+                )
+        compute_queue.schedule(stage_end_time, decision.compute_delay, queue_id=f"uav:{decision.assigned_uav_id}")
     elif decision.target == "bs":
-        tdma_queue.schedule(current_time, decision.transmission_delay, queue_id="bs")
-        compute_arrival_time = current_time + decision.queue_delay + decision.transmission_delay
-        compute_queue.schedule(compute_arrival_time, decision.compute_delay, queue_id="bs")
+        _, bs_tx_end_time, _ = tdma_queue.schedule(current_time, decision.transmission_delay, queue_id="bs")
+        compute_queue.schedule(bs_tx_end_time, decision.compute_delay, queue_id="bs")
 
     return decision
