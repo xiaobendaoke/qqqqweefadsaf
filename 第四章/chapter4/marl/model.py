@@ -45,8 +45,9 @@ def _movement_budget(observation: list[float], *, max_user_blocks: int, user_fea
         priority = pending + (1.0 - min_slack)
         max_priority = max(max_priority, priority)
         max_distance = max(max_distance, distance)
+    # Keep mobility conservative when no user backlog is observed.
     if max_priority <= 0.0:
-        return 0.35
+        return 0.20
     return min(1.0, max(0.18, 0.35 + 0.30 * min(1.0, max_priority) + 0.35 * max_distance))
 
 

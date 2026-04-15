@@ -827,19 +827,19 @@
   },
   "marl_metrics": {
     "completion_rate": 0.9791666666666666,
-    "average_latency": 0.40630061089026165,
-    "total_energy": 104.31493111169733,
-    "cache_hit_rate": 0.7182938965059709,
+    "average_latency": 0.4052489233283172,
+    "total_energy": 45.367207020628,
+    "cache_hit_rate": 0.7109409553295003,
     "fairness_user_completion": 0.9950000000000001,
-    "fairness_uav_load": 0.6917244170871456,
+    "fairness_uav_load": 0.7072550469404674,
     "deadline_violation_rate": 0.0,
     "reliability_violation_rate": 0.020833333333333332,
-    "uav_move_energy": 100.8367549116151,
-    "uav_compute_energy": 1.5354774586922177,
+    "uav_move_energy": 41.888346774310094,
+    "uav_compute_energy": 1.531510387105227,
     "ue_local_energy": 0.12397793290366324,
-    "ue_uplink_energy": 0.5134024011903489,
-    "bs_compute_energy": 1.1596733434477784,
-    "relay_fetch_energy": 0.1456450638482208
+    "ue_uplink_energy": 0.510449270329098,
+    "bs_compute_energy": 1.162053586399973,
+    "relay_fetch_energy": 0.15086906957995305
   },
   "heuristic_metrics": {
     "completion_rate": 0.9791666666666666,
@@ -859,19 +859,19 @@
   },
   "comparison": {
     "average_latency": {
-      "left": 0.40630061089026165,
+      "left": 0.4052489233283172,
       "right": 0.4052230673891422,
-      "delta": 0.0010775435011194379
+      "delta": 2.585593917497908e-05
     },
     "bs_compute_energy": {
-      "left": 1.1596733434477784,
+      "left": 1.162053586399973,
       "right": 1.162053586399973,
-      "delta": -0.0023802429521946333
+      "delta": 0.0
     },
     "cache_hit_rate": {
-      "left": 0.7182938965059709,
+      "left": 0.7109409553295003,
       "right": 0.7109409553295002,
-      "delta": 0.007352941176470673
+      "delta": 1.1102230246251565e-16
     },
     "completion_rate": {
       "left": 0.9791666666666666,
@@ -884,9 +884,9 @@
       "delta": 0.0
     },
     "fairness_uav_load": {
-      "left": 0.6917244170871456,
+      "left": 0.7072550469404674,
       "right": 0.7072550469404674,
-      "delta": -0.015530629853321765
+      "delta": 0.0
     },
     "fairness_user_completion": {
       "left": 0.9950000000000001,
@@ -894,9 +894,9 @@
       "delta": 0.0
     },
     "relay_fetch_energy": {
-      "left": 0.1456450638482208,
+      "left": 0.15086906957995305,
       "right": 0.14986906957995305,
-      "delta": -0.004224005731732261
+      "delta": 0.0010000000000000009
     },
     "reliability_violation_rate": {
       "left": 0.020833333333333332,
@@ -904,19 +904,19 @@
       "delta": 0.0
     },
     "total_energy": {
-      "left": 104.31493111169733,
+      "left": 45.367207020628,
       "right": 16.93395805145135,
-      "delta": 87.38097306024599
+      "delta": 28.433248969176653
     },
     "uav_compute_energy": {
-      "left": 1.5354774586922177,
+      "left": 1.531510387105227,
       "right": 1.531510387105227,
-      "delta": 0.0039670715869908335
+      "delta": 0.0
     },
     "uav_move_energy": {
-      "left": 100.8367549116151,
+      "left": 41.888346774310094,
       "right": 13.456315916752459,
-      "delta": 87.38043899486264
+      "delta": 28.432030857557635
     },
     "ue_local_energy": {
       "left": 0.12397793290366324,
@@ -924,9 +924,9 @@
       "delta": 0.0
     },
     "ue_uplink_energy": {
-      "left": 0.5134024011903489,
+      "left": 0.510449270329098,
       "right": 0.5102311587100717,
-      "delta": 0.0031712424802771144
+      "delta": 0.0002181116190262955
     }
   },
   "marl_episode_logs": [
@@ -939,17 +939,17 @@
       "assignment_rule": "nearest_uav",
       "global_metrics": {
         "completion_rate": 1.0,
-        "average_latency": 0.3631470465161456,
-        "total_energy": 78.128816780812,
+        "average_latency": 0.36310018717821635,
+        "total_energy": 34.57805764327468,
         "cache_hit_rate": 0.631578947368421,
         "fairness_user_completion": 1.0,
         "fairness_uav_load": 0.9310344827586207,
         "deadline_violation_rate": 0.0,
         "reliability_violation_rate": 0.0,
-        "uav_move_energy": 74.86928848041435,
+        "uav_move_energy": 31.31904166532255,
         "uav_compute_energy": 1.5703299256356062,
         "ue_local_energy": 0.0,
-        "ue_uplink_energy": 0.4586541003383162,
+        "ue_uplink_energy": 0.45814177789279614,
         "bs_compute_energy": 1.1017084492137978,
         "relay_fetch_energy": 0.12883582520992964
       },
@@ -965,13 +965,13 @@
           "current_compute_queue_length": 0,
           "current_compute_queue_delay": 0.0,
           "current_backlog_load": 0,
-          "current_coverage_load": 3,
+          "current_coverage_load": 4,
           "cumulative_tx_queue_delay": 0.0,
           "cumulative_compute_queue_delay": 0.0,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 0,
-          "remaining_energy_j": 4972.666777515775,
-          "energy_used_j": 27.33322248422519,
+          "remaining_energy_j": 4988.327431711616,
+          "energy_used_j": 11.672568288384355,
           "cache_usage_ratio": 0.6666666666666666,
           "cache_services": [
             1,
@@ -993,13 +993,13 @@
           "current_compute_queue_length": 0,
           "current_compute_queue_delay": 0.0,
           "current_backlog_load": 0,
-          "current_coverage_load": 3,
+          "current_coverage_load": 4,
           "cumulative_tx_queue_delay": 0.0,
           "cumulative_compute_queue_delay": 0.0,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 0,
-          "remaining_energy_j": 4980.813272787716,
-          "energy_used_j": 19.186727212283586,
+          "remaining_energy_j": 4987.894237251797,
+          "energy_used_j": 12.105762748203233,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             2,
@@ -1028,8 +1028,8 @@
           "cumulative_compute_queue_delay": 0.0,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 0,
-          "remaining_energy_j": 4970.080331290461,
-          "energy_used_j": 29.91966870953911,
+          "remaining_energy_j": 4990.88895944563,
+          "energy_used_j": 9.111040554370447,
           "cache_usage_ratio": 0.6666666666666666,
           "cache_services": [
             2,
@@ -1406,16 +1406,16 @@
           "finalized_tasks": 3.0,
           "completed_tasks": 3.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.33158481911126897,
+          "average_latency": 0.3316038586430125,
           "cache_hit_rate": 0.6666666666666666,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 12.802726552359063,
-          "uav_move_energy": 12.37320853046238,
+          "total_energy": 5.335123112156645,
+          "uav_move_energy": 4.905571876175758,
           "uav_compute_energy": 0.1245145604343073,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.08214986169605526,
+          "ue_uplink_energy": 0.08218307578025974,
           "bs_compute_energy": 0.20785359976632015,
           "relay_fetch_energy": 0.015000000000000001
         },
@@ -1425,16 +1425,16 @@
           "finalized_tasks": 6.0,
           "completed_tasks": 6.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.4255608624954405,
+          "average_latency": 0.4255955161281008,
           "cache_hit_rate": 0.3333333333333333,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 18.196627517627483,
-          "uav_move_energy": 17.059456881827636,
+          "total_energy": 7.47073703834543,
+          "uav_move_energy": 6.333591025623377,
           "uav_compute_energy": 0.7224445637578714,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.11550752081127716,
+          "ue_uplink_energy": 0.1154828977334833,
           "bs_compute_energy": 0.22529590941177582,
           "relay_fetch_energy": 0.07392264181892177
         },
@@ -1444,16 +1444,16 @@
           "finalized_tasks": 3.0,
           "completed_tasks": 3.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.4325890417577461,
+          "average_latency": 0.43258572679043866,
           "cache_hit_rate": 0.6666666666666666,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 9.844576751512191,
-          "uav_move_energy": 9.170998919341898,
+          "total_energy": 5.045577484114933,
+          "uav_move_energy": 4.372076658722868,
           "uav_compute_energy": 0.4557594608520154,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.057840333825906545,
+          "ue_uplink_energy": 0.057763327047678295,
           "bs_compute_energy": 0.14897803749237135,
           "relay_fetch_energy": 0.011000000000000001
         },
@@ -1468,8 +1468,8 @@
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 7.867333965279272,
-          "uav_move_energy": 7.6258136433550705,
+          "total_energy": 3.418858743242124,
+          "uav_move_energy": 3.1773384213179225,
           "uav_compute_energy": 0.0,
           "ue_local_energy": 0.0,
           "ue_uplink_energy": 0.042956245341515265,
@@ -1487,8 +1487,8 @@
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 8.126971151131693,
-          "uav_move_energy": 7.971652730817014,
+          "total_energy": 3.405913601302627,
+          "uav_move_energy": 3.250595180987948,
           "uav_compute_energy": 0.0,
           "ue_local_energy": 0.0,
           "ue_uplink_energy": 0.036329324872101484,
@@ -1506,8 +1506,8 @@
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 8.260222263023628,
-          "uav_move_energy": 8.128437902933802,
+          "total_energy": 3.3482857783566606,
+          "uav_move_energy": 3.2165014182668346,
           "uav_compute_energy": 0.0,
           "ue_local_energy": 0.0,
           "ue_uplink_energy": 0.04492198894045075,
@@ -1520,16 +1520,16 @@
           "finalized_tasks": 3.0,
           "completed_tasks": 3.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.3052185039596485,
+          "average_latency": 0.30483669632300686,
           "cache_hit_rate": 0.6666666666666666,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 8.516394374933084,
-          "uav_move_energy": 8.025755666730964,
+          "total_energy": 3.6597566421203718,
+          "uav_move_energy": 3.1695618405919537,
           "uav_compute_energy": 0.26761134059141223,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.07894882485100974,
+          "ue_uplink_energy": 0.07850491817730731,
           "bs_compute_energy": 0.11516535936869057,
           "relay_fetch_energy": 0.028913183391007884
         },
@@ -1544,8 +1544,8 @@
           "completion_rate": 0.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 4.513964204945598,
-          "uav_move_energy": 4.513964204945598,
+          "total_energy": 2.893805243635891,
+          "uav_move_energy": 2.893805243635891,
           "uav_compute_energy": 0.0,
           "ue_local_energy": 0.0,
           "ue_uplink_energy": 0.0,
@@ -1555,44 +1555,44 @@
       ],
       "energy_breakdown": {
         "episode_totals": {
-          "uav_move_energy": 74.86928848041435,
+          "uav_move_energy": 31.31904166532255,
           "uav_compute_energy": 1.5703299256356062,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.4586541003383162,
+          "ue_uplink_energy": 0.45814177789279614,
           "bs_compute_energy": 1.1017084492137978,
           "relay_fetch_energy": 0.12883582520992964
         },
         "step_breakdown": [
           {
             "step": 1,
-            "uav_move_energy": 12.37320853046238,
+            "uav_move_energy": 4.905571876175758,
             "uav_compute_energy": 0.1245145604343073,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.08214986169605526,
+            "ue_uplink_energy": 0.08218307578025974,
             "bs_compute_energy": 0.20785359976632015,
             "relay_fetch_energy": 0.015000000000000001
           },
           {
             "step": 2,
-            "uav_move_energy": 17.059456881827636,
+            "uav_move_energy": 6.333591025623377,
             "uav_compute_energy": 0.7224445637578714,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.11550752081127716,
+            "ue_uplink_energy": 0.1154828977334833,
             "bs_compute_energy": 0.22529590941177582,
             "relay_fetch_energy": 0.07392264181892177
           },
           {
             "step": 3,
-            "uav_move_energy": 9.170998919341898,
+            "uav_move_energy": 4.372076658722868,
             "uav_compute_energy": 0.4557594608520154,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.057840333825906545,
+            "ue_uplink_energy": 0.057763327047678295,
             "bs_compute_energy": 0.14897803749237135,
             "relay_fetch_energy": 0.011000000000000001
           },
           {
             "step": 4,
-            "uav_move_energy": 7.6258136433550705,
+            "uav_move_energy": 3.1773384213179225,
             "uav_compute_energy": 0.0,
             "ue_local_energy": 0.0,
             "ue_uplink_energy": 0.042956245341515265,
@@ -1601,7 +1601,7 @@
           },
           {
             "step": 5,
-            "uav_move_energy": 7.971652730817014,
+            "uav_move_energy": 3.250595180987948,
             "uav_compute_energy": 0.0,
             "ue_local_energy": 0.0,
             "ue_uplink_energy": 0.036329324872101484,
@@ -1610,7 +1610,7 @@
           },
           {
             "step": 6,
-            "uav_move_energy": 8.128437902933802,
+            "uav_move_energy": 3.2165014182668346,
             "uav_compute_energy": 0.0,
             "ue_local_energy": 0.0,
             "ue_uplink_energy": 0.04492198894045075,
@@ -1619,16 +1619,16 @@
           },
           {
             "step": 7,
-            "uav_move_energy": 8.025755666730964,
+            "uav_move_energy": 3.1695618405919537,
             "uav_compute_energy": 0.26761134059141223,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.07894882485100974,
+            "ue_uplink_energy": 0.07850491817730731,
             "bs_compute_energy": 0.11516535936869057,
             "relay_fetch_energy": 0.028913183391007884
           },
           {
             "step": 8,
-            "uav_move_energy": 4.513964204945598,
+            "uav_move_energy": 2.893805243635891,
             "uav_compute_energy": 0.0,
             "ue_local_energy": 0.0,
             "ue_uplink_energy": 0.0,
@@ -1840,7 +1840,7 @@
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
               "backlog_load": 0,
-              "coverage_load": 3
+              "coverage_load": 4
             },
             {
               "uav_id": 1,
@@ -1849,7 +1849,7 @@
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
               "backlog_load": 0,
-              "coverage_load": 3
+              "coverage_load": 4
             },
             {
               "uav_id": 2,
@@ -1872,7 +1872,7 @@
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
               "backlog_load": 0,
-              "coverage_load": 3
+              "coverage_load": 4
             },
             {
               "uav_id": 1,
@@ -1881,7 +1881,7 @@
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
               "backlog_load": 0,
-              "coverage_load": 3
+              "coverage_load": 4
             },
             {
               "uav_id": 2,
@@ -2021,17 +2021,17 @@
       "assignment_rule": "nearest_uav",
       "global_metrics": {
         "completion_rate": 0.9166666666666666,
-        "average_latency": 0.5639899678713496,
-        "total_energy": 149.95604476227965,
+        "average_latency": 0.5639783912199525,
+        "total_energy": 66.5982368008152,
         "cache_hit_rate": 0.9166666666666666,
         "fairness_user_completion": 0.9800000000000002,
         "fairness_uav_load": 0.3333333333333333,
         "deadline_violation_rate": 0.0,
         "reliability_violation_rate": 0.08333333333333333,
-        "uav_move_energy": 148.04120926081174,
+        "uav_move_energy": 64.68358886569335,
         "uav_compute_energy": 0.15482879358439555,
         "ue_local_energy": 0.49591173161465296,
-        "ue_uplink_energy": 0.25553230065055443,
+        "ue_uplink_energy": 0.2553447343044807,
         "bs_compute_energy": 0.9975626756183233,
         "relay_fetch_energy": 0.011000000000000001
       },
@@ -2052,8 +2052,8 @@
           "cumulative_compute_queue_delay": 0.0,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 0,
-          "remaining_energy_j": 4948.160992611628,
-          "energy_used_j": 51.83900738837201,
+          "remaining_energy_j": 4977.651979277706,
+          "energy_used_j": 22.348020722293768,
           "cache_usage_ratio": 0.0,
           "cache_services": [],
           "cache_scores": {}
@@ -2074,8 +2074,8 @@
           "cumulative_compute_queue_delay": 0.0,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 0,
-          "remaining_energy_j": 4955.285397586506,
-          "energy_used_j": 44.714602413493594,
+          "remaining_energy_j": 4979.8163060990155,
+          "energy_used_j": 20.183693900984508,
           "cache_usage_ratio": 0.3333333333333333,
           "cache_services": [
             2
@@ -2100,8 +2100,8 @@
           "cumulative_compute_queue_delay": 0.0,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 0,
-          "remaining_energy_j": 4948.357571747467,
-          "energy_used_j": 51.642428252533136,
+          "remaining_energy_j": 4977.693296963998,
+          "energy_used_j": 22.306703036001636,
           "cache_usage_ratio": 0.0,
           "cache_services": [],
           "cache_scores": {}
@@ -2477,8 +2477,8 @@
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 12.52017511863137,
-          "uav_move_energy": 12.364688999599199,
+          "total_energy": 5.114672753210966,
+          "uav_move_energy": 4.959186634178796,
           "uav_compute_energy": 0.0,
           "ue_local_energy": 0.0,
           "ue_uplink_energy": 0.03335482249327187,
@@ -2496,8 +2496,8 @@
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 17.608901728280035,
-          "uav_move_energy": 17.45072201611237,
+          "total_energy": 6.475199728515103,
+          "uav_move_energy": 6.317020016347439,
           "uav_compute_energy": 0.0,
           "ue_local_energy": 0.0,
           "ue_uplink_energy": 0.025007052192737418,
@@ -2515,8 +2515,8 @@
           "completion_rate": 0.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 17.34726508703911,
-          "uav_move_energy": 17.34726508703911,
+          "total_energy": 6.287622212712208,
+          "uav_move_energy": 6.287622212712208,
           "uav_compute_energy": 0.0,
           "ue_local_energy": 0.0,
           "ue_uplink_energy": 0.0,
@@ -2534,8 +2534,8 @@
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 18.014930796309077,
-          "uav_move_energy": 17.43424679771634,
+          "total_energy": 6.904196707238527,
+          "uav_move_energy": 6.323512708645792,
           "uav_compute_energy": 0.0,
           "ue_local_energy": 0.49591173161465296,
           "ue_uplink_energy": 0.03221749992797593,
@@ -2553,8 +2553,8 @@
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 39.391884298231275,
-          "uav_move_energy": 39.215137251362194,
+          "total_energy": 25.391194911696385,
+          "uav_move_energy": 25.214447864827303,
           "uav_compute_energy": 0.0,
           "ue_local_energy": 0.0,
           "ue_uplink_energy": 0.03547887955967197,
@@ -2567,16 +2567,16 @@
           "finalized_tasks": 3.0,
           "completed_tasks": 2.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.4068070979044978,
+          "average_latency": 0.4067607912989096,
           "cache_hit_rate": 0.6666666666666666,
           "completion_rate": 0.6666666666666666,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.3333333333333333,
-          "total_energy": 17.743329005639005,
-          "uav_move_energy": 17.245535034066116,
+          "total_energy": 6.70896582161704,
+          "uav_move_energy": 6.2113594163902235,
           "uav_compute_energy": 0.15482879358439555,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.05421617985697674,
+          "ue_uplink_energy": 0.054028613510903004,
           "bs_compute_energy": 0.2777489981315179,
           "relay_fetch_energy": 0.011000000000000001
         },
@@ -2591,8 +2591,8 @@
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 13.75655186964553,
-          "uav_move_energy": 13.410607216412146,
+          "total_energy": 5.048254594840071,
+          "uav_move_energy": 4.702309941606686,
           "uav_compute_energy": 0.0,
           "ue_local_energy": 0.0,
           "ue_uplink_energy": 0.07525786661992051,
@@ -2610,8 +2610,8 @@
           "completion_rate": 0.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 13.57300685850425,
-          "uav_move_energy": 13.57300685850425,
+          "total_energy": 4.668130070984905,
+          "uav_move_energy": 4.668130070984905,
           "uav_compute_energy": 0.0,
           "ue_local_energy": 0.0,
           "ue_uplink_energy": 0.0,
@@ -2621,17 +2621,17 @@
       ],
       "energy_breakdown": {
         "episode_totals": {
-          "uav_move_energy": 148.04120926081174,
+          "uav_move_energy": 64.68358886569335,
           "uav_compute_energy": 0.15482879358439555,
           "ue_local_energy": 0.49591173161465296,
-          "ue_uplink_energy": 0.25553230065055443,
+          "ue_uplink_energy": 0.2553447343044807,
           "bs_compute_energy": 0.9975626756183233,
           "relay_fetch_energy": 0.011000000000000001
         },
         "step_breakdown": [
           {
             "step": 1,
-            "uav_move_energy": 12.364688999599199,
+            "uav_move_energy": 4.959186634178796,
             "uav_compute_energy": 0.0,
             "ue_local_energy": 0.0,
             "ue_uplink_energy": 0.03335482249327187,
@@ -2640,7 +2640,7 @@
           },
           {
             "step": 2,
-            "uav_move_energy": 17.45072201611237,
+            "uav_move_energy": 6.317020016347439,
             "uav_compute_energy": 0.0,
             "ue_local_energy": 0.0,
             "ue_uplink_energy": 0.025007052192737418,
@@ -2649,7 +2649,7 @@
           },
           {
             "step": 3,
-            "uav_move_energy": 17.34726508703911,
+            "uav_move_energy": 6.287622212712208,
             "uav_compute_energy": 0.0,
             "ue_local_energy": 0.0,
             "ue_uplink_energy": 0.0,
@@ -2658,7 +2658,7 @@
           },
           {
             "step": 4,
-            "uav_move_energy": 17.43424679771634,
+            "uav_move_energy": 6.323512708645792,
             "uav_compute_energy": 0.0,
             "ue_local_energy": 0.49591173161465296,
             "ue_uplink_energy": 0.03221749992797593,
@@ -2667,7 +2667,7 @@
           },
           {
             "step": 5,
-            "uav_move_energy": 39.215137251362194,
+            "uav_move_energy": 25.214447864827303,
             "uav_compute_energy": 0.0,
             "ue_local_energy": 0.0,
             "ue_uplink_energy": 0.03547887955967197,
@@ -2676,16 +2676,16 @@
           },
           {
             "step": 6,
-            "uav_move_energy": 17.245535034066116,
+            "uav_move_energy": 6.2113594163902235,
             "uav_compute_energy": 0.15482879358439555,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.05421617985697674,
+            "ue_uplink_energy": 0.054028613510903004,
             "bs_compute_energy": 0.2777489981315179,
             "relay_fetch_energy": 0.011000000000000001
           },
           {
             "step": 7,
-            "uav_move_energy": 13.410607216412146,
+            "uav_move_energy": 4.702309941606686,
             "uav_compute_energy": 0.0,
             "ue_local_energy": 0.0,
             "ue_uplink_energy": 0.07525786661992051,
@@ -2694,7 +2694,7 @@
           },
           {
             "step": 8,
-            "uav_move_energy": 13.57300685850425,
+            "uav_move_energy": 4.668130070984905,
             "uav_compute_energy": 0.0,
             "ue_local_energy": 0.0,
             "ue_uplink_energy": 0.0,
@@ -3039,17 +3039,17 @@
       "assignment_rule": "nearest_uav",
       "global_metrics": {
         "completion_rate": 1.0,
-        "average_latency": 0.31337543939804663,
-        "total_energy": 92.40083199567792,
+        "average_latency": 0.3133321177673451,
+        "total_energy": 39.11144774729031,
         "cache_hit_rate": 0.6190476190476191,
         "fairness_user_completion": 1.0,
         "fairness_uav_load": 0.6172839506172839,
         "deadline_violation_rate": 0.0,
         "reliability_violation_rate": 0.0,
-        "uav_move_energy": 89.35990793971247,
+        "uav_move_energy": 36.07083585464903,
         "uav_compute_energy": 1.3320378799513903,
         "ue_local_energy": 0.0,
-        "ue_uplink_energy": 0.5083888711521221,
+        "ue_uplink_energy": 0.5080767078279579,
         "bs_compute_energy": 1.036418888997007,
         "relay_fetch_energy": 0.1640784158649256
       },
@@ -3058,20 +3058,20 @@
           "agent_id": "uav_0",
           "uav_id": 0,
           "served_task_count_total": 2,
-          "assigned_task_count_total": 3,
+          "assigned_task_count_total": 4,
           "completed_task_count_total": 2,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 0,
           "current_compute_queue_delay": 0.0,
           "current_backlog_load": 0,
-          "current_coverage_load": 2,
+          "current_coverage_load": 3,
           "cumulative_tx_queue_delay": 0.0,
           "cumulative_compute_queue_delay": 0.0,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 0,
-          "remaining_energy_j": 4965.53789517012,
-          "energy_used_j": 34.462104829880445,
+          "remaining_energy_j": 4984.314754925262,
+          "energy_used_j": 15.685245074738305,
           "cache_usage_ratio": 0.3333333333333333,
           "cache_services": [
             3
@@ -3091,13 +3091,13 @@
           "current_compute_queue_length": 0,
           "current_compute_queue_delay": 0.0,
           "current_backlog_load": 0,
-          "current_coverage_load": 2,
+          "current_coverage_load": 3,
           "cumulative_tx_queue_delay": 0.0,
           "cumulative_compute_queue_delay": 0.0,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 0,
-          "remaining_energy_j": 4967.350330677838,
-          "energy_used_j": 32.64966932216157,
+          "remaining_energy_j": 4992.935641655835,
+          "energy_used_j": 7.064358344165157,
           "cache_usage_ratio": 0.3333333333333333,
           "cache_services": [
             1
@@ -3122,8 +3122,8 @@
           "cumulative_compute_queue_delay": 0.0,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 0,
-          "remaining_energy_j": 4976.419828332377,
-          "energy_used_j": 23.58017166762329,
+          "remaining_energy_j": 4985.346729684304,
+          "energy_used_j": 14.653270315696318,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             0,
@@ -3504,16 +3504,16 @@
           "finalized_tasks": 4.0,
           "completed_tasks": 4.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.42636048252127157,
+          "average_latency": 0.4263558553315451,
           "cache_hit_rate": 0.75,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 12.072813328532986,
-          "uav_move_energy": 11.554193419876299,
+          "total_energy": 5.352254655904355,
+          "uav_move_energy": 4.833660829450124,
           "uav_compute_energy": 0.1377567788386089,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.1024929105439504,
+          "ue_uplink_energy": 0.10246682834149491,
           "bs_compute_energy": 0.26537021927412713,
           "relay_fetch_energy": 0.013000000000000001
         },
@@ -3523,16 +3523,16 @@
           "finalized_tasks": 5.0,
           "completed_tasks": 5.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.35751711937339936,
+          "average_latency": 0.3573859150650497,
           "cache_hit_rate": 0.4,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 16.545261853948947,
-          "uav_move_energy": 15.678661475404489,
+          "total_energy": 6.753772385474441,
+          "uav_move_energy": 5.8873356138549084,
           "uav_compute_energy": 0.4435449997588702,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.13292848662153617,
+          "ue_uplink_energy": 0.13276487969661283,
           "bs_compute_energy": 0.19911116108362537,
           "relay_fetch_energy": 0.0910157310804247
         },
@@ -3542,16 +3542,16 @@
           "finalized_tasks": 3.0,
           "completed_tasks": 3.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.3227347141122758,
+          "average_latency": 0.32270644531645615,
           "cache_hit_rate": 0.6666666666666666,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 11.530988090986686,
-          "uav_move_energy": 11.022827163080372,
+          "total_energy": 5.043138092857633,
+          "uav_move_energy": 4.535006236748089,
           "uav_compute_energy": 0.2860279478232742,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.05775097470487554,
+          "ue_uplink_energy": 0.057721902908106644,
           "bs_compute_energy": 0.1393193205936624,
           "relay_fetch_energy": 0.025062684784500893
         },
@@ -3561,16 +3561,16 @@
           "finalized_tasks": 2.0,
           "completed_tasks": 2.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.2194722694991864,
+          "average_latency": 0.21942052840895254,
           "cache_hit_rate": 0.5,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 10.692941023042321,
-          "uav_move_energy": 10.456073143710963,
+          "total_energy": 4.3427394158225,
+          "uav_move_energy": 4.105877204743666,
           "uav_compute_energy": 0.0988548620618647,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.03698121135680105,
+          "ue_uplink_energy": 0.036975543104276476,
           "bs_compute_energy": 0.0920318059126927,
           "relay_fetch_energy": 0.009000000000000001
         },
@@ -3580,16 +3580,16 @@
           "finalized_tasks": 2.0,
           "completed_tasks": 2.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.16296699501825618,
+          "average_latency": 0.16297523730918817,
           "cache_hit_rate": 1.0,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 10.676786740445424,
-          "uav_move_energy": 10.500110922871933,
+          "total_energy": 3.9568732897439145,
+          "uav_move_energy": 3.7801842845049327,
           "uav_compute_energy": 0.08368539136233742,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.04220021675367742,
+          "ue_uplink_energy": 0.0422134044191686,
           "bs_compute_energy": 0.05079020945747598,
           "relay_fetch_energy": 0.0
         },
@@ -3599,16 +3599,16 @@
           "finalized_tasks": 2.0,
           "completed_tasks": 2.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.23714817638250008,
+          "average_latency": 0.23716522760888692,
           "cache_hit_rate": 0.5,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 10.219330328389145,
-          "uav_move_energy": 9.958097768454955,
+          "total_energy": 4.081277145150904,
+          "uav_move_energy": 3.8200441619231724,
           "uav_compute_energy": 0.15034506791899183,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.049826369947977775,
+          "ue_uplink_energy": 0.04982679324151924,
           "bs_compute_energy": 0.05006112206722062,
           "relay_fetch_energy": 0.011000000000000001
         },
@@ -3623,8 +3623,8 @@
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 10.519337304366687,
-          "uav_move_energy": 10.368167808068499,
+          "total_energy": 4.9007586955191496,
+          "uav_move_energy": 4.749589199220963,
           "uav_compute_energy": 0.0,
           "ue_local_energy": 0.0,
           "ue_uplink_energy": 0.01913648243973894,
@@ -3637,87 +3637,87 @@
           "finalized_tasks": 2.0,
           "completed_tasks": 2.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.29074414717437147,
+          "average_latency": 0.2906953859689767,
           "cache_hit_rate": 0.5,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 10.143373325965728,
-          "uav_move_energy": 9.821776238244965,
+          "total_energy": 4.680634066817418,
+          "uav_move_energy": 4.35913832420318,
           "uav_compute_energy": 0.13182283218744337,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.06707221878356483,
+          "ue_uplink_energy": 0.06697087367704027,
           "bs_compute_energy": 0.10770203674975484,
           "relay_fetch_energy": 0.015000000000000001
         }
       ],
       "energy_breakdown": {
         "episode_totals": {
-          "uav_move_energy": 89.35990793971247,
+          "uav_move_energy": 36.07083585464903,
           "uav_compute_energy": 1.3320378799513903,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.5083888711521221,
+          "ue_uplink_energy": 0.5080767078279579,
           "bs_compute_energy": 1.036418888997007,
           "relay_fetch_energy": 0.1640784158649256
         },
         "step_breakdown": [
           {
             "step": 1,
-            "uav_move_energy": 11.554193419876299,
+            "uav_move_energy": 4.833660829450124,
             "uav_compute_energy": 0.1377567788386089,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.1024929105439504,
+            "ue_uplink_energy": 0.10246682834149491,
             "bs_compute_energy": 0.26537021927412713,
             "relay_fetch_energy": 0.013000000000000001
           },
           {
             "step": 2,
-            "uav_move_energy": 15.678661475404489,
+            "uav_move_energy": 5.8873356138549084,
             "uav_compute_energy": 0.4435449997588702,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.13292848662153617,
+            "ue_uplink_energy": 0.13276487969661283,
             "bs_compute_energy": 0.19911116108362537,
             "relay_fetch_energy": 0.0910157310804247
           },
           {
             "step": 3,
-            "uav_move_energy": 11.022827163080372,
+            "uav_move_energy": 4.535006236748089,
             "uav_compute_energy": 0.2860279478232742,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.05775097470487554,
+            "ue_uplink_energy": 0.057721902908106644,
             "bs_compute_energy": 0.1393193205936624,
             "relay_fetch_energy": 0.025062684784500893
           },
           {
             "step": 4,
-            "uav_move_energy": 10.456073143710963,
+            "uav_move_energy": 4.105877204743666,
             "uav_compute_energy": 0.0988548620618647,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.03698121135680105,
+            "ue_uplink_energy": 0.036975543104276476,
             "bs_compute_energy": 0.0920318059126927,
             "relay_fetch_energy": 0.009000000000000001
           },
           {
             "step": 5,
-            "uav_move_energy": 10.500110922871933,
+            "uav_move_energy": 3.7801842845049327,
             "uav_compute_energy": 0.08368539136233742,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.04220021675367742,
+            "ue_uplink_energy": 0.0422134044191686,
             "bs_compute_energy": 0.05079020945747598,
             "relay_fetch_energy": 0.0
           },
           {
             "step": 6,
-            "uav_move_energy": 9.958097768454955,
+            "uav_move_energy": 3.8200441619231724,
             "uav_compute_energy": 0.15034506791899183,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.049826369947977775,
+            "ue_uplink_energy": 0.04982679324151924,
             "bs_compute_energy": 0.05006112206722062,
             "relay_fetch_energy": 0.011000000000000001
           },
           {
             "step": 7,
-            "uav_move_energy": 10.368167808068499,
+            "uav_move_energy": 4.749589199220963,
             "uav_compute_energy": 0.0,
             "ue_local_energy": 0.0,
             "ue_uplink_energy": 0.01913648243973894,
@@ -3726,10 +3726,10 @@
           },
           {
             "step": 8,
-            "uav_move_energy": 9.821776238244965,
+            "uav_move_energy": 4.35913832420318,
             "uav_compute_energy": 0.13182283218744337,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.06707221878356483,
+            "ue_uplink_energy": 0.06697087367704027,
             "bs_compute_energy": 0.10770203674975484,
             "relay_fetch_energy": 0.015000000000000001
           }
@@ -3915,7 +3915,7 @@
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
               "backlog_load": 0,
-              "coverage_load": 3
+              "coverage_load": 4
             },
             {
               "uav_id": 2,
@@ -3938,7 +3938,7 @@
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
               "backlog_load": 0,
-              "coverage_load": 2
+              "coverage_load": 3
             },
             {
               "uav_id": 1,
@@ -3970,7 +3970,7 @@
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
               "backlog_load": 0,
-              "coverage_load": 2
+              "coverage_load": 3
             },
             {
               "uav_id": 1,
@@ -3979,7 +3979,7 @@
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
               "backlog_load": 0,
-              "coverage_load": 2
+              "coverage_load": 3
             },
             {
               "uav_id": 2,
@@ -4199,26 +4199,26 @@
       "assignment_rule": "nearest_uav",
       "global_metrics": {
         "completion_rate": 1.0,
-        "average_latency": 0.38468998977550467,
-        "total_energy": 96.77403090801975,
-        "cache_hit_rate": 0.7058823529411765,
+        "average_latency": 0.3805849971477549,
+        "total_energy": 41.181085891131815,
+        "cache_hit_rate": 0.6764705882352942,
         "fairness_user_completion": 1.0,
-        "fairness_uav_load": 0.8852459016393442,
+        "fairness_uav_load": 0.9473684210526315,
         "deadline_violation_rate": 0.0,
         "reliability_violation_rate": 0.0,
-        "uav_move_energy": 91.07661396552186,
-        "uav_compute_energy": 3.0847132355974796,
+        "uav_move_energy": 35.479920711575424,
+        "uav_compute_energy": 3.0688449492495153,
         "ue_local_energy": 0.0,
-        "ue_uplink_energy": 0.8310343326204027,
-        "bs_compute_energy": 1.5030033599619854,
-        "relay_fetch_energy": 0.2786660143180279
+        "ue_uplink_energy": 0.8202338612911575,
+        "bs_compute_energy": 1.512524331770764,
+        "relay_fetch_energy": 0.2995620372449569
       },
       "per_uav_metrics": [
         {
           "agent_id": "uav_0",
           "uav_id": 0,
           "served_task_count_total": 7,
-          "assigned_task_count_total": 1,
+          "assigned_task_count_total": 9,
           "completed_task_count_total": 7,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
@@ -4230,8 +4230,8 @@
           "cumulative_compute_queue_delay": 0.0,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 0,
-          "remaining_energy_j": 4980.990148453553,
-          "energy_used_j": 19.009851546446953,
+          "remaining_energy_j": 4986.605682311191,
+          "energy_used_j": 13.39431768880877,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             0,
@@ -4239,8 +4239,8 @@
             2
           ],
           "cache_scores": {
-            "0": 1e-06,
-            "1": 1.5861111111111111e-06,
+            "0": 2.039285714285714e-06,
+            "1": 1e-06,
             "2": 2.184431818181818e-06,
             "4": 1e-06
           }
@@ -4248,9 +4248,9 @@
         {
           "agent_id": "uav_1",
           "uav_id": 1,
-          "served_task_count_total": 3,
+          "served_task_count_total": 4,
           "assigned_task_count_total": 2,
-          "completed_task_count_total": 3,
+          "completed_task_count_total": 4,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 0,
@@ -4261,47 +4261,49 @@
           "cumulative_compute_queue_delay": 0.0,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 0,
-          "remaining_energy_j": 4956.167670677804,
-          "energy_used_j": 43.83232932219562,
-          "cache_usage_ratio": 0.6666666666666666,
+          "remaining_energy_j": 4986.155903149029,
+          "energy_used_j": 13.844096850971255,
+          "cache_usage_ratio": 1.0,
           "cache_services": [
-            3,
+            1,
+            2,
             4
           ],
           "cache_scores": {
-            "3": 1.098076923076923e-06,
+            "1": 1.5861111111111111e-06,
+            "2": 1e-06,
             "4": 1e-06
           }
         },
         {
           "agent_id": "uav_2",
           "uav_id": 2,
-          "served_task_count_total": 8,
-          "assigned_task_count_total": 17,
-          "completed_task_count_total": 8,
+          "served_task_count_total": 7,
+          "assigned_task_count_total": 11,
+          "completed_task_count_total": 7,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 0,
           "current_compute_queue_delay": 0.0,
           "current_backlog_load": 0,
-          "current_coverage_load": 3,
+          "current_coverage_load": 4,
           "cumulative_tx_queue_delay": 0.0,
           "cumulative_compute_queue_delay": 0.0,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 0,
-          "remaining_energy_j": 4968.680853667524,
-          "energy_used_j": 31.31914633247561,
+          "remaining_energy_j": 4988.689648878956,
+          "energy_used_j": 11.310351121043823,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             0,
             1,
-            2
+            3
           ],
           "cache_scores": {
-            "0": 4.963383928571429e-06,
+            "0": 3.432678571428571e-06,
             "1": 1e-06,
-            "2": 1.2977272727272728e-06,
-            "4": 1e-06
+            "2": 1e-06,
+            "3": 1.098076923076923e-06
           }
         }
       ],
@@ -4670,16 +4672,16 @@
           "finalized_tasks": 2.0,
           "completed_tasks": 2.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.19501069789141331,
+          "average_latency": 0.1950257706947553,
           "cache_hit_rate": 0.5,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 14.436194705154762,
-          "uav_move_energy": 14.225320208700872,
+          "total_energy": 5.724641220293905,
+          "uav_move_energy": 5.513752700371077,
           "uav_compute_energy": 0.11008175881648763,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.02893549131883166,
+          "ue_uplink_energy": 0.02894951478777012,
           "bs_compute_energy": 0.060857246318569896,
           "relay_fetch_energy": 0.011000000000000001
         },
@@ -4689,16 +4691,16 @@
           "finalized_tasks": 4.0,
           "completed_tasks": 4.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.36499171893572085,
+          "average_latency": 0.36493661313218323,
           "cache_hit_rate": 0.5,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 15.91452275595552,
-          "uav_move_energy": 15.28682524534481,
+          "total_energy": 5.313828404036925,
+          "uav_move_energy": 4.686311419606133,
           "uav_compute_energy": 0.2663118119304519,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.08788593169681251,
+          "ue_uplink_energy": 0.08770540551689428,
           "bs_compute_energy": 0.2412077968479262,
           "relay_fetch_energy": 0.03229197013551942
         },
@@ -4708,16 +4710,16 @@
           "finalized_tasks": 3.0,
           "completed_tasks": 3.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.2660334675929099,
+          "average_latency": 0.2659586440250645,
           "cache_hit_rate": 1.0,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 13.596420036615415,
-          "uav_move_energy": 13.231565881483771,
+          "total_energy": 5.061450744038236,
+          "uav_move_energy": 4.696776165469422,
           "uav_compute_energy": 0.18561310722780888,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.06721677949648114,
+          "ue_uplink_energy": 0.06703720293365205,
           "bs_compute_energy": 0.11202426840735322,
           "relay_fetch_energy": 0.0
         },
@@ -4727,16 +4729,16 @@
           "finalized_tasks": 3.0,
           "completed_tasks": 3.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.3691246377103445,
+          "average_latency": 0.36903200657589,
           "cache_hit_rate": 1.0,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 13.532350008571642,
-          "uav_move_energy": 13.05130559548795,
+          "total_energy": 4.995600632218119,
+          "uav_move_energy": 4.514778533857117,
           "uav_compute_energy": 0.21307064849188884,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.08371298042496557,
+          "ue_uplink_energy": 0.08349066570227483,
           "bs_compute_energy": 0.1842607841668379,
           "relay_fetch_energy": 0.0
         },
@@ -4746,18 +4748,18 @@
           "finalized_tasks": 3.0,
           "completed_tasks": 3.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.3759287387298273,
+          "average_latency": 0.3601869515632978,
           "cache_hit_rate": 0.6666666666666666,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 12.059726560576518,
-          "uav_move_energy": 11.458781743104598,
+          "total_energy": 5.10100696047577,
+          "uav_move_energy": 4.52092364002994,
           "uav_compute_energy": 0.38767458438578195,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.09212724419920906,
+          "ue_uplink_energy": 0.09210242988360054,
           "bs_compute_energy": 0.08930630617644716,
-          "relay_fetch_energy": 0.03183668271048118
+          "relay_fetch_energy": 0.011000000000000001
         },
         {
           "step": 6,
@@ -4765,18 +4767,18 @@
           "finalized_tasks": 7.0,
           "completed_tasks": 7.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.4636554578588904,
+          "average_latency": 0.46509632363107717,
           "cache_hit_rate": 0.5714285714285714,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 9.736448923669657,
-          "uav_move_energy": 8.476877996516981,
+          "total_energy": 5.780331613550173,
+          "uav_move_energy": 4.4766121586841034,
           "uav_compute_energy": 0.7384237519638268,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.1578102006668447,
+          "ue_uplink_energy": 0.1576234763906669,
           "bs_compute_energy": 0.30866341825130333,
-          "relay_fetch_energy": 0.05467355627070117
+          "relay_fetch_energy": 0.0990088082602719
         },
         {
           "step": 7,
@@ -4784,18 +4786,18 @@
           "finalized_tasks": 7.0,
           "completed_tasks": 7.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.4513574437867208,
+          "average_latency": 0.4353822644558294,
           "cache_hit_rate": 0.7142857142857143,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 9.58303082483998,
-          "uav_move_energy": 8.303834881162397,
-          "uav_compute_energy": 0.7049892112568152,
+          "total_energy": 5.033651137570083,
+          "uav_move_energy": 3.7979981274839862,
+          "uav_compute_energy": 0.6891209249088511,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.17724704958384507,
-          "bs_compute_energy": 0.2825878747971203,
-          "relay_fetch_energy": 0.1143718080398039
+          "ue_uplink_energy": 0.16715269453697365,
+          "bs_compute_energy": 0.29210884660589875,
+          "relay_fetch_energy": 0.0872705440343732
         },
         {
           "step": 8,
@@ -4803,101 +4805,101 @@
           "finalized_tasks": 5.0,
           "completed_tasks": 5.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.3582241074445854,
-          "cache_hit_rate": 0.8,
+          "average_latency": 0.3602417972008645,
+          "cache_hit_rate": 0.6,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 7.915337092636268,
-          "uav_move_energy": 7.042102413720487,
+          "total_energy": 4.1705751789486065,
+          "uav_move_energy": 3.2727679660736437,
           "uav_compute_energy": 0.4785483615244182,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.136098655233413,
+          "ue_uplink_energy": 0.13617247153932505,
           "bs_compute_energy": 0.2240956649964274,
-          "relay_fetch_energy": 0.03449199716152225
+          "relay_fetch_energy": 0.05899071481479237
         }
       ],
       "energy_breakdown": {
         "episode_totals": {
-          "uav_move_energy": 91.07661396552186,
-          "uav_compute_energy": 3.0847132355974796,
+          "uav_move_energy": 35.479920711575424,
+          "uav_compute_energy": 3.0688449492495153,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 0.8310343326204027,
-          "bs_compute_energy": 1.5030033599619854,
-          "relay_fetch_energy": 0.2786660143180279
+          "ue_uplink_energy": 0.8202338612911575,
+          "bs_compute_energy": 1.512524331770764,
+          "relay_fetch_energy": 0.2995620372449569
         },
         "step_breakdown": [
           {
             "step": 1,
-            "uav_move_energy": 14.225320208700872,
+            "uav_move_energy": 5.513752700371077,
             "uav_compute_energy": 0.11008175881648763,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.02893549131883166,
+            "ue_uplink_energy": 0.02894951478777012,
             "bs_compute_energy": 0.060857246318569896,
             "relay_fetch_energy": 0.011000000000000001
           },
           {
             "step": 2,
-            "uav_move_energy": 15.28682524534481,
+            "uav_move_energy": 4.686311419606133,
             "uav_compute_energy": 0.2663118119304519,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.08788593169681251,
+            "ue_uplink_energy": 0.08770540551689428,
             "bs_compute_energy": 0.2412077968479262,
             "relay_fetch_energy": 0.03229197013551942
           },
           {
             "step": 3,
-            "uav_move_energy": 13.231565881483771,
+            "uav_move_energy": 4.696776165469422,
             "uav_compute_energy": 0.18561310722780888,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.06721677949648114,
+            "ue_uplink_energy": 0.06703720293365205,
             "bs_compute_energy": 0.11202426840735322,
             "relay_fetch_energy": 0.0
           },
           {
             "step": 4,
-            "uav_move_energy": 13.05130559548795,
+            "uav_move_energy": 4.514778533857117,
             "uav_compute_energy": 0.21307064849188884,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.08371298042496557,
+            "ue_uplink_energy": 0.08349066570227483,
             "bs_compute_energy": 0.1842607841668379,
             "relay_fetch_energy": 0.0
           },
           {
             "step": 5,
-            "uav_move_energy": 11.458781743104598,
+            "uav_move_energy": 4.52092364002994,
             "uav_compute_energy": 0.38767458438578195,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.09212724419920906,
+            "ue_uplink_energy": 0.09210242988360054,
             "bs_compute_energy": 0.08930630617644716,
-            "relay_fetch_energy": 0.03183668271048118
+            "relay_fetch_energy": 0.011000000000000001
           },
           {
             "step": 6,
-            "uav_move_energy": 8.476877996516981,
+            "uav_move_energy": 4.4766121586841034,
             "uav_compute_energy": 0.7384237519638268,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.1578102006668447,
+            "ue_uplink_energy": 0.1576234763906669,
             "bs_compute_energy": 0.30866341825130333,
-            "relay_fetch_energy": 0.05467355627070117
+            "relay_fetch_energy": 0.0990088082602719
           },
           {
             "step": 7,
-            "uav_move_energy": 8.303834881162397,
-            "uav_compute_energy": 0.7049892112568152,
+            "uav_move_energy": 3.7979981274839862,
+            "uav_compute_energy": 0.6891209249088511,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.17724704958384507,
-            "bs_compute_energy": 0.2825878747971203,
-            "relay_fetch_energy": 0.1143718080398039
+            "ue_uplink_energy": 0.16715269453697365,
+            "bs_compute_energy": 0.29210884660589875,
+            "relay_fetch_energy": 0.0872705440343732
           },
           {
             "step": 8,
-            "uav_move_energy": 7.042102413720487,
+            "uav_move_energy": 3.2727679660736437,
             "uav_compute_energy": 0.4785483615244182,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 0.136098655233413,
+            "ue_uplink_energy": 0.13617247153932505,
             "bs_compute_energy": 0.2240956649964274,
-            "relay_fetch_energy": 0.03449199716152225
+            "relay_fetch_energy": 0.05899071481479237
           }
         ]
       },
@@ -4912,7 +4914,7 @@
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
               "backlog_load": 0,
-              "coverage_load": 3
+              "coverage_load": 4
             },
             {
               "uav_id": 1,
@@ -4985,7 +4987,7 @@
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
               "backlog_load": 0,
-              "coverage_load": 3
+              "coverage_load": 2
             },
             {
               "uav_id": 2,
@@ -5026,7 +5028,7 @@
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
               "backlog_load": 0,
-              "coverage_load": 3
+              "coverage_load": 4
             }
           ]
         },
@@ -5058,7 +5060,7 @@
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
               "backlog_load": 0,
-              "coverage_load": 3
+              "coverage_load": 4
             }
           ]
         },
@@ -5090,7 +5092,7 @@
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
               "backlog_load": 0,
-              "coverage_load": 3
+              "coverage_load": 4
             }
           ]
         },
@@ -5113,7 +5115,7 @@
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
               "backlog_load": 0,
-              "coverage_load": 2
+              "coverage_load": 3
             },
             {
               "uav_id": 2,
@@ -5122,7 +5124,7 @@
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
               "backlog_load": 0,
-              "coverage_load": 3
+              "coverage_load": 4
             }
           ]
         },
@@ -5154,7 +5156,7 @@
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
               "backlog_load": 0,
-              "coverage_load": 3
+              "coverage_load": 4
             }
           ]
         }
@@ -5194,7 +5196,7 @@
         },
         {
           "step": 6,
-          "uav_id": 2,
+          "uav_id": 0,
           "action": "admit",
           "service_type": 4,
           "value_score": 1e-06,
@@ -5202,7 +5204,7 @@
         },
         {
           "step": 6,
-          "uav_id": 0,
+          "uav_id": 1,
           "action": "admit",
           "service_type": 1,
           "value_score": 1e-06,
@@ -5210,7 +5212,7 @@
         },
         {
           "step": 6,
-          "uav_id": 1,
+          "uav_id": 2,
           "action": "admit",
           "service_type": 3,
           "value_score": 1e-06,
@@ -5218,17 +5220,17 @@
         },
         {
           "step": 7,
-          "uav_id": 0,
+          "uav_id": 2,
           "action": "evict",
-          "service_type": 0,
+          "service_type": 2,
           "value_score": 1e-06,
           "reason": "low_value"
         },
         {
           "step": 7,
-          "uav_id": 0,
+          "uav_id": 2,
           "action": "admit",
-          "service_type": 4,
+          "service_type": 1,
           "value_score": 1e-06,
           "reason": "opportunistic_admission"
         },
@@ -5242,7 +5244,7 @@
         },
         {
           "step": 8,
-          "uav_id": 2,
+          "uav_id": 0,
           "action": "evict",
           "service_type": 4,
           "value_score": 1e-06,
@@ -5250,7 +5252,7 @@
         },
         {
           "step": 8,
-          "uav_id": 2,
+          "uav_id": 0,
           "action": "admit",
           "service_type": 1,
           "value_score": 1e-06,
@@ -5258,19 +5260,11 @@
         },
         {
           "step": 8,
-          "uav_id": 0,
-          "action": "evict",
-          "service_type": 4,
-          "value_score": 1e-06,
-          "reason": "refresh"
-        },
-        {
-          "step": 8,
-          "uav_id": 0,
+          "uav_id": 1,
           "action": "admit",
-          "service_type": 0,
+          "service_type": 2,
           "value_score": 1e-06,
-          "reason": "refresh"
+          "reason": "opportunistic_admission"
         }
       ],
       "task_lifecycle_counts": [
