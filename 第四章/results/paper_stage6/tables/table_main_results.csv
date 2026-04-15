@@ -1,11 +1,14 @@
 metric,num_seeds,delta_mean,delta_std,delta_mean_std
 average_latency,3,0.0,0.0,0.0000 +/- 0.0000
+average_latency_completed,3,0.0,0.0,0.0000 +/- 0.0000
+average_latency_finalized,3,0.0,0.0,0.0000 +/- 0.0000
 bs_compute_energy,3,0.0,0.0,0.0000 +/- 0.0000
 cache_hit_rate,3,0.0,0.0,0.0000 +/- 0.0000
 completion_rate,3,0.0,0.0,0.0000 +/- 0.0000
 deadline_violation_rate,3,0.0,0.0,0.0000 +/- 0.0000
-fairness_uav_load,3,0.0,0.0,0.0000 +/- 0.0000
+fairness_uav_load,3,,,null
 fairness_user_completion,3,0.0,0.0,0.0000 +/- 0.0000
+latency_per_generated_task,3,0.0,0.0,0.0000 +/- 0.0000
 relay_fetch_energy,3,0.0,0.0,0.0000 +/- 0.0000
 reliability_violation_rate,3,0.0,0.0,0.0000 +/- 0.0000
 total_energy,3,0.0,0.0,0.0000 +/- 0.0000

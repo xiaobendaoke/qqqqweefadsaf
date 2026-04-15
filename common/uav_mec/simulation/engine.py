@@ -27,6 +27,24 @@ class StepExecution:
     task_lifecycle_counts: dict[str, int]
 
 
+def _finalize_remaining_tasks_at_episode_end(
+    *,
+    pending_tasks: list[Task],
+    expired_tasks: list[Task],
+    episode_end_time: float,
+) -> list[Task]:
+    forced_finalized: list[Task] = []
+    for task in list(pending_tasks):
+        pending_tasks.remove(task)
+        task.status = "expired"
+        task.completed = False
+        if task.total_latency <= 0.0:
+            task.total_latency = max(0.0, episode_end_time - task.arrival_time)
+        forced_finalized.append(task)
+        expired_tasks.append(task)
+    return forced_finalized
+
+
 def _refresh_runtime_counters(
     *,
     config: SystemConfig,
@@ -188,6 +206,10 @@ def run_step(
         if decision.assigned_uav_id is not None:
             executed_uav = uav_lookup[decision.assigned_uav_id]
             executed_uav.remaining_energy_j = max(0.0, executed_uav.remaining_energy_j - decision.uav_compute_energy)
+            for source_uav_id, relay_energy in (decision.uav_tx_energy_by_id or {}).items():
+                if source_uav_id in uav_lookup:
+                    source_uav = uav_lookup[source_uav_id]
+                    source_uav.remaining_energy_j = max(0.0, source_uav.remaining_energy_j - float(relay_energy))
             if decision.cache_hit:
                 record_service_request(executed_uav, task.service_type, config=config, service_catalog=service_catalog)
             else:
@@ -246,6 +268,15 @@ def run_step(
                 task.total_latency = max(0.0, next_time - task.arrival_time)
             expired_tasks.append(task)
         finalized_tasks.append(task)
+
+    if current_step + 1 >= config.steps_per_episode and pending_tasks:
+        finalized_tasks.extend(
+            _finalize_remaining_tasks_at_episode_end(
+                pending_tasks=pending_tasks,
+                expired_tasks=expired_tasks,
+                episode_end_time=next_time,
+            )
+        )
 
     _refresh_runtime_counters(
         config=config,

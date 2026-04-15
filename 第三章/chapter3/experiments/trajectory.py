@@ -84,10 +84,15 @@ def export_trajectory_artifacts(
 
     payload = recorder.build_payload(summary_metrics=summary_metrics)
     write_json(json_path, payload)
-    _plot_trajectory(payload=payload, output_path=png_path)
+    png_output = ""
+    try:
+        _plot_trajectory(payload=payload, output_path=png_path)
+        png_output = str(png_path)
+    except ModuleNotFoundError:
+        png_output = ""
     return {
         "json": str(json_path),
-        "png": str(png_path),
+        "png": png_output,
     }
 
 

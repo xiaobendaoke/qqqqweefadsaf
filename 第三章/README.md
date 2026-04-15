@@ -47,3 +47,9 @@
 - `compare-ch4` 持续通过，`第四章(NUM_UAVS=1)` 仍可退化为第三章
 - 第三章已补入 MPC shell，不再只有 heuristic 单一路径
 - 第三章普通实验会导出 UAV/UE 位置轨迹，便于论文中补充单 UAV 路径图
+
+## 指标口径说明
+
+- `cache_hit_rate` 现在只统计 UAV 执行分支上的服务缓存命中；`local` 与 `BS` 分支不再记为缓存命中。
+- episode 结束时若仍有未完成任务，这些任务会被统一转为 `expired` 并计入最终指标，避免 `completion_rate / average_latency / violation_rate` 漏统终局 pending 任务。
+- 若本机缺少 `matplotlib`，轨迹导出仍会稳定写出 `json`，但 `png` 会被跳过。

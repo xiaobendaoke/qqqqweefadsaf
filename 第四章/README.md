@@ -56,6 +56,12 @@ python -m venv .venv
 
 当目标 UAV 未缓存所需服务时，环境会在 `BS` 与其他已缓存该服务的 UAV 之间比较 fetch 时延，并选择更优的 service fetch 来源。
 
+## 指标口径说明
+
+- `cache_hit_rate` 只统计 UAV 执行链路上的服务缓存命中；`local` 与 `BS` 分支不计入缓存命中。
+- episode 到达终局时，剩余未完成任务会被统一转为 `expired` 并纳入最终 episode 指标，避免 summary 漏掉终局 pending 任务。
+- 协同中继与 peer fetch 的发射能耗会回写到对应发送 UAV 的剩余能量状态中，因此多 UAV 观测里的能量状态与实际能耗链路保持一致。
+
 ## 结果目录说明
 
 - `results/paper_stage5/`: 第五阶段单组主实验、调参与最小消融结果

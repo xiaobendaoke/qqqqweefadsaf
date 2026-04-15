@@ -43,6 +43,7 @@ class OffloadingDecision:
     relay_wait: float = 0.0
     relay_delay: float = 0.0
     completion_time: float = 0.0
+    uav_tx_energy_by_id: dict[int, float] | None = None
     cache_events: list[dict[str, object]] | None = None
 
 
@@ -125,14 +126,14 @@ def _estimate_fetch(
     tdma_queue: TDMAQueue,
     current_time: float,
     task: Task,
-) -> tuple[bool, float, float, str | None, float]:
+) -> tuple[bool, float, float, str | None, float, float]:
     if cache_lookup(candidate_uav, task.service_type):
-        return True, 0.0, 0.0, "local_cache", 0.0
+        return True, 0.0, 0.0, "local_cache", 0.0, 1.0
 
     fetch_bits = service_catalog.get_fetch_size_bits(task.service_type)
-    best = (float("inf"), float("inf"), "bs", 0.0)
+    best = (float("inf"), float("inf"), "bs", 0.0, 0.0)
 
-    bs_delay, bs_wait, _, bs_energy = _schedule_serial_link(
+    bs_delay, bs_wait, bs_prob, bs_energy = _schedule_serial_link(
         sender_position=bs.position,
         receiver_position=candidate_uav.position,
         sender_height=bs.height,
@@ -144,12 +145,12 @@ def _estimate_fetch(
         current_time=current_time,
         queue_id=f"fetch:bs->uav:{candidate_uav.uav_id}",
     )
-    best = (bs_wait + bs_delay, bs_wait, "bs", bs_energy)
+    best = (bs_wait + bs_delay, bs_wait, "bs", bs_energy, bs_prob)
 
     for peer_uav in all_uavs:
         if peer_uav.uav_id == candidate_uav.uav_id or not cache_lookup(peer_uav, task.service_type):
             continue
-        peer_delay, peer_wait, _, peer_energy = _schedule_serial_link(
+        peer_delay, peer_wait, peer_prob, peer_energy = _schedule_serial_link(
             sender_position=peer_uav.position,
             receiver_position=candidate_uav.position,
             sender_height=peer_uav.altitude,
@@ -161,12 +162,12 @@ def _estimate_fetch(
             current_time=current_time,
             queue_id=f"fetch:uav:{peer_uav.uav_id}->uav:{candidate_uav.uav_id}",
         )
-        candidate = (peer_wait + peer_delay, peer_wait, f"uav:{peer_uav.uav_id}", peer_energy)
+        candidate = (peer_wait + peer_delay, peer_wait, f"uav:{peer_uav.uav_id}", peer_energy, peer_prob)
         if candidate[0] < best[0]:
             best = candidate
-    fetch_total, fetch_wait, fetch_source, relay_energy = best
+    fetch_total, fetch_wait, fetch_source, relay_energy, fetch_probability = best
     fetch_delay = fetch_total - fetch_wait
-    return False, fetch_wait, fetch_delay, fetch_source, relay_energy
+    return False, fetch_wait, fetch_delay, fetch_source, relay_energy, fetch_probability
 
 
 def decide_offloading(
@@ -189,7 +190,7 @@ def decide_offloading(
         target="local",
         associated_uav_id=associated_uav.uav_id if associated_uav is not None else None,
         assigned_uav_id=None,
-        cache_hit=True,
+        cache_hit=False,
         queue_delay=0.0,
         fetch_wait_delay=0.0,
         fetch_delay=0.0,
@@ -227,6 +228,7 @@ def decide_offloading(
         total_relay_energy = 0.0
         probability = tx_prob
         tx_end_time = current_time + ue_tx_wait + ue_tx_delay
+        relay_energy_by_uav: dict[int, float] = {}
 
         if collaborator_from is not None:
             relay_delay, relay_wait, relay_prob, relay_energy = _schedule_serial_link(
@@ -242,10 +244,11 @@ def decide_offloading(
                 queue_id=f"relay:uav:{collaborator_from.uav_id}->uav:{server_uav.uav_id}",
             )
             total_relay_energy += relay_energy
+            relay_energy_by_uav[collaborator_from.uav_id] = relay_energy_by_uav.get(collaborator_from.uav_id, 0.0) + relay_energy
             probability = min(probability, relay_prob)
             tx_end_time = tx_end_time + relay_wait + relay_delay
 
-        cache_hit, fetch_wait_delay, fetch_delay, fetch_source, fetch_energy = _estimate_fetch(
+        cache_hit, fetch_wait_delay, fetch_delay, fetch_source, fetch_energy, fetch_probability = _estimate_fetch(
             candidate_uav=server_uav,
             all_uavs=all_uavs,
             bs=bs,
@@ -255,6 +258,10 @@ def decide_offloading(
             current_time=tx_end_time,
             task=task,
         )
+        probability = min(probability, fetch_probability)
+        if fetch_source is not None and fetch_source.startswith("uav:"):
+            peer_uav_id = int(fetch_source.split(":", 1)[1])
+            relay_energy_by_uav[peer_uav_id] = relay_energy_by_uav.get(peer_uav_id, 0.0) + fetch_energy
         compute_delay, compute_wait_delay, completion_time = _schedule_compute(
             current_time=tx_end_time + fetch_wait_delay + fetch_delay,
             cpu_cycles=task.cpu_cycles,
@@ -291,6 +298,7 @@ def decide_offloading(
             relay_wait=relay_wait,
             relay_delay=relay_delay,
             completion_time=completion_time,
+            uav_tx_energy_by_id=relay_energy_by_uav,
             cache_events=[],
         )
 
@@ -326,7 +334,7 @@ def decide_offloading(
         target="bs",
         associated_uav_id=associated_uav.uav_id if associated_uav is not None else None,
         assigned_uav_id=None,
-        cache_hit=True,
+        cache_hit=False,
         queue_delay=bs_queue_delay,
         fetch_wait_delay=0.0,
         fetch_delay=0.0,

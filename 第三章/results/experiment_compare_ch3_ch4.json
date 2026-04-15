@@ -1,68 +1,68 @@
 {
-  "seed": 42,
+  "seed": 62,
   "episodes": 1,
   "chapter3_metrics": {
     "completion_rate": 1.0,
-    "average_latency": 0.41219431480197566,
-    "average_latency_finalized": 0.41219431480197566,
-    "average_latency_completed": 0.41219431480197566,
-    "latency_per_generated_task": 0.41219431480197566,
-    "total_energy": 3.239485435483747,
-    "cache_hit_rate": 0.8095238095238095,
+    "average_latency": 0.3193284507413938,
+    "average_latency_finalized": 0.3193284507413938,
+    "average_latency_completed": 0.3193284507413938,
+    "latency_per_generated_task": 0.3193284507413938,
+    "total_energy": 1.6763485955691262,
+    "cache_hit_rate": 0.0,
     "fairness_user_completion": 1.0,
     "fairness_uav_load": null,
     "deadline_violation_rate": 0.0,
     "reliability_violation_rate": 0.0,
     "uav_move_energy": 0.0,
-    "uav_compute_energy": 0.9711504892282626,
+    "uav_compute_energy": 0.3450707697683244,
     "ue_local_energy": 0.0,
-    "ue_uplink_energy": 0.5800426266927109,
-    "bs_compute_energy": 1.6402923195627732,
-    "relay_fetch_energy": 0.048
+    "ue_uplink_energy": 0.30681097679742814,
+    "bs_compute_energy": 1.0084668490033735,
+    "relay_fetch_energy": 0.016
   },
   "chapter4_metrics": {
     "completion_rate": 1.0,
-    "average_latency": 0.41219431480197566,
-    "average_latency_finalized": 0.41219431480197566,
-    "average_latency_completed": 0.41219431480197566,
-    "latency_per_generated_task": 0.41219431480197566,
-    "total_energy": 3.239485435483747,
-    "cache_hit_rate": 0.8095238095238095,
+    "average_latency": 0.3193284507413938,
+    "average_latency_finalized": 0.3193284507413938,
+    "average_latency_completed": 0.3193284507413938,
+    "latency_per_generated_task": 0.3193284507413938,
+    "total_energy": 1.6763485955691262,
+    "cache_hit_rate": 0.0,
     "fairness_user_completion": 1.0,
     "fairness_uav_load": null,
     "deadline_violation_rate": 0.0,
     "reliability_violation_rate": 0.0,
     "uav_move_energy": 0.0,
-    "uav_compute_energy": 0.9711504892282626,
+    "uav_compute_energy": 0.3450707697683244,
     "ue_local_energy": 0.0,
-    "ue_uplink_energy": 0.5800426266927109,
-    "bs_compute_energy": 1.6402923195627732,
-    "relay_fetch_energy": 0.048
+    "ue_uplink_energy": 0.30681097679742814,
+    "bs_compute_energy": 1.0084668490033735,
+    "relay_fetch_energy": 0.016
   },
   "comparison": {
     "average_latency": {
-      "left": 0.41219431480197566,
-      "right": 0.41219431480197566,
+      "left": 0.3193284507413938,
+      "right": 0.3193284507413938,
       "delta": 0.0
     },
     "average_latency_completed": {
-      "left": 0.41219431480197566,
-      "right": 0.41219431480197566,
+      "left": 0.3193284507413938,
+      "right": 0.3193284507413938,
       "delta": 0.0
     },
     "average_latency_finalized": {
-      "left": 0.41219431480197566,
-      "right": 0.41219431480197566,
+      "left": 0.3193284507413938,
+      "right": 0.3193284507413938,
       "delta": 0.0
     },
     "bs_compute_energy": {
-      "left": 1.6402923195627732,
-      "right": 1.6402923195627732,
+      "left": 1.0084668490033735,
+      "right": 1.0084668490033735,
       "delta": 0.0
     },
     "cache_hit_rate": {
-      "left": 0.8095238095238095,
-      "right": 0.8095238095238095,
+      "left": 0.0,
+      "right": 0.0,
       "delta": 0.0
     },
     "completion_rate": {
@@ -86,13 +86,13 @@
       "delta": 0.0
     },
     "latency_per_generated_task": {
-      "left": 0.41219431480197566,
-      "right": 0.41219431480197566,
+      "left": 0.3193284507413938,
+      "right": 0.3193284507413938,
       "delta": 0.0
     },
     "relay_fetch_energy": {
-      "left": 0.048,
-      "right": 0.048,
+      "left": 0.016,
+      "right": 0.016,
       "delta": 0.0
     },
     "reliability_violation_rate": {
@@ -101,13 +101,13 @@
       "delta": 0.0
     },
     "total_energy": {
-      "left": 3.239485435483747,
-      "right": 3.239485435483747,
+      "left": 1.6763485955691262,
+      "right": 1.6763485955691262,
       "delta": 0.0
     },
     "uav_compute_energy": {
-      "left": 0.9711504892282626,
-      "right": 0.9711504892282626,
+      "left": 0.3450707697683244,
+      "right": 0.3450707697683244,
       "delta": 0.0
     },
     "uav_move_energy": {
@@ -121,8 +121,8 @@
       "delta": 0.0
     },
     "ue_uplink_energy": {
-      "left": 0.5800426266927109,
-      "right": 0.5800426266927109,
+      "left": 0.30681097679742814,
+      "right": 0.30681097679742814,
       "delta": 0.0
     }
   }

@@ -81,12 +81,15 @@
   },
   "averaged_metrics": {
     "completion_rate": 0.9025030453889735,
-    "average_latency": 0.862007588423653,
+    "average_latency": 0.9690853663514418,
+    "average_latency_finalized": 0.9690853663514418,
+    "average_latency_completed": 0.9340503097632253,
+    "latency_per_generated_task": 0.9690853663514418,
     "total_energy": 130.28915061912645,
-    "cache_hit_rate": 0.6076556690990216,
+    "cache_hit_rate": 0.21768691243414245,
     "fairness_user_completion": 0.9835838702316548,
     "fairness_uav_load": 0.9995107669419596,
-    "deadline_violation_rate": 0.01217966769923965,
+    "deadline_violation_rate": 0.01591101098282174,
     "reliability_violation_rate": 0.0,
     "uav_move_energy": 113.4,
     "uav_compute_energy": 4.432841724952805,
@@ -101,9 +104,12 @@
       "seed": 62,
       "metrics": {
         "completion_rate": 0.9056603773584906,
-        "average_latency": 0.8284631094967244,
+        "average_latency": 0.9165939501112363,
+        "average_latency_finalized": 0.9165939501112363,
+        "average_latency_completed": 0.8852635035241323,
+        "latency_per_generated_task": 0.9165939501112363,
         "total_energy": 116.37721380327741,
-        "cache_hit_rate": 0.6226415094339622,
+        "cache_hit_rate": 0.24528301886792453,
         "fairness_user_completion": 0.9892826433558,
         "fairness_uav_load": 1.0,
         "deadline_violation_rate": 0.018867924528301886,
@@ -123,9 +129,9 @@
         ],
         "num_generated_tasks": 10,
         "num_completed_tasks": 11,
-        "num_expired_tasks": 0,
-        "num_pending_tasks": 4,
-        "num_cache_hits": 8,
+        "num_expired_tasks": 4,
+        "num_pending_tasks": 0,
+        "num_cache_hits": 4,
         "num_deadline_violations": 0,
         "num_reliability_violations": 0
       }
@@ -135,12 +141,15 @@
       "seed": 63,
       "metrics": {
         "completion_rate": 0.8805970149253731,
-        "average_latency": 0.9199405946220461,
+        "average_latency": 1.0445322167994782,
+        "average_latency_finalized": 1.0445322167994782,
+        "average_latency_completed": 0.9894177280857315,
+        "latency_per_generated_task": 1.0445322167994782,
         "total_energy": 145.3825910714428,
-        "cache_hit_rate": 0.6119402985074627,
+        "cache_hit_rate": 0.1791044776119403,
         "fairness_user_completion": 0.9699220371822669,
         "fairness_uav_load": 0.9990825688073395,
-        "deadline_violation_rate": 0.029850746268656716,
+        "deadline_violation_rate": 0.04477611940298507,
         "reliability_violation_rate": 0.0,
         "uav_move_energy": 126.0,
         "uav_compute_energy": 4.700488308836598,
@@ -157,10 +166,10 @@
         ],
         "num_generated_tasks": 11,
         "num_completed_tasks": 9,
-        "num_expired_tasks": 0,
-        "num_pending_tasks": 6,
-        "num_cache_hits": 8,
-        "num_deadline_violations": 0,
+        "num_expired_tasks": 6,
+        "num_pending_tasks": 0,
+        "num_cache_hits": 5,
+        "num_deadline_violations": 1,
         "num_reliability_violations": 0
       }
     },
@@ -169,9 +178,12 @@
       "seed": 64,
       "metrics": {
         "completion_rate": 0.8793103448275862,
-        "average_latency": 0.7894203256248736,
+        "average_latency": 0.9398806977886272,
+        "average_latency_finalized": 0.9398806977886272,
+        "average_latency_completed": 0.8977721350243661,
+        "latency_per_generated_task": 0.9398806977886272,
         "total_energy": 117.44307639240033,
-        "cache_hit_rate": 0.603448275862069,
+        "cache_hit_rate": 0.22413793103448276,
         "fairness_user_completion": 0.9875928064675796,
         "fairness_uav_load": 0.998960498960499,
         "deadline_violation_rate": 0.0,
@@ -191,9 +203,9 @@
         ],
         "num_generated_tasks": 10,
         "num_completed_tasks": 9,
-        "num_expired_tasks": 0,
-        "num_pending_tasks": 7,
-        "num_cache_hits": 8,
+        "num_expired_tasks": 7,
+        "num_pending_tasks": 0,
+        "num_cache_hits": 3,
         "num_deadline_violations": 0,
         "num_reliability_violations": 0
       }
@@ -203,9 +215,12 @@
       "seed": 65,
       "metrics": {
         "completion_rate": 0.9444444444444444,
-        "average_latency": 0.9102063239509677,
+        "average_latency": 0.9753346007064257,
+        "average_latency_finalized": 0.9753346007064257,
+        "average_latency_completed": 0.9637478724186717,
+        "latency_per_generated_task": 0.9753346007064257,
         "total_energy": 141.9537212093853,
-        "cache_hit_rate": 0.5925925925925926,
+        "cache_hit_rate": 0.2222222222222222,
         "fairness_user_completion": 0.9875379939209726,
         "fairness_uav_load": 1.0,
         "deadline_violation_rate": 0.0,
@@ -225,9 +240,9 @@
         ],
         "num_generated_tasks": 9,
         "num_completed_tasks": 9,
-        "num_expired_tasks": 0,
-        "num_pending_tasks": 3,
-        "num_cache_hits": 5,
+        "num_expired_tasks": 3,
+        "num_pending_tasks": 0,
+        "num_cache_hits": 2,
         "num_deadline_violations": 0,
         "num_reliability_violations": 0
       }
@@ -625,9 +640,12 @@
       "assignment_rule": "least_loaded_uav",
       "global_metrics": {
         "completion_rate": 0.9056603773584906,
-        "average_latency": 0.8284631094967244,
+        "average_latency": 0.9165939501112363,
+        "average_latency_finalized": 0.9165939501112363,
+        "average_latency_completed": 0.8852635035241323,
+        "latency_per_generated_task": 0.9165939501112363,
         "total_energy": 116.37721380327741,
-        "cache_hit_rate": 0.6226415094339622,
+        "cache_hit_rate": 0.24528301886792453,
         "fairness_user_completion": 0.9892826433558,
         "fairness_uav_load": 1.0,
         "deadline_violation_rate": 0.018867924528301886,
@@ -644,20 +662,20 @@
           "agent_id": "uav_0",
           "uav_id": 0,
           "served_task_count_total": 14,
-          "assigned_task_count_total": 29,
+          "assigned_task_count_total": 15,
           "completed_task_count_total": 14,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 1,
           "current_compute_queue_delay": 0.1943771701588055,
-          "current_backlog_load": 1,
+          "current_backlog_load": 0,
           "current_coverage_load": 10,
           "cumulative_tx_queue_delay": 0.0,
           "cumulative_compute_queue_delay": 0.8987373125867317,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 1,
-          "remaining_energy_j": 4947.504885045968,
-          "energy_used_j": 52.49511495403203,
+          "remaining_energy_j": 4947.328349523506,
+          "energy_used_j": 52.671650476493596,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             2,
@@ -675,20 +693,20 @@
           "agent_id": "uav_1",
           "uav_id": 1,
           "served_task_count_total": 14,
-          "assigned_task_count_total": 24,
+          "assigned_task_count_total": 15,
           "completed_task_count_total": 14,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 1,
           "current_compute_queue_delay": 0.3538233915665181,
-          "current_backlog_load": 3,
+          "current_backlog_load": 0,
           "current_coverage_load": 10,
           "cumulative_tx_queue_delay": 0.0,
           "cumulative_compute_queue_delay": 0.9239194384435043,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 1,
-          "remaining_energy_j": 4947.457625947016,
-          "energy_used_j": 52.54237405298409,
+          "remaining_energy_j": 4947.3210746850955,
+          "energy_used_j": 52.67892531490452,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             0,
@@ -1050,7 +1068,8 @@
           "completed_tasks": 6.0,
           "pending_tasks": 0.0,
           "average_latency": 0.7210622982019239,
-          "cache_hit_rate": 0.5,
+          "average_latency_completed": 0.7210622982019239,
+          "cache_hit_rate": 0.16666666666666666,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -1069,7 +1088,8 @@
           "completed_tasks": 6.0,
           "pending_tasks": 7.0,
           "average_latency": 0.7395169134323568,
-          "cache_hit_rate": 0.5,
+          "average_latency_completed": 0.7395169134323568,
+          "cache_hit_rate": 0.16666666666666666,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -1088,7 +1108,8 @@
           "completed_tasks": 11.0,
           "pending_tasks": 3.0,
           "average_latency": 1.133156096186376,
-          "cache_hit_rate": 0.75,
+          "average_latency_completed": 1.1074524109153152,
+          "cache_hit_rate": 0.25,
           "completion_rate": 0.9166666666666666,
           "deadline_violation_rate": 0.08333333333333333,
           "reliability_violation_rate": 0.0,
@@ -1107,7 +1128,8 @@
           "completed_tasks": 8.0,
           "pending_tasks": 1.0,
           "average_latency": 0.909385538625648,
-          "cache_hit_rate": 0.625,
+          "average_latency_completed": 0.909385538625648,
+          "cache_hit_rate": 0.25,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -1126,7 +1148,8 @@
           "completed_tasks": 6.0,
           "pending_tasks": 5.0,
           "average_latency": 0.756554705390763,
-          "cache_hit_rate": 0.8333333333333334,
+          "average_latency_completed": 0.756554705390763,
+          "cache_hit_rate": 0.3333333333333333,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -1141,12 +1164,13 @@
         {
           "step": 6,
           "generated_tasks": 10.0,
-          "finalized_tasks": 11.0,
+          "finalized_tasks": 15.0,
           "completed_tasks": 11.0,
-          "pending_tasks": 4.0,
-          "average_latency": 0.8847985307213144,
-          "cache_hit_rate": 0.7272727272727273,
-          "completion_rate": 1.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.9602478927002399,
+          "average_latency_completed": 0.8847985307213144,
+          "cache_hit_rate": 0.26666666666666666,
+          "completion_rate": 0.7333333333333333,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
           "total_energy": 28.03548603294731,
@@ -1257,7 +1281,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.25410431180093607,
-              "backlog_load": 7,
+              "backlog_load": 1,
               "coverage_load": 10
             },
             {
@@ -1266,7 +1290,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.32652835683184067,
-              "backlog_load": 2,
+              "backlog_load": 1,
               "coverage_load": 10
             }
           ]
@@ -1280,7 +1304,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.3653733092455309,
-              "backlog_load": 3,
+              "backlog_load": 1,
               "coverage_load": 10
             },
             {
@@ -1289,7 +1313,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.21705440032644985,
-              "backlog_load": 2,
+              "backlog_load": 1,
               "coverage_load": 10
             }
           ]
@@ -1312,7 +1336,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
-              "backlog_load": 1,
+              "backlog_load": 0,
               "coverage_load": 10
             }
           ]
@@ -1326,7 +1350,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.08488252138145924,
-              "backlog_load": 4,
+              "backlog_load": 1,
               "coverage_load": 10
             },
             {
@@ -1335,7 +1359,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.02651328971869571,
-              "backlog_load": 2,
+              "backlog_load": 1,
               "coverage_load": 10
             }
           ]
@@ -1349,7 +1373,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.1943771701588055,
-              "backlog_load": 1,
+              "backlog_load": 0,
               "coverage_load": 10
             },
             {
@@ -1358,7 +1382,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.3538233915665181,
-              "backlog_load": 3,
+              "backlog_load": 0,
               "coverage_load": 10
             }
           ]
@@ -1597,9 +1621,9 @@
         {
           "step": 6,
           "new_tasks": 10,
-          "pending_tasks": 4,
+          "pending_tasks": 0,
           "completed_tasks": 11,
-          "expired_tasks": 0
+          "expired_tasks": 4
         }
       ]
     },
@@ -1612,12 +1636,15 @@
       "assignment_rule": "least_loaded_uav",
       "global_metrics": {
         "completion_rate": 0.8805970149253731,
-        "average_latency": 0.9199405946220461,
+        "average_latency": 1.0445322167994782,
+        "average_latency_finalized": 1.0445322167994782,
+        "average_latency_completed": 0.9894177280857315,
+        "latency_per_generated_task": 1.0445322167994782,
         "total_energy": 145.3825910714428,
-        "cache_hit_rate": 0.6119402985074627,
+        "cache_hit_rate": 0.1791044776119403,
         "fairness_user_completion": 0.9699220371822669,
         "fairness_uav_load": 0.9990825688073395,
-        "deadline_violation_rate": 0.029850746268656716,
+        "deadline_violation_rate": 0.04477611940298507,
         "reliability_violation_rate": 0.0,
         "uav_move_energy": 126.0,
         "uav_compute_energy": 4.700488308836598,
@@ -1631,20 +1658,20 @@
           "agent_id": "uav_0",
           "uav_id": 0,
           "served_task_count_total": 15,
-          "assigned_task_count_total": 38,
+          "assigned_task_count_total": 16,
           "completed_task_count_total": 15,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 1,
           "current_compute_queue_delay": 0.27376159231389874,
-          "current_backlog_load": 2,
+          "current_backlog_load": 0,
           "current_coverage_load": 10,
           "cumulative_tx_queue_delay": 0.0,
           "cumulative_compute_queue_delay": 1.753721081731236,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 2,
-          "remaining_energy_j": 4934.643473089869,
-          "energy_used_j": 65.35652691013092,
+          "remaining_energy_j": 4934.503494928801,
+          "energy_used_j": 65.49650507119895,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             2,
@@ -1662,20 +1689,20 @@
           "agent_id": "uav_1",
           "uav_id": 1,
           "served_task_count_total": 16,
-          "assigned_task_count_total": 29,
+          "assigned_task_count_total": 17,
           "completed_task_count_total": 16,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 1,
           "current_compute_queue_delay": 0.2831768281712259,
-          "current_backlog_load": 6,
+          "current_backlog_load": 0,
           "current_coverage_load": 10,
           "cumulative_tx_queue_delay": 0.0,
           "cumulative_compute_queue_delay": 1.4927806200358993,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 2,
-          "remaining_energy_j": 4934.656038601291,
-          "energy_used_j": 65.34396139870933,
+          "remaining_energy_j": 4934.520481924683,
+          "energy_used_j": 65.47951807531717,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             0,
@@ -2037,7 +2064,8 @@
           "completed_tasks": 6.0,
           "pending_tasks": 13.0,
           "average_latency": 0.6826693271128752,
-          "cache_hit_rate": 0.3333333333333333,
+          "average_latency_completed": 0.6826693271128752,
+          "cache_hit_rate": 0.0,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -2056,7 +2084,8 @@
           "completed_tasks": 14.0,
           "pending_tasks": 6.0,
           "average_latency": 1.3338591275859433,
-          "cache_hit_rate": 0.6875,
+          "average_latency_completed": 1.2915265827682985,
+          "cache_hit_rate": 0.0625,
           "completion_rate": 0.875,
           "deadline_violation_rate": 0.125,
           "reliability_violation_rate": 0.0,
@@ -2075,7 +2104,8 @@
           "completed_tasks": 12.0,
           "pending_tasks": 5.0,
           "average_latency": 0.9558829781498872,
-          "cache_hit_rate": 0.5833333333333334,
+          "average_latency_completed": 0.9558829781498872,
+          "cache_hit_rate": 0.08333333333333333,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -2094,7 +2124,8 @@
           "completed_tasks": 10.0,
           "pending_tasks": 2.0,
           "average_latency": 0.954543396403688,
-          "cache_hit_rate": 0.8,
+          "average_latency_completed": 0.954543396403688,
+          "cache_hit_rate": 0.3,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -2113,7 +2144,8 @@
           "completed_tasks": 8.0,
           "pending_tasks": 4.0,
           "average_latency": 0.8241373944830729,
-          "cache_hit_rate": 0.625,
+          "average_latency_completed": 0.8241373944830729,
+          "cache_hit_rate": 0.25,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -2128,13 +2160,14 @@
         {
           "step": 6,
           "generated_tasks": 11.0,
-          "finalized_tasks": 9.0,
+          "finalized_tasks": 15.0,
           "completed_tasks": 9.0,
-          "pending_tasks": 6.0,
-          "average_latency": 0.9543476642138486,
-          "cache_hit_rate": 0.8888888888888888,
-          "completion_rate": 1.0,
-          "deadline_violation_rate": 0.0,
+          "pending_tasks": 0.0,
+          "average_latency": 1.1291178442541718,
+          "average_latency_completed": 0.9543476642138486,
+          "cache_hit_rate": 0.3333333333333333,
+          "completion_rate": 0.6,
+          "deadline_violation_rate": 0.06666666666666667,
           "reliability_violation_rate": 0.0,
           "total_energy": 28.49857200807919,
           "uav_move_energy": 25.19999999999998,
@@ -2221,7 +2254,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 2,
               "compute_queue_delay": 0.4738919429882147,
-              "backlog_load": 10,
+              "backlog_load": 2,
               "coverage_load": 10
             },
             {
@@ -2230,7 +2263,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 2,
               "compute_queue_delay": 0.49467420807114415,
-              "backlog_load": 5,
+              "backlog_load": 2,
               "coverage_load": 10
             }
           ]
@@ -2244,7 +2277,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.1783674492197176,
-              "backlog_load": 5,
+              "backlog_load": 1,
               "coverage_load": 10
             },
             {
@@ -2267,7 +2300,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.29715390759695737,
-              "backlog_load": 4,
+              "backlog_load": 1,
               "coverage_load": 10
             },
             {
@@ -2290,7 +2323,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.10039852086556955,
-              "backlog_load": 2,
+              "backlog_load": 1,
               "coverage_load": 10
             },
             {
@@ -2299,7 +2332,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
-              "backlog_load": 1,
+              "backlog_load": 0,
               "coverage_load": 10
             }
           ]
@@ -2322,7 +2355,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.27745752463854867,
-              "backlog_load": 3,
+              "backlog_load": 1,
               "coverage_load": 10
             }
           ]
@@ -2336,7 +2369,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.27376159231389874,
-              "backlog_load": 2,
+              "backlog_load": 0,
               "coverage_load": 10
             },
             {
@@ -2345,7 +2378,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.2831768281712259,
-              "backlog_load": 6,
+              "backlog_load": 0,
               "coverage_load": 10
             }
           ]
@@ -2616,9 +2649,9 @@
         {
           "step": 6,
           "new_tasks": 11,
-          "pending_tasks": 6,
+          "pending_tasks": 0,
           "completed_tasks": 9,
-          "expired_tasks": 0
+          "expired_tasks": 6
         }
       ]
     },
@@ -2631,9 +2664,12 @@
       "assignment_rule": "least_loaded_uav",
       "global_metrics": {
         "completion_rate": 0.8793103448275862,
-        "average_latency": 0.7894203256248736,
+        "average_latency": 0.9398806977886272,
+        "average_latency_finalized": 0.9398806977886272,
+        "average_latency_completed": 0.8977721350243661,
+        "latency_per_generated_task": 0.9398806977886272,
         "total_energy": 117.44307639240033,
-        "cache_hit_rate": 0.603448275862069,
+        "cache_hit_rate": 0.22413793103448276,
         "fairness_user_completion": 0.9875928064675796,
         "fairness_uav_load": 0.998960498960499,
         "deadline_violation_rate": 0.0,
@@ -2650,20 +2686,20 @@
           "agent_id": "uav_0",
           "uav_id": 0,
           "served_task_count_total": 15,
-          "assigned_task_count_total": 33,
+          "assigned_task_count_total": 16,
           "completed_task_count_total": 15,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 1,
           "current_compute_queue_delay": 0.1567916854938325,
-          "current_backlog_load": 6,
+          "current_backlog_load": 0,
           "current_coverage_load": 10,
           "cumulative_tx_queue_delay": 0.0,
           "cumulative_compute_queue_delay": 1.2294520708550647,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 2,
-          "remaining_energy_j": 4947.364891835505,
-          "energy_used_j": 52.63510816449525,
+          "remaining_energy_j": 4947.186030147671,
+          "energy_used_j": 52.81396985232914,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             1,
@@ -2681,20 +2717,20 @@
           "agent_id": "uav_1",
           "uav_id": 1,
           "served_task_count_total": 14,
-          "assigned_task_count_total": 25,
+          "assigned_task_count_total": 15,
           "completed_task_count_total": 14,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 1,
           "current_compute_queue_delay": 0.17732342072191276,
-          "current_backlog_load": 1,
+          "current_backlog_load": 0,
           "current_coverage_load": 10,
           "cumulative_tx_queue_delay": 0.0,
           "cumulative_compute_queue_delay": 0.9234372189791542,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 1,
-          "remaining_energy_j": 4947.520663873494,
-          "energy_used_j": 52.479336126505586,
+          "remaining_energy_j": 4947.387930407358,
+          "energy_used_j": 52.612069592642,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             1,
@@ -3056,7 +3092,8 @@
           "completed_tasks": 7.0,
           "pending_tasks": 0.0,
           "average_latency": 0.6760146885679023,
-          "cache_hit_rate": 0.5714285714285714,
+          "average_latency_completed": 0.6760146885679023,
+          "cache_hit_rate": 0.2857142857142857,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -3075,7 +3112,8 @@
           "completed_tasks": 6.0,
           "pending_tasks": 7.0,
           "average_latency": 0.7034443128620818,
-          "cache_hit_rate": 0.3333333333333333,
+          "average_latency_completed": 0.7034443128620818,
+          "cache_hit_rate": 0.0,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -3094,7 +3132,8 @@
           "completed_tasks": 12.0,
           "pending_tasks": 5.0,
           "average_latency": 0.9638498078484371,
-          "cache_hit_rate": 0.8333333333333334,
+          "average_latency_completed": 0.9638498078484371,
+          "cache_hit_rate": 0.25,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -3113,7 +3152,8 @@
           "completed_tasks": 10.0,
           "pending_tasks": 1.0,
           "average_latency": 0.9749143005293748,
-          "cache_hit_rate": 0.6,
+          "average_latency_completed": 0.9749143005293748,
+          "cache_hit_rate": 0.2,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -3132,7 +3172,8 @@
           "completed_tasks": 7.0,
           "pending_tasks": 6.0,
           "average_latency": 0.7902704425229317,
-          "cache_hit_rate": 0.7142857142857143,
+          "average_latency_completed": 0.7902704425229317,
+          "cache_hit_rate": 0.42857142857142855,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -3147,12 +3188,13 @@
         {
           "step": 6,
           "generated_tasks": 10.0,
-          "finalized_tasks": 9.0,
+          "finalized_tasks": 16.0,
           "completed_tasks": 9.0,
-          "pending_tasks": 7.0,
-          "average_latency": 1.1095973768843728,
-          "cache_hit_rate": 0.8888888888888888,
-          "completion_rate": 1.0,
+          "pending_tasks": 0.0,
+          "average_latency": 1.1695673735910663,
+          "average_latency_completed": 1.1095973768843728,
+          "cache_hit_rate": 0.1875,
+          "completion_rate": 0.5625,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
           "total_energy": 27.95705311757402,
@@ -3263,7 +3305,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.2955249811137226,
-              "backlog_load": 3,
+              "backlog_load": 1,
               "coverage_load": 10
             },
             {
@@ -3272,7 +3314,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.15043810584480788,
-              "backlog_load": 6,
+              "backlog_load": 1,
               "coverage_load": 10
             }
           ]
@@ -3286,7 +3328,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 2,
               "compute_queue_delay": 0.39423207310229014,
-              "backlog_load": 3,
+              "backlog_load": 2,
               "coverage_load": 10
             },
             {
@@ -3295,7 +3337,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.19059824416871374,
-              "backlog_load": 5,
+              "backlog_load": 1,
               "coverage_load": 10
             }
           ]
@@ -3318,7 +3360,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
-              "backlog_load": 1,
+              "backlog_load": 0,
               "coverage_load": 10
             }
           ]
@@ -3332,7 +3374,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.3194641385802619,
-              "backlog_load": 4,
+              "backlog_load": 1,
               "coverage_load": 10
             },
             {
@@ -3341,7 +3383,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.40507744824371983,
-              "backlog_load": 2,
+              "backlog_load": 1,
               "coverage_load": 10
             }
           ]
@@ -3355,7 +3397,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.1567916854938325,
-              "backlog_load": 6,
+              "backlog_load": 0,
               "coverage_load": 10
             },
             {
@@ -3364,7 +3406,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.17732342072191276,
-              "backlog_load": 1,
+              "backlog_load": 0,
               "coverage_load": 10
             }
           ]
@@ -3523,9 +3565,9 @@
         {
           "step": 6,
           "new_tasks": 10,
-          "pending_tasks": 7,
+          "pending_tasks": 0,
           "completed_tasks": 9,
-          "expired_tasks": 0
+          "expired_tasks": 7
         }
       ]
     },
@@ -3538,9 +3580,12 @@
       "assignment_rule": "least_loaded_uav",
       "global_metrics": {
         "completion_rate": 0.9444444444444444,
-        "average_latency": 0.9102063239509677,
+        "average_latency": 0.9753346007064257,
+        "average_latency_finalized": 0.9753346007064257,
+        "average_latency_completed": 0.9637478724186717,
+        "latency_per_generated_task": 0.9753346007064257,
         "total_energy": 141.9537212093853,
-        "cache_hit_rate": 0.5925925925925926,
+        "cache_hit_rate": 0.2222222222222222,
         "fairness_user_completion": 0.9875379939209726,
         "fairness_uav_load": 1.0,
         "deadline_violation_rate": 0.0,
@@ -3557,20 +3602,20 @@
           "agent_id": "uav_0",
           "uav_id": 0,
           "served_task_count_total": 15,
-          "assigned_task_count_total": 26,
+          "assigned_task_count_total": 16,
           "completed_task_count_total": 15,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 1,
           "current_compute_queue_delay": 0.1370958729964764,
-          "current_backlog_load": 3,
+          "current_backlog_load": 0,
           "current_coverage_load": 10,
           "cumulative_tx_queue_delay": 0.0,
           "cumulative_compute_queue_delay": 1.4339207709176633,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 2,
-          "remaining_energy_j": 4934.783572987754,
-          "energy_used_j": 65.21642701224573,
+          "remaining_energy_j": 4934.6262534092575,
+          "energy_used_j": 65.37374659074248,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             1,
@@ -3588,20 +3633,20 @@
           "agent_id": "uav_1",
           "uav_id": 1,
           "served_task_count_total": 15,
-          "assigned_task_count_total": 28,
+          "assigned_task_count_total": 16,
           "completed_task_count_total": 15,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 1,
           "current_compute_queue_delay": 0.23619809150533122,
-          "current_backlog_load": 2,
+          "current_backlog_load": 0,
           "current_coverage_load": 10,
           "cumulative_tx_queue_delay": 0.0,
           "cumulative_compute_queue_delay": 1.8096237009750205,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 2,
-          "remaining_energy_j": 4934.737481719282,
-          "energy_used_j": 65.26251828071781,
+          "remaining_energy_j": 4934.641113434456,
+          "energy_used_j": 65.3588865655438,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             0,
@@ -3963,7 +4008,8 @@
           "completed_tasks": 6.0,
           "pending_tasks": 5.0,
           "average_latency": 0.7665337436744366,
-          "cache_hit_rate": 0.3333333333333333,
+          "average_latency_completed": 0.7665337436744366,
+          "cache_hit_rate": 0.0,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -3982,7 +4028,8 @@
           "completed_tasks": 8.0,
           "pending_tasks": 6.0,
           "average_latency": 1.1758772951368397,
-          "cache_hit_rate": 0.75,
+          "average_latency_completed": 1.1758772951368397,
+          "cache_hit_rate": 0.375,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -4001,7 +4048,8 @@
           "completed_tasks": 10.0,
           "pending_tasks": 6.0,
           "average_latency": 1.004827880425637,
-          "cache_hit_rate": 0.7,
+          "average_latency_completed": 1.004827880425637,
+          "cache_hit_rate": 0.2,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -4020,7 +4068,8 @@
           "completed_tasks": 10.0,
           "pending_tasks": 2.0,
           "average_latency": 1.073378315204564,
-          "cache_hit_rate": 0.7,
+          "average_latency_completed": 1.073378315204564,
+          "cache_hit_rate": 0.3,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -4039,7 +4088,8 @@
           "completed_tasks": 8.0,
           "pending_tasks": 3.0,
           "average_latency": 0.833308808082595,
-          "cache_hit_rate": 0.625,
+          "average_latency_completed": 0.833308808082595,
+          "cache_hit_rate": 0.25,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -4054,12 +4104,13 @@
         {
           "step": 6,
           "generated_tasks": 9.0,
-          "finalized_tasks": 9.0,
+          "finalized_tasks": 12.0,
           "completed_tasks": 9.0,
-          "pending_tasks": 3.0,
-          "average_latency": 0.8551542499164602,
-          "cache_hit_rate": 0.5555555555555556,
-          "completion_rate": 1.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.9344429328369067,
+          "average_latency_completed": 0.8551542499164602,
+          "cache_hit_rate": 0.16666666666666666,
+          "completion_rate": 0.75,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
           "total_energy": 27.91987345990419,
@@ -4156,7 +4207,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 2,
               "compute_queue_delay": 0.623612762006303,
-              "backlog_load": 4,
+              "backlog_load": 2,
               "coverage_load": 10
             }
           ]
@@ -4170,7 +4221,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.3422523141118514,
-              "backlog_load": 2,
+              "backlog_load": 1,
               "coverage_load": 10
             },
             {
@@ -4179,7 +4230,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 2,
               "compute_queue_delay": 0.42485191600029637,
-              "backlog_load": 6,
+              "backlog_load": 2,
               "coverage_load": 10
             }
           ]
@@ -4193,7 +4244,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 2,
               "compute_queue_delay": 0.5017592676027145,
-              "backlog_load": 4,
+              "backlog_load": 2,
               "coverage_load": 10
             },
             {
@@ -4216,7 +4267,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
-              "backlog_load": 1,
+              "backlog_load": 0,
               "coverage_load": 10
             },
             {
@@ -4248,7 +4299,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
-              "backlog_load": 2,
+              "backlog_load": 0,
               "coverage_load": 10
             }
           ]
@@ -4262,7 +4313,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.1370958729964764,
-              "backlog_load": 3,
+              "backlog_load": 0,
               "coverage_load": 10
             },
             {
@@ -4271,7 +4322,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.23619809150533122,
-              "backlog_load": 2,
+              "backlog_load": 0,
               "coverage_load": 10
             }
           ]
@@ -4494,9 +4545,9 @@
         {
           "step": 6,
           "new_tasks": 9,
-          "pending_tasks": 3,
+          "pending_tasks": 0,
           "completed_tasks": 9,
-          "expired_tasks": 0
+          "expired_tasks": 3
         }
       ]
     }

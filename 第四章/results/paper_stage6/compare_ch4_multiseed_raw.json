@@ -7,6 +7,16 @@
     },
     {
       "seed": 42,
+      "metric": "average_latency_completed",
+      "delta": 0.0
+    },
+    {
+      "seed": 42,
+      "metric": "average_latency_finalized",
+      "delta": 0.0
+    },
+    {
+      "seed": 42,
       "metric": "bs_compute_energy",
       "delta": 0.0
     },
@@ -28,11 +38,16 @@
     {
       "seed": 42,
       "metric": "fairness_uav_load",
-      "delta": 0.0
+      "delta": null
     },
     {
       "seed": 42,
       "metric": "fairness_user_completion",
+      "delta": 0.0
+    },
+    {
+      "seed": 42,
+      "metric": "latency_per_generated_task",
       "delta": 0.0
     },
     {
@@ -77,6 +92,16 @@
     },
     {
       "seed": 52,
+      "metric": "average_latency_completed",
+      "delta": 0.0
+    },
+    {
+      "seed": 52,
+      "metric": "average_latency_finalized",
+      "delta": 0.0
+    },
+    {
+      "seed": 52,
       "metric": "bs_compute_energy",
       "delta": 0.0
     },
@@ -98,11 +123,16 @@
     {
       "seed": 52,
       "metric": "fairness_uav_load",
-      "delta": 0.0
+      "delta": null
     },
     {
       "seed": 52,
       "metric": "fairness_user_completion",
+      "delta": 0.0
+    },
+    {
+      "seed": 52,
+      "metric": "latency_per_generated_task",
       "delta": 0.0
     },
     {
@@ -147,6 +177,16 @@
     },
     {
       "seed": 62,
+      "metric": "average_latency_completed",
+      "delta": 0.0
+    },
+    {
+      "seed": 62,
+      "metric": "average_latency_finalized",
+      "delta": 0.0
+    },
+    {
+      "seed": 62,
       "metric": "bs_compute_energy",
       "delta": 0.0
     },
@@ -168,11 +208,16 @@
     {
       "seed": 62,
       "metric": "fairness_uav_load",
-      "delta": 0.0
+      "delta": null
     },
     {
       "seed": 62,
       "metric": "fairness_user_completion",
+      "delta": 0.0
+    },
+    {
+      "seed": 62,
+      "metric": "latency_per_generated_task",
       "delta": 0.0
     },
     {

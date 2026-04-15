@@ -84,20 +84,23 @@
     "observation_max_neighbors": 2
   },
   "averaged_metrics": {
-    "completion_rate": 0.9282523171750587,
-    "average_latency": 0.8010640672764382,
-    "total_energy": 151.88946528225767,
-    "cache_hit_rate": 0.5276343648633145,
-    "fairness_user_completion": 0.9860149680345797,
-    "fairness_uav_load": 0.9821498831496251,
+    "completion_rate": 0.9325626620026449,
+    "average_latency": 0.8721124416159828,
+    "average_latency_finalized": 0.8721124416159828,
+    "average_latency_completed": 0.8466087077463861,
+    "latency_per_generated_task": 0.8721124416159828,
+    "total_energy": 151.95585923538283,
+    "cache_hit_rate": 0.2305925012399148,
+    "fairness_user_completion": 0.9857846163739219,
+    "fairness_uav_load": 0.9869553431887045,
     "deadline_violation_rate": 0.01217966769923965,
     "reliability_violation_rate": 0.0,
     "uav_move_energy": 134.0935511613977,
-    "uav_compute_energy": 5.313660277773365,
-    "ue_local_energy": 0.7450666163317213,
-    "ue_uplink_energy": 9.557140003693267,
-    "bs_compute_energy": 1.4108299504661748,
-    "relay_fetch_energy": 0.7692172725954576
+    "uav_compute_energy": 5.368246024370871,
+    "ue_local_energy": 0.6472531549407453,
+    "ue_uplink_energy": 9.652805216863257,
+    "bs_compute_energy": 1.4172038870640615,
+    "relay_fetch_energy": 0.7767997907462129
   },
   "episode_summaries": [
     {
@@ -105,19 +108,22 @@
       "seed": 62,
       "metrics": {
         "completion_rate": 0.9245283018867925,
-        "average_latency": 0.7696755284345342,
-        "total_energy": 133.69834091478253,
-        "cache_hit_rate": 0.5660377358490566,
+        "average_latency": 0.8278617140373669,
+        "average_latency_finalized": 0.8278617140373669,
+        "average_latency_completed": 0.8013768889799048,
+        "latency_per_generated_task": 0.8278617140373669,
+        "total_energy": 133.68706050164096,
+        "cache_hit_rate": 0.2830188679245283,
         "fairness_user_completion": 0.9897151833569651,
         "fairness_uav_load": 0.9863013698630136,
         "deadline_violation_rate": 0.018867924528301886,
         "reliability_violation_rate": 0.0,
         "uav_move_energy": 117.47401100521512,
-        "uav_compute_energy": 4.902978343459126,
+        "uav_compute_energy": 4.934318221177877,
         "ue_local_energy": 0.5413401141111995,
-        "ue_uplink_energy": 8.777049137630215,
-        "bs_compute_energy": 1.3403802602032042,
-        "relay_fetch_energy": 0.6625820541636762
+        "ue_uplink_energy": 8.777977331388751,
+        "bs_compute_energy": 1.3215763335719537,
+        "relay_fetch_energy": 0.6378374961760632
       },
       "last_info": {
         "time_step": 6,
@@ -128,9 +134,9 @@
         ],
         "num_generated_tasks": 10,
         "num_completed_tasks": 9,
-        "num_expired_tasks": 0,
-        "num_pending_tasks": 3,
-        "num_cache_hits": 6,
+        "num_expired_tasks": 3,
+        "num_pending_tasks": 0,
+        "num_cache_hits": 3,
         "num_deadline_violations": 0,
         "num_reliability_violations": 0
       }
@@ -140,19 +146,22 @@
       "seed": 63,
       "metrics": {
         "completion_rate": 0.9104477611940298,
-        "average_latency": 0.87999349150563,
-        "total_energy": 174.0804730520635,
-        "cache_hit_rate": 0.5074626865671642,
+        "average_latency": 0.9641327607208872,
+        "average_latency_finalized": 0.9641327607208872,
+        "average_latency_completed": 0.9260803644907349,
+        "latency_per_generated_task": 0.9641327607208872,
+        "total_energy": 174.21558572006654,
+        "cache_hit_rate": 0.208955223880597,
         "fairness_user_completion": 0.9684973427754958,
-        "fairness_uav_load": 0.9865771812080537,
+        "fairness_uav_load": 0.9956919763058697,
         "deadline_violation_rate": 0.029850746268656716,
         "reliability_violation_rate": 0.0,
-        "uav_move_energy": 153.74552740686883,
-        "uav_compute_energy": 5.883398336285707,
-        "ue_local_energy": 1.5748281793167234,
-        "ue_uplink_energy": 10.431087856489398,
-        "bs_compute_energy": 1.5477452913953493,
-        "relay_fetch_energy": 0.8978859817074711
+        "uav_move_energy": 153.74552740686886,
+        "uav_compute_energy": 5.938695243043092,
+        "ue_local_energy": 1.3503851019225968,
+        "ue_uplink_energy": 10.689421479917625,
+        "bs_compute_energy": 1.6043443782985694,
+        "relay_fetch_energy": 0.8872121100158183
       },
       "last_info": {
         "time_step": 6,
@@ -163,9 +172,9 @@
         ],
         "num_generated_tasks": 11,
         "num_completed_tasks": 10,
-        "num_expired_tasks": 0,
-        "num_pending_tasks": 4,
-        "num_cache_hits": 5,
+        "num_expired_tasks": 4,
+        "num_pending_tasks": 0,
+        "num_cache_hits": 3,
         "num_deadline_violations": 0,
         "num_reliability_violations": 0
       }
@@ -174,20 +183,23 @@
       "episode": 2,
       "seed": 64,
       "metrics": {
-        "completion_rate": 0.896551724137931,
-        "average_latency": 0.7431774223972407,
-        "total_energy": 131.02452204594755,
-        "cache_hit_rate": 0.5,
-        "fairness_user_completion": 0.9884261425674622,
-        "fairness_uav_load": 0.9743589743589743,
+        "completion_rate": 0.9137931034482759,
+        "average_latency": 0.8634541824597627,
+        "average_latency_finalized": 0.8634541824597627,
+        "average_latency_completed": 0.8322581313735691,
+        "latency_per_generated_task": 0.8634541824597627,
+        "total_energy": 131.16626560358674,
+        "cache_hit_rate": 0.1896551724137931,
+        "fairness_user_completion": 0.9875047359248313,
+        "fairness_uav_load": 0.9844660194174757,
         "deadline_violation_rate": 0.0,
         "reliability_violation_rate": 0.0,
         "uav_move_energy": 113.40000000000006,
-        "uav_compute_energy": 5.2424693667150475,
-        "ue_local_energy": 0.7041220214105819,
-        "ue_uplink_energy": 9.556119808521803,
-        "bs_compute_energy": 1.3753465663092896,
-        "relay_fetch_energy": 0.7464642829907706
+        "uav_compute_energy": 5.374175568628937,
+        "ue_local_energy": 0.5373112532408045,
+        "ue_uplink_energy": 9.679518844014998,
+        "bs_compute_energy": 1.3630471524288672,
+        "relay_fetch_energy": 0.8122127852730574
       },
       "last_info": {
         "time_step": 6,
@@ -197,10 +209,10 @@
           "uav_2"
         ],
         "num_generated_tasks": 10,
-        "num_completed_tasks": 9,
-        "num_expired_tasks": 0,
-        "num_pending_tasks": 6,
-        "num_cache_hits": 6,
+        "num_completed_tasks": 10,
+        "num_expired_tasks": 5,
+        "num_pending_tasks": 0,
+        "num_cache_hits": 2,
         "num_deadline_violations": 0,
         "num_reliability_violations": 0
       }
@@ -210,9 +222,12 @@
       "seed": 65,
       "metrics": {
         "completion_rate": 0.9814814814814815,
-        "average_latency": 0.8114098267683478,
+        "average_latency": 0.8330011092459143,
+        "average_latency_finalized": 0.8330011092459143,
+        "average_latency_completed": 0.8267194461413355,
+        "latency_per_generated_task": 0.8330011092459143,
         "total_energy": 168.75452511623715,
-        "cache_hit_rate": 0.5370370370370371,
+        "cache_hit_rate": 0.24074074074074073,
         "fairness_user_completion": 0.9974212034383956,
         "fairness_uav_load": 0.9813620071684588,
         "deadline_violation_rate": 0.0,
@@ -233,9 +248,9 @@
         ],
         "num_generated_tasks": 9,
         "num_completed_tasks": 10,
-        "num_expired_tasks": 0,
-        "num_pending_tasks": 1,
-        "num_cache_hits": 5,
+        "num_expired_tasks": 1,
+        "num_pending_tasks": 0,
+        "num_cache_hits": 1,
         "num_deadline_violations": 0,
         "num_reliability_violations": 0
       }
@@ -652,39 +667,42 @@
       "assignment_rule": "least_loaded_uav",
       "global_metrics": {
         "completion_rate": 0.9245283018867925,
-        "average_latency": 0.7696755284345342,
-        "total_energy": 133.69834091478253,
-        "cache_hit_rate": 0.5660377358490566,
+        "average_latency": 0.8278617140373669,
+        "average_latency_finalized": 0.8278617140373669,
+        "average_latency_completed": 0.8013768889799048,
+        "latency_per_generated_task": 0.8278617140373669,
+        "total_energy": 133.68706050164096,
+        "cache_hit_rate": 0.2830188679245283,
         "fairness_user_completion": 0.9897151833569651,
         "fairness_uav_load": 0.9863013698630136,
         "deadline_violation_rate": 0.018867924528301886,
         "reliability_violation_rate": 0.0,
         "uav_move_energy": 117.47401100521512,
-        "uav_compute_energy": 4.902978343459126,
+        "uav_compute_energy": 4.934318221177877,
         "ue_local_energy": 0.5413401141111995,
-        "ue_uplink_energy": 8.777049137630215,
-        "bs_compute_energy": 1.3403802602032042,
-        "relay_fetch_energy": 0.6625820541636762
+        "ue_uplink_energy": 8.777977331388751,
+        "bs_compute_energy": 1.3215763335719537,
+        "relay_fetch_energy": 0.6378374961760632
       },
       "per_uav_metrics": [
         {
           "agent_id": "uav_0",
           "uav_id": 0,
           "served_task_count_total": 13,
-          "assigned_task_count_total": 22,
+          "assigned_task_count_total": 13,
           "completed_task_count_total": 13,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 0,
           "current_compute_queue_delay": 0.0,
-          "current_backlog_load": 2,
+          "current_backlog_load": 0,
           "current_coverage_load": 10,
           "cumulative_tx_queue_delay": 0.0,
-          "cumulative_compute_queue_delay": 0.4923645127203504,
+          "cumulative_compute_queue_delay": 0.5071298858294022,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 1,
-          "remaining_energy_j": 4960.472146212147,
-          "energy_used_j": 39.52785378785302,
+          "remaining_energy_j": 4960.30123885047,
+          "energy_used_j": 39.69876114952967,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             2,
@@ -701,20 +719,20 @@
           "agent_id": "uav_1",
           "uav_id": 1,
           "served_task_count_total": 13,
-          "assigned_task_count_total": 20,
+          "assigned_task_count_total": 13,
           "completed_task_count_total": 13,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 0,
           "current_compute_queue_delay": 0.0,
-          "current_backlog_load": 1,
+          "current_backlog_load": 0,
           "current_coverage_load": 10,
           "cumulative_tx_queue_delay": 0.0,
           "cumulative_compute_queue_delay": 0.25304893495930036,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 1,
-          "remaining_energy_j": 4960.483888465472,
-          "energy_used_j": 39.516111534528136,
+          "remaining_energy_j": 4960.263968924206,
+          "energy_used_j": 39.73603107579402,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             3,
@@ -732,20 +750,20 @@
           "agent_id": "uav_2",
           "uav_id": 2,
           "served_task_count_total": 9,
-          "assigned_task_count_total": 11,
+          "assigned_task_count_total": 10,
           "completed_task_count_total": 9,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 1,
           "current_compute_queue_delay": 0.017932057195004347,
-          "current_backlog_load": 1,
+          "current_backlog_load": 0,
           "current_coverage_load": 7,
           "cumulative_tx_queue_delay": 0.0,
-          "cumulative_compute_queue_delay": 0.2368076572400466,
+          "cumulative_compute_queue_delay": 0.22319760905002672,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 1,
-          "remaining_energy_j": 4956.666975973705,
-          "energy_used_j": 43.33302402629488,
+          "remaining_energy_j": 4956.556625502751,
+          "energy_used_j": 43.44337449724935,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             0,
@@ -1125,7 +1143,8 @@
           "completed_tasks": 6.0,
           "pending_tasks": 0.0,
           "average_latency": 0.674045575422057,
-          "cache_hit_rate": 0.16666666666666666,
+          "average_latency_completed": 0.674045575422057,
+          "cache_hit_rate": 0.0,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -1144,17 +1163,18 @@
           "completed_tasks": 7.0,
           "pending_tasks": 6.0,
           "average_latency": 0.7386223909910162,
-          "cache_hit_rate": 0.7142857142857143,
+          "average_latency_completed": 0.7386223909910162,
+          "cache_hit_rate": 0.42857142857142855,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 3.89231714299271,
+          "total_energy": 3.86473030695147,
           "uav_move_energy": 0.0,
           "uav_compute_energy": 1.1742326488754167,
           "ue_local_energy": 0.21238449512520666,
-          "ue_uplink_energy": 1.9849288511476857,
+          "ue_uplink_energy": 1.9788411381090312,
           "bs_compute_energy": 0.3784103704336727,
-          "relay_fetch_energy": 0.14236077741072817
+          "relay_fetch_energy": 0.12086165440814262
         },
         {
           "step": 3,
@@ -1162,18 +1182,19 @@
           "finalized_tasks": 11.0,
           "completed_tasks": 10.0,
           "pending_tasks": 3.0,
-          "average_latency": 1.03683146920587,
-          "cache_hit_rate": 0.7272727272727273,
+          "average_latency": 1.03247561626692,
+          "average_latency_completed": 0.9941335144768075,
+          "cache_hit_rate": 0.36363636363636365,
           "completion_rate": 0.9090909090909091,
           "deadline_violation_rate": 0.09090909090909091,
           "reliability_violation_rate": 0.0,
-          "total_energy": 40.36820948646552,
+          "total_energy": 40.384515909365184,
           "uav_move_energy": 37.79999999999997,
-          "uav_compute_energy": 0.8007180163756815,
+          "uav_compute_energy": 0.8320578940944326,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 1.4125516262145164,
-          "bs_compute_energy": 0.18433406354917387,
-          "relay_fetch_energy": 0.17060578032617874
+          "ue_uplink_energy": 1.4195675330117088,
+          "bs_compute_energy": 0.1655301369179232,
+          "relay_fetch_energy": 0.16736034534115135
         },
         {
           "step": 4,
@@ -1181,8 +1202,9 @@
           "finalized_tasks": 9.0,
           "completed_tasks": 9.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.8016236650730773,
-          "cache_hit_rate": 0.6666666666666666,
+          "average_latency": 0.7947876172376915,
+          "average_latency_completed": 0.7947876172376915,
+          "cache_hit_rate": 0.3333333333333333,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -1201,7 +1223,8 @@
           "completed_tasks": 8.0,
           "pending_tasks": 2.0,
           "average_latency": 0.7262490870889107,
-          "cache_hit_rate": 0.5,
+          "average_latency_completed": 0.7262490870889107,
+          "cache_hit_rate": 0.25,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -1216,12 +1239,13 @@
         {
           "step": 6,
           "generated_tasks": 10.0,
-          "finalized_tasks": 9.0,
+          "finalized_tasks": 12.0,
           "completed_tasks": 9.0,
-          "pending_tasks": 3.0,
-          "average_latency": 0.794268997103034,
-          "cache_hit_rate": 0.6666666666666666,
-          "completion_rate": 1.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.861810635310364,
+          "average_latency_completed": 0.794268997103034,
+          "cache_hit_rate": 0.25,
+          "completion_rate": 0.75,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
           "total_energy": 40.776102384533544,
@@ -1236,11 +1260,11 @@
       "energy_breakdown": {
         "episode_totals": {
           "uav_move_energy": 117.47401100521512,
-          "uav_compute_energy": 4.902978343459126,
+          "uav_compute_energy": 4.934318221177877,
           "ue_local_energy": 0.5413401141111995,
-          "ue_uplink_energy": 8.777049137630215,
-          "bs_compute_energy": 1.3403802602032042,
-          "relay_fetch_energy": 0.6625820541636762
+          "ue_uplink_energy": 8.777977331388751,
+          "bs_compute_energy": 1.3215763335719537,
+          "relay_fetch_energy": 0.6378374961760632
         },
         "step_breakdown": [
           {
@@ -1257,18 +1281,18 @@
             "uav_move_energy": 0.0,
             "uav_compute_energy": 1.1742326488754167,
             "ue_local_energy": 0.21238449512520666,
-            "ue_uplink_energy": 1.9849288511476857,
+            "ue_uplink_energy": 1.9788411381090312,
             "bs_compute_energy": 0.3784103704336727,
-            "relay_fetch_energy": 0.14236077741072817
+            "relay_fetch_energy": 0.12086165440814262
           },
           {
             "step": 3,
             "uav_move_energy": 37.79999999999997,
-            "uav_compute_energy": 0.8007180163756815,
+            "uav_compute_energy": 0.8320578940944326,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 1.4125516262145164,
-            "bs_compute_energy": 0.18433406354917387,
-            "relay_fetch_energy": 0.17060578032617874
+            "ue_uplink_energy": 1.4195675330117088,
+            "bs_compute_energy": 0.1655301369179232,
+            "relay_fetch_energy": 0.16736034534115135
           },
           {
             "step": 4,
@@ -1341,7 +1365,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.28783394963642284,
-              "backlog_load": 3,
+              "backlog_load": 1,
               "coverage_load": 10
             },
             {
@@ -1359,7 +1383,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.16914052533285506,
-              "backlog_load": 5,
+              "backlog_load": 1,
               "coverage_load": 2
             }
           ]
@@ -1372,7 +1396,7 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.1471561795622338,
+              "compute_queue_delay": 0.1619215526712856,
               "backlog_load": 1,
               "coverage_load": 10
             },
@@ -1382,7 +1406,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
-              "backlog_load": 2,
+              "backlog_load": 0,
               "coverage_load": 10
             },
             {
@@ -1390,7 +1414,7 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.04973507471218719,
+              "compute_queue_delay": 0.036125026522167314,
               "backlog_load": 1,
               "coverage_load": 3
             }
@@ -1446,7 +1470,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
-              "backlog_load": 1,
+              "backlog_load": 0,
               "coverage_load": 10
             },
             {
@@ -1469,7 +1493,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
-              "backlog_load": 2,
+              "backlog_load": 0,
               "coverage_load": 10
             },
             {
@@ -1478,7 +1502,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
-              "backlog_load": 1,
+              "backlog_load": 0,
               "coverage_load": 10
             },
             {
@@ -1487,7 +1511,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.017932057195004347,
-              "backlog_load": 1,
+              "backlog_load": 0,
               "coverage_load": 7
             }
           ]
@@ -1678,9 +1702,9 @@
         {
           "step": 6,
           "new_tasks": 10,
-          "pending_tasks": 3,
+          "pending_tasks": 0,
           "completed_tasks": 9,
-          "expired_tasks": 0
+          "expired_tasks": 3
         }
       ]
     },
@@ -1693,111 +1717,115 @@
       "assignment_rule": "least_loaded_uav",
       "global_metrics": {
         "completion_rate": 0.9104477611940298,
-        "average_latency": 0.87999349150563,
-        "total_energy": 174.0804730520635,
-        "cache_hit_rate": 0.5074626865671642,
+        "average_latency": 0.9641327607208872,
+        "average_latency_finalized": 0.9641327607208872,
+        "average_latency_completed": 0.9260803644907349,
+        "latency_per_generated_task": 0.9641327607208872,
+        "total_energy": 174.21558572006654,
+        "cache_hit_rate": 0.208955223880597,
         "fairness_user_completion": 0.9684973427754958,
-        "fairness_uav_load": 0.9865771812080537,
+        "fairness_uav_load": 0.9956919763058697,
         "deadline_violation_rate": 0.029850746268656716,
         "reliability_violation_rate": 0.0,
-        "uav_move_energy": 153.74552740686883,
-        "uav_compute_energy": 5.883398336285707,
-        "ue_local_energy": 1.5748281793167234,
-        "ue_uplink_energy": 10.431087856489398,
-        "bs_compute_energy": 1.5477452913953493,
-        "relay_fetch_energy": 0.8978859817074711
+        "uav_move_energy": 153.74552740686886,
+        "uav_compute_energy": 5.938695243043092,
+        "ue_local_energy": 1.3503851019225968,
+        "ue_uplink_energy": 10.689421479917625,
+        "bs_compute_energy": 1.6043443782985694,
+        "relay_fetch_energy": 0.8872121100158183
       },
       "per_uav_metrics": [
         {
           "agent_id": "uav_0",
           "uav_id": 0,
-          "served_task_count_total": 13,
-          "assigned_task_count_total": 25,
-          "completed_task_count_total": 13,
+          "served_task_count_total": 14,
+          "assigned_task_count_total": 15,
+          "completed_task_count_total": 14,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 1,
-          "current_compute_queue_delay": 0.15946617510387462,
-          "current_backlog_load": 3,
+          "current_compute_queue_delay": 0.1594459090073519,
+          "current_backlog_load": 0,
           "current_coverage_load": 10,
-          "cumulative_tx_queue_delay": 0.07637050957685787,
-          "cumulative_compute_queue_delay": 0.8475396153129104,
-          "max_tx_queue_length": 1,
+          "cumulative_tx_queue_delay": 0.0,
+          "cumulative_compute_queue_delay": 1.2598843089456986,
+          "max_tx_queue_length": 0,
           "max_compute_queue_length": 2,
-          "remaining_energy_j": 4947.549747575393,
-          "energy_used_j": 52.45025242460724,
+          "remaining_energy_j": 4947.273616304426,
+          "energy_used_j": 52.72638369557444,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             1,
-            3
+            4
           ],
           "cache_scores": {
-            "0": 2.039285714285714e-06,
-            "1": 3.860409722222222e-06,
-            "2": 1e-06,
-            "3": 2.672591346153846e-06,
-            "4": 1.6019166666666666e-06
+            "0": 1e-06,
+            "1": 5.120377430555555e-06,
+            "2": 1.2977272727272728e-06,
+            "3": 1.8483653846153844e-06,
+            "4": 2.3162458333333334e-06
           }
         },
         {
           "agent_id": "uav_1",
           "uav_id": 1,
           "served_task_count_total": 14,
-          "assigned_task_count_total": 26,
+          "assigned_task_count_total": 15,
           "completed_task_count_total": 14,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 1,
-          "current_compute_queue_delay": 0.39316484624071624,
-          "current_backlog_load": 2,
+          "current_compute_queue_delay": 0.39559322440715583,
+          "current_backlog_load": 0,
           "current_coverage_load": 10,
-          "cumulative_tx_queue_delay": 0.0,
-          "cumulative_compute_queue_delay": 1.2289202908152288,
-          "max_tx_queue_length": 0,
+          "cumulative_tx_queue_delay": 0.01628743045573766,
+          "cumulative_compute_queue_delay": 1.0238708912034067,
+          "max_tx_queue_length": 1,
           "max_compute_queue_length": 2,
-          "remaining_energy_j": 4947.464757211548,
-          "energy_used_j": 52.5352427884518,
+          "remaining_energy_j": 4947.300160765306,
+          "energy_used_j": 52.69983923469408,
           "cache_usage_ratio": 1.0,
           "cache_services": [
-            1,
-            2
-          ],
-          "cache_scores": {
-            "0": 2.039285714285714e-06,
-            "1": 2.669861111111111e-06,
-            "2": 4.189399715909091e-06,
-            "3": 1.8483653846153844e-06,
-            "4": 1.6019166666666666e-06
-          }
-        },
-        {
-          "agent_id": "uav_2",
-          "uav_id": 2,
-          "served_task_count_total": 11,
-          "assigned_task_count_total": 16,
-          "completed_task_count_total": 11,
-          "current_tx_queue_length": 0,
-          "current_tx_queue_delay": 0.0,
-          "current_compute_queue_length": 1,
-          "current_compute_queue_delay": 0.1609067120198313,
-          "current_backlog_load": 1,
-          "current_coverage_load": 6,
-          "cumulative_tx_queue_delay": 0.0,
-          "cumulative_compute_queue_delay": 1.0016798178047042,
-          "max_tx_queue_length": 0,
-          "max_compute_queue_length": 1,
-          "remaining_energy_j": 4945.356569469903,
-          "energy_used_j": 54.64343053009725,
-          "cache_usage_ratio": 1.0,
-          "cache_services": [
-            1,
-            2
+            2,
+            3
           ],
           "cache_scores": {
             "0": 2.039285714285714e-06,
             "1": 2.669861111111111e-06,
             "2": 3.1585170454545456e-06,
-            "4": 1.6019166666666666e-06
+            "3": 2.672591346153846e-06,
+            "4": 1e-06
+          }
+        },
+        {
+          "agent_id": "uav_2",
+          "uav_id": 2,
+          "served_task_count_total": 12,
+          "assigned_task_count_total": 13,
+          "completed_task_count_total": 12,
+          "current_tx_queue_length": 0,
+          "current_tx_queue_delay": 0.0,
+          "current_compute_queue_length": 1,
+          "current_compute_queue_delay": 0.16088337496938454,
+          "current_backlog_load": 0,
+          "current_coverage_load": 6,
+          "cumulative_tx_queue_delay": 0.0,
+          "cumulative_compute_queue_delay": 1.138844088440141,
+          "max_tx_queue_length": 0,
+          "max_compute_queue_length": 1,
+          "remaining_energy_j": 4945.015788170336,
+          "energy_used_j": 54.984211829663764,
+          "cache_usage_ratio": 1.0,
+          "cache_services": [
+            0,
+            2
+          ],
+          "cache_scores": {
+            "0": 4.963383928571429e-06,
+            "1": 2.669861111111111e-06,
+            "2": 3.1585170454545456e-06,
+            "3": 1e-06,
+            "4": 1e-06
           }
         }
       ],
@@ -2163,59 +2191,62 @@
         {
           "step": 1,
           "generated_tasks": 19.0,
-          "finalized_tasks": 7.0,
-          "completed_tasks": 7.0,
-          "pending_tasks": 12.0,
-          "average_latency": 0.7017968279386638,
-          "cache_hit_rate": 0.2857142857142857,
+          "finalized_tasks": 8.0,
+          "completed_tasks": 8.0,
+          "pending_tasks": 11.0,
+          "average_latency": 0.7353182938888823,
+          "average_latency_completed": 0.7353182938888823,
+          "cache_hit_rate": 0.0,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 5.385795904781866,
+          "total_energy": 5.522136252612105,
           "uav_move_energy": 0.0,
-          "uav_compute_energy": 1.355720113600278,
-          "ue_local_energy": 1.0930375124966316,
-          "ue_uplink_energy": 2.3021092501104703,
-          "bs_compute_energy": 0.39041624666966723,
-          "relay_fetch_energy": 0.2445127819048187
+          "uav_compute_energy": 1.4846457566821976,
+          "ue_local_energy": 0.868594435102505,
+          "ue_uplink_energy": 2.52085554939184,
+          "bs_compute_energy": 0.40283809177816626,
+          "relay_fetch_energy": 0.24520241965739648
         },
         {
           "step": 2,
           "generated_tasks": 9.0,
-          "finalized_tasks": 16.0,
-          "completed_tasks": 14.0,
-          "pending_tasks": 5.0,
-          "average_latency": 1.242485835520552,
-          "cache_hit_rate": 0.6875,
-          "completion_rate": 0.875,
-          "deadline_violation_rate": 0.125,
+          "finalized_tasks": 14.0,
+          "completed_tasks": 12.0,
+          "pending_tasks": 6.0,
+          "average_latency": 1.3008939920412481,
+          "average_latency_completed": 1.2586838747747398,
+          "cache_hit_rate": 0.21428571428571427,
+          "completion_rate": 0.8571428571428571,
+          "deadline_violation_rate": 0.14285714285714285,
           "reliability_violation_rate": 0.0,
-          "total_energy": 40.39734615990403,
-          "uav_move_energy": 37.800000000000026,
-          "uav_compute_energy": 0.7824865743743599,
+          "total_energy": 40.50607349674662,
+          "uav_move_energy": 37.80000000000003,
+          "uav_compute_energy": 0.7989412042104939,
           "ue_local_energy": 0.1709624154056262,
-          "ue_uplink_energy": 1.3754213921495309,
-          "bs_compute_energy": 0.18066264005114485,
-          "relay_fetch_energy": 0.08781313792334443
+          "ue_uplink_energy": 1.4258901892176818,
+          "bs_compute_energy": 0.17078986214946446,
+          "relay_fetch_energy": 0.13948982576332655
         },
         {
           "step": 3,
           "generated_tasks": 11.0,
-          "finalized_tasks": 12.0,
-          "completed_tasks": 12.0,
+          "finalized_tasks": 13.0,
+          "completed_tasks": 13.0,
           "pending_tasks": 4.0,
-          "average_latency": 0.882314729573471,
-          "cache_hit_rate": 0.5833333333333334,
+          "average_latency": 0.9177983129153413,
+          "average_latency_completed": 0.9177983129153413,
+          "cache_hit_rate": 0.23076923076923078,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 40.99393110953692,
+          "total_energy": 40.95458039170749,
           "uav_move_energy": 37.80000000000001,
-          "uav_compute_energy": 1.018520421493499,
+          "uav_compute_energy": 0.9284370553328305,
           "ue_local_energy": 0.1585775151191221,
-          "ue_uplink_energy": 1.6626388382014166,
-          "bs_compute_energy": 0.21730295833995728,
-          "relay_fetch_energy": 0.13689137638291654
+          "ue_uplink_energy": 1.667048634215472,
+          "bs_compute_energy": 0.2713529780363585,
+          "relay_fetch_energy": 0.1291642090036917
         },
         {
           "step": 4,
@@ -2223,18 +2254,19 @@
           "finalized_tasks": 11.0,
           "completed_tasks": 11.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.8836303045096165,
-          "cache_hit_rate": 0.5454545454545454,
+          "average_latency": 0.8848124570597894,
+          "average_latency_completed": 0.8848124570597894,
+          "cache_hit_rate": 0.18181818181818182,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 40.11026654316428,
+          "total_energy": 40.13426518365456,
           "uav_move_energy": 37.799999999999955,
           "uav_compute_energy": 0.6587227555307339,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 1.3303179520443758,
+          "ue_uplink_energy": 1.3303165925346592,
           "bs_compute_energy": 0.20836976065188223,
-          "relay_fetch_energy": 0.1128560749373349
+          "relay_fetch_energy": 0.1368560749373349
         },
         {
           "step": 5,
@@ -2242,102 +2274,104 @@
           "finalized_tasks": 7.0,
           "completed_tasks": 7.0,
           "pending_tasks": 3.0,
-          "average_latency": 0.7368998660380317,
+          "average_latency": 0.735148620462594,
+          "average_latency_completed": 0.735148620462594,
           "cache_hit_rate": 0.42857142857142855,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 3.2121884819834468,
+          "total_energy": 3.188145472047344,
           "uav_move_energy": 0.0,
           "uav_compute_energy": 0.9204303288981028,
           "ue_local_energy": 0.15225073629534333,
-          "ue_uplink_energy": 1.7711400493843004,
+          "ue_uplink_energy": 1.7710970394481977,
           "bs_compute_energy": 0.24980145077464555,
-          "relay_fetch_energy": 0.11856591663105458
+          "relay_fetch_energy": 0.09456591663105458
         },
         {
           "step": 6,
           "generated_tasks": 11.0,
-          "finalized_tasks": 10.0,
+          "finalized_tasks": 14.0,
           "completed_tasks": 10.0,
-          "pending_tasks": 4.0,
-          "average_latency": 0.8701203600224063,
-          "cache_hit_rate": 0.5,
-          "completion_rate": 1.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.9779626635582573,
+          "average_latency_completed": 0.86937939467316,
+          "cache_hit_rate": 0.21428571428571427,
+          "completion_rate": 0.7142857142857143,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 43.98094485269294,
-          "uav_move_energy": 40.34552740686885,
+          "total_energy": 43.91038492329842,
+          "uav_move_energy": 40.345527406868854,
           "uav_compute_energy": 1.1475181423887337,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 1.9894603745993047,
+          "ue_uplink_energy": 1.9742134751097722,
           "bs_compute_energy": 0.3011922349080523,
-          "relay_fetch_energy": 0.1972466939280021
+          "relay_fetch_energy": 0.14193366402301422
         }
       ],
       "energy_breakdown": {
         "episode_totals": {
-          "uav_move_energy": 153.74552740686883,
-          "uav_compute_energy": 5.883398336285707,
-          "ue_local_energy": 1.5748281793167234,
-          "ue_uplink_energy": 10.431087856489398,
-          "bs_compute_energy": 1.5477452913953493,
-          "relay_fetch_energy": 0.8978859817074711
+          "uav_move_energy": 153.74552740686886,
+          "uav_compute_energy": 5.938695243043092,
+          "ue_local_energy": 1.3503851019225968,
+          "ue_uplink_energy": 10.689421479917625,
+          "bs_compute_energy": 1.6043443782985694,
+          "relay_fetch_energy": 0.8872121100158183
         },
         "step_breakdown": [
           {
             "step": 1,
             "uav_move_energy": 0.0,
-            "uav_compute_energy": 1.355720113600278,
-            "ue_local_energy": 1.0930375124966316,
-            "ue_uplink_energy": 2.3021092501104703,
-            "bs_compute_energy": 0.39041624666966723,
-            "relay_fetch_energy": 0.2445127819048187
+            "uav_compute_energy": 1.4846457566821976,
+            "ue_local_energy": 0.868594435102505,
+            "ue_uplink_energy": 2.52085554939184,
+            "bs_compute_energy": 0.40283809177816626,
+            "relay_fetch_energy": 0.24520241965739648
           },
           {
             "step": 2,
-            "uav_move_energy": 37.800000000000026,
-            "uav_compute_energy": 0.7824865743743599,
+            "uav_move_energy": 37.80000000000003,
+            "uav_compute_energy": 0.7989412042104939,
             "ue_local_energy": 0.1709624154056262,
-            "ue_uplink_energy": 1.3754213921495309,
-            "bs_compute_energy": 0.18066264005114485,
-            "relay_fetch_energy": 0.08781313792334443
+            "ue_uplink_energy": 1.4258901892176818,
+            "bs_compute_energy": 0.17078986214946446,
+            "relay_fetch_energy": 0.13948982576332655
           },
           {
             "step": 3,
             "uav_move_energy": 37.80000000000001,
-            "uav_compute_energy": 1.018520421493499,
+            "uav_compute_energy": 0.9284370553328305,
             "ue_local_energy": 0.1585775151191221,
-            "ue_uplink_energy": 1.6626388382014166,
-            "bs_compute_energy": 0.21730295833995728,
-            "relay_fetch_energy": 0.13689137638291654
+            "ue_uplink_energy": 1.667048634215472,
+            "bs_compute_energy": 0.2713529780363585,
+            "relay_fetch_energy": 0.1291642090036917
           },
           {
             "step": 4,
             "uav_move_energy": 37.799999999999955,
             "uav_compute_energy": 0.6587227555307339,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 1.3303179520443758,
+            "ue_uplink_energy": 1.3303165925346592,
             "bs_compute_energy": 0.20836976065188223,
-            "relay_fetch_energy": 0.1128560749373349
+            "relay_fetch_energy": 0.1368560749373349
           },
           {
             "step": 5,
             "uav_move_energy": 0.0,
             "uav_compute_energy": 0.9204303288981028,
             "ue_local_energy": 0.15225073629534333,
-            "ue_uplink_energy": 1.7711400493843004,
+            "ue_uplink_energy": 1.7710970394481977,
             "bs_compute_energy": 0.24980145077464555,
-            "relay_fetch_energy": 0.11856591663105458
+            "relay_fetch_energy": 0.09456591663105458
           },
           {
             "step": 6,
-            "uav_move_energy": 40.34552740686885,
+            "uav_move_energy": 40.345527406868854,
             "uav_compute_energy": 1.1475181423887337,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 1.9894603745993047,
+            "ue_uplink_energy": 1.9742134751097722,
             "bs_compute_energy": 0.3011922349080523,
-            "relay_fetch_energy": 0.1972466939280021
+            "relay_fetch_energy": 0.14193366402301422
           }
         ]
       },
@@ -2347,20 +2381,20 @@
           "uavs": [
             {
               "uav_id": 0,
-              "tx_queue_length": 1,
-              "tx_queue_delay": 0.07637050957685787,
+              "tx_queue_length": 0,
+              "tx_queue_delay": 0.0,
               "compute_queue_length": 2,
-              "compute_queue_delay": 0.4817748456487363,
-              "backlog_load": 6,
+              "compute_queue_delay": 0.7435632951908102,
+              "backlog_load": 2,
               "coverage_load": 10
             },
             {
               "uav_id": 1,
-              "tx_queue_length": 0,
-              "tx_queue_delay": 0.0,
+              "tx_queue_length": 1,
+              "tx_queue_delay": 0.01628743045573766,
               "compute_queue_length": 2,
-              "compute_queue_delay": 0.5438164935257537,
-              "backlog_load": 5,
+              "compute_queue_delay": 0.442146107113774,
+              "backlog_load": 2,
               "coverage_load": 10
             },
             {
@@ -2368,8 +2402,8 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.3252041413418074,
-              "backlog_load": 5,
+              "compute_queue_delay": 0.404389552342322,
+              "backlog_load": 1,
               "coverage_load": 2
             }
           ]
@@ -2381,8 +2415,8 @@
               "uav_id": 0,
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
-              "compute_queue_length": 1,
-              "compute_queue_delay": 0.15649988420151928,
+              "compute_queue_length": 2,
+              "compute_queue_delay": 0.3568751047475365,
               "backlog_load": 2,
               "coverage_load": 10
             },
@@ -2391,7 +2425,7 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.1457421961708647,
+              "compute_queue_delay": 0.1466216133452769,
               "backlog_load": 1,
               "coverage_load": 10
             },
@@ -2400,8 +2434,8 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.004769836079812517,
-              "backlog_load": 3,
+              "compute_queue_delay": 0.08395524708032731,
+              "backlog_load": 1,
               "coverage_load": 3
             }
           ]
@@ -2413,9 +2447,9 @@
               "uav_id": 0,
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
-              "compute_queue_length": 1,
-              "compute_queue_delay": 0.04979871035878025,
-              "backlog_load": 2,
+              "compute_queue_length": 0,
+              "compute_queue_delay": 0.0,
+              "backlog_load": 0,
               "coverage_load": 10
             },
             {
@@ -2423,8 +2457,8 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.14619675487789419,
-              "backlog_load": 2,
+              "compute_queue_delay": 0.03950994633719995,
+              "backlog_load": 1,
               "coverage_load": 10
             },
             {
@@ -2432,8 +2466,8 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.20742019341622253,
-              "backlog_load": 2,
+              "compute_queue_delay": 0.1984395196829256,
+              "backlog_load": 1,
               "coverage_load": 4
             }
           ]
@@ -2479,7 +2513,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
-              "backlog_load": 1,
+              "backlog_load": 0,
               "coverage_load": 10
             },
             {
@@ -2496,8 +2530,8 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.3033789349470304,
-              "backlog_load": 2,
+              "compute_queue_delay": 0.2911763943651815,
+              "backlog_load": 1,
               "coverage_load": 5
             }
           ]
@@ -2510,8 +2544,8 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.15946617510387462,
-              "backlog_load": 3,
+              "compute_queue_delay": 0.1594459090073519,
+              "backlog_load": 0,
               "coverage_load": 10
             },
             {
@@ -2519,8 +2553,8 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.39316484624071624,
-              "backlog_load": 2,
+              "compute_queue_delay": 0.39559322440715583,
+              "backlog_load": 0,
               "coverage_load": 10
             },
             {
@@ -2528,8 +2562,8 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.1609067120198313,
-              "backlog_load": 1,
+              "compute_queue_delay": 0.16088337496938454,
+              "backlog_load": 0,
               "coverage_load": 6
             }
           ]
@@ -2572,7 +2606,7 @@
           "step": 1,
           "uav_id": 0,
           "action": "admit",
-          "service_type": 3,
+          "service_type": 1,
           "value_score": 1e-06,
           "reason": "opportunistic_admission"
         },
@@ -2612,7 +2646,23 @@
           "step": 1,
           "uav_id": 2,
           "action": "admit",
-          "service_type": 4,
+          "service_type": 1,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 1,
+          "uav_id": 1,
+          "action": "evict",
+          "service_type": 2,
+          "value_score": 1e-06,
+          "reason": "low_value"
+        },
+        {
+          "step": 1,
+          "uav_id": 1,
+          "action": "admit",
+          "service_type": 0,
           "value_score": 1e-06,
           "reason": "opportunistic_admission"
         },
@@ -2620,7 +2670,7 @@
           "step": 1,
           "uav_id": 0,
           "action": "evict",
-          "service_type": 3,
+          "service_type": 1,
           "value_score": 1e-06,
           "reason": "low_value"
         },
@@ -2628,7 +2678,7 @@
           "step": 1,
           "uav_id": 0,
           "action": "admit",
-          "service_type": 1,
+          "service_type": 3,
           "value_score": 1e-06,
           "reason": "opportunistic_admission"
         },
@@ -2636,7 +2686,7 @@
           "step": 2,
           "uav_id": 0,
           "action": "evict",
-          "service_type": 1,
+          "service_type": 3,
           "value_score": 1e-06,
           "reason": "low_value"
         },
@@ -2644,15 +2694,15 @@
           "step": 2,
           "uav_id": 0,
           "action": "admit",
-          "service_type": 3,
-          "value_score": 1.098076923076923e-06,
+          "service_type": 2,
+          "value_score": 1e-06,
           "reason": "opportunistic_admission"
         },
         {
           "step": 2,
           "uav_id": 2,
           "action": "evict",
-          "service_type": 4,
+          "service_type": 1,
           "value_score": 1e-06,
           "reason": "low_value"
         },
@@ -2665,56 +2715,72 @@
           "reason": "opportunistic_admission"
         },
         {
-          "step": 3,
+          "step": 2,
+          "uav_id": 1,
+          "action": "evict",
+          "service_type": 0,
+          "value_score": 1e-06,
+          "reason": "low_value"
+        },
+        {
+          "step": 2,
+          "uav_id": 1,
+          "action": "admit",
+          "service_type": 4,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 2,
           "uav_id": 0,
+          "action": "evict",
+          "service_type": 2,
+          "value_score": 1e-06,
+          "reason": "refresh"
+        },
+        {
+          "step": 2,
+          "uav_id": 0,
+          "action": "admit",
+          "service_type": 1,
+          "value_score": 1e-06,
+          "reason": "refresh"
+        },
+        {
+          "step": 2,
+          "uav_id": 1,
           "action": "evict",
           "service_type": 4,
           "value_score": 1e-06,
+          "reason": "refresh"
+        },
+        {
+          "step": 2,
+          "uav_id": 1,
+          "action": "admit",
+          "service_type": 0,
+          "value_score": 1e-06,
+          "reason": "refresh"
+        },
+        {
+          "step": 3,
+          "uav_id": 1,
+          "action": "evict",
+          "service_type": 0,
+          "value_score": 1e-06,
           "reason": "low_value"
         },
         {
           "step": 3,
-          "uav_id": 0,
-          "action": "admit",
-          "service_type": 0,
-          "value_score": 1e-06,
-          "reason": "opportunistic_admission"
-        },
-        {
-          "step": 4,
-          "uav_id": 0,
-          "action": "evict",
-          "service_type": 0,
-          "value_score": 1e-06,
-          "reason": "low_value"
-        },
-        {
-          "step": 4,
-          "uav_id": 0,
+          "uav_id": 1,
           "action": "admit",
           "service_type": 2,
-          "value_score": 1e-06,
+          "value_score": 1.2977272727272728e-06,
           "reason": "opportunistic_admission"
         },
         {
           "step": 4,
           "uav_id": 1,
-          "action": "evict",
-          "service_type": 3,
-          "value_score": 1.098076923076923e-06,
-          "reason": "low_value"
-        },
-        {
-          "step": 4,
-          "uav_id": 1,
-          "action": "admit",
-          "service_type": 1,
-          "value_score": 1.5861111111111111e-06,
-          "reason": "opportunistic_admission"
-        },
-        {
-          "step": 4,
-          "uav_id": 2,
           "action": "evict",
           "service_type": 2,
           "value_score": 1.2977272727272728e-06,
@@ -2722,62 +2788,30 @@
         },
         {
           "step": 4,
-          "uav_id": 2,
+          "uav_id": 1,
           "action": "admit",
-          "service_type": 4,
-          "value_score": 1.6019166666666666e-06,
+          "service_type": 1,
+          "value_score": 1.5861111111111111e-06,
           "reason": "opportunistic_admission"
         },
         {
           "step": 4,
           "uav_id": 0,
           "action": "evict",
-          "service_type": 2,
-          "value_score": 1e-06,
-          "reason": "refresh"
+          "service_type": 1,
+          "value_score": 1.5861111111111111e-06,
+          "reason": "low_value"
         },
         {
           "step": 4,
           "uav_id": 0,
           "action": "admit",
-          "service_type": 4,
-          "value_score": 1e-06,
-          "reason": "refresh"
-        },
-        {
-          "step": 5,
-          "uav_id": 0,
-          "action": "evict",
-          "service_type": 4,
-          "value_score": 1e-06,
-          "reason": "low_value"
-        },
-        {
-          "step": 5,
-          "uav_id": 0,
-          "action": "admit",
-          "service_type": 0,
-          "value_score": 2.039285714285714e-06,
+          "service_type": 3,
+          "value_score": 1.8483653846153844e-06,
           "reason": "opportunistic_admission"
         },
         {
-          "step": 5,
-          "uav_id": 2,
-          "action": "evict",
-          "service_type": 4,
-          "value_score": 1.6019166666666666e-06,
-          "reason": "low_value"
-        },
-        {
-          "step": 5,
-          "uav_id": 2,
-          "action": "admit",
-          "service_type": 2,
-          "value_score": 2.184431818181818e-06,
-          "reason": "opportunistic_admission"
-        },
-        {
-          "step": 5,
+          "step": 4,
           "uav_id": 1,
           "action": "evict",
           "service_type": 1,
@@ -2785,39 +2819,23 @@
           "reason": "low_value"
         },
         {
+          "step": 4,
+          "uav_id": 1,
+          "action": "admit",
+          "service_type": 2,
+          "value_score": 2.184431818181818e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
           "step": 5,
-          "uav_id": 1,
-          "action": "admit",
-          "service_type": 3,
-          "value_score": 1.8483653846153844e-06,
-          "reason": "opportunistic_admission"
-        },
-        {
-          "step": 6,
-          "uav_id": 1,
-          "action": "evict",
-          "service_type": 3,
-          "value_score": 1.8483653846153844e-06,
-          "reason": "low_value"
-        },
-        {
-          "step": 6,
-          "uav_id": 1,
-          "action": "admit",
-          "service_type": 0,
-          "value_score": 2.039285714285714e-06,
-          "reason": "opportunistic_admission"
-        },
-        {
-          "step": 6,
           "uav_id": 0,
           "action": "evict",
-          "service_type": 0,
-          "value_score": 2.039285714285714e-06,
+          "service_type": 4,
+          "value_score": 1.6019166666666666e-06,
           "reason": "low_value"
         },
         {
-          "step": 6,
+          "step": 5,
           "uav_id": 0,
           "action": "admit",
           "service_type": 1,
@@ -2826,34 +2844,18 @@
         },
         {
           "step": 6,
-          "uav_id": 2,
+          "uav_id": 0,
           "action": "evict",
-          "service_type": 0,
-          "value_score": 2.039285714285714e-06,
+          "service_type": 3,
+          "value_score": 1.8483653846153844e-06,
           "reason": "low_value"
         },
         {
           "step": 6,
-          "uav_id": 2,
+          "uav_id": 0,
           "action": "admit",
-          "service_type": 1,
-          "value_score": 2.669861111111111e-06,
-          "reason": "opportunistic_admission"
-        },
-        {
-          "step": 6,
-          "uav_id": 1,
-          "action": "evict",
-          "service_type": 0,
-          "value_score": 2.039285714285714e-06,
-          "reason": "low_value"
-        },
-        {
-          "step": 6,
-          "uav_id": 1,
-          "action": "admit",
-          "service_type": 1,
-          "value_score": 2.669861111111111e-06,
+          "service_type": 4,
+          "value_score": 2.3162458333333334e-06,
           "reason": "opportunistic_admission"
         }
       ],
@@ -2861,22 +2863,22 @@
         {
           "step": 1,
           "new_tasks": 19,
-          "pending_tasks": 12,
-          "completed_tasks": 7,
+          "pending_tasks": 11,
+          "completed_tasks": 8,
           "expired_tasks": 0
         },
         {
           "step": 2,
           "new_tasks": 9,
-          "pending_tasks": 5,
-          "completed_tasks": 14,
+          "pending_tasks": 6,
+          "completed_tasks": 12,
           "expired_tasks": 2
         },
         {
           "step": 3,
           "new_tasks": 11,
           "pending_tasks": 4,
-          "completed_tasks": 12,
+          "completed_tasks": 13,
           "expired_tasks": 0
         },
         {
@@ -2896,9 +2898,9 @@
         {
           "step": 6,
           "new_tasks": 11,
-          "pending_tasks": 4,
+          "pending_tasks": 0,
           "completed_tasks": 10,
-          "expired_tasks": 0
+          "expired_tasks": 4
         }
       ]
     },
@@ -2910,79 +2912,81 @@
       "num_users": 10,
       "assignment_rule": "least_loaded_uav",
       "global_metrics": {
-        "completion_rate": 0.896551724137931,
-        "average_latency": 0.7431774223972407,
-        "total_energy": 131.02452204594755,
-        "cache_hit_rate": 0.5,
-        "fairness_user_completion": 0.9884261425674622,
-        "fairness_uav_load": 0.9743589743589743,
+        "completion_rate": 0.9137931034482759,
+        "average_latency": 0.8634541824597627,
+        "average_latency_finalized": 0.8634541824597627,
+        "average_latency_completed": 0.8322581313735691,
+        "latency_per_generated_task": 0.8634541824597627,
+        "total_energy": 131.16626560358674,
+        "cache_hit_rate": 0.1896551724137931,
+        "fairness_user_completion": 0.9875047359248313,
+        "fairness_uav_load": 0.9844660194174757,
         "deadline_violation_rate": 0.0,
         "reliability_violation_rate": 0.0,
         "uav_move_energy": 113.40000000000006,
-        "uav_compute_energy": 5.2424693667150475,
-        "ue_local_energy": 0.7041220214105819,
-        "ue_uplink_energy": 9.556119808521803,
-        "bs_compute_energy": 1.3753465663092896,
-        "relay_fetch_energy": 0.7464642829907706
+        "uav_compute_energy": 5.374175568628937,
+        "ue_local_energy": 0.5373112532408045,
+        "ue_uplink_energy": 9.679518844014998,
+        "bs_compute_energy": 1.3630471524288672,
+        "relay_fetch_energy": 0.8122127852730574
       },
       "per_uav_metrics": [
         {
           "agent_id": "uav_0",
           "uav_id": 0,
-          "served_task_count_total": 12,
-          "assigned_task_count_total": 23,
-          "completed_task_count_total": 12,
+          "served_task_count_total": 14,
+          "assigned_task_count_total": 15,
+          "completed_task_count_total": 14,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 1,
-          "current_compute_queue_delay": 0.1821172891883398,
-          "current_backlog_load": 2,
+          "current_compute_queue_delay": 0.023793276071988778,
+          "current_backlog_load": 0,
           "current_coverage_load": 10,
           "cumulative_tx_queue_delay": 0.0,
-          "cumulative_compute_queue_delay": 0.8768979353104731,
+          "cumulative_compute_queue_delay": 0.47170993151015894,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 1,
-          "remaining_energy_j": 4960.395404845238,
-          "energy_used_j": 39.60459515476214,
-          "cache_usage_ratio": 1.0,
-          "cache_services": [
-            1,
-            2
-          ],
-          "cache_scores": {
-            "0": 2.039285714285714e-06,
-            "1": 2.669861111111111e-06,
-            "2": 4.189399715909091e-06,
-            "3": 1.098076923076923e-06,
-            "4": 1e-06
-          }
-        },
-        {
-          "agent_id": "uav_1",
-          "uav_id": 1,
-          "served_task_count_total": 13,
-          "assigned_task_count_total": 20,
-          "completed_task_count_total": 13,
-          "current_tx_queue_length": 0,
-          "current_tx_queue_delay": 0.0,
-          "current_compute_queue_length": 2,
-          "current_compute_queue_delay": 0.34414078099683554,
-          "current_backlog_load": 3,
-          "current_coverage_load": 10,
-          "cumulative_tx_queue_delay": 0.0,
-          "cumulative_compute_queue_delay": 0.7306347430794373,
-          "max_tx_queue_length": 0,
-          "max_compute_queue_length": 2,
-          "remaining_energy_j": 4960.1843218363865,
-          "energy_used_j": 39.815678163613484,
+          "remaining_energy_j": 4960.037267943715,
+          "energy_used_j": 39.96273205628495,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             0,
             1
           ],
           "cache_scores": {
-            "0": 3.432678571428571e-06,
+            "0": 4.963383928571429e-06,
             "1": 5.120377430555555e-06,
+            "2": 2.184431818181818e-06,
+            "3": 1.8483653846153844e-06
+          }
+        },
+        {
+          "agent_id": "uav_1",
+          "uav_id": 1,
+          "served_task_count_total": 12,
+          "assigned_task_count_total": 13,
+          "completed_task_count_total": 12,
+          "current_tx_queue_length": 0,
+          "current_tx_queue_delay": 0.0,
+          "current_compute_queue_length": 1,
+          "current_compute_queue_delay": 0.33220773962534533,
+          "current_backlog_load": 0,
+          "current_coverage_load": 10,
+          "cumulative_tx_queue_delay": 0.0,
+          "cumulative_compute_queue_delay": 0.8993590851121676,
+          "max_tx_queue_length": 0,
+          "max_compute_queue_length": 1,
+          "remaining_energy_j": 4960.117788296055,
+          "energy_used_j": 39.88221170394536,
+          "cache_usage_ratio": 1.0,
+          "cache_services": [
+            0,
+            1
+          ],
+          "cache_scores": {
+            "0": 2.039285714285714e-06,
+            "1": 3.860409722222222e-06,
             "2": 1.2977272727272728e-06,
             "3": 1.8483653846153844e-06,
             "4": 1e-06
@@ -2991,30 +2995,30 @@
         {
           "agent_id": "uav_2",
           "uav_id": 2,
-          "served_task_count_total": 9,
-          "assigned_task_count_total": 15,
-          "completed_task_count_total": 9,
+          "served_task_count_total": 10,
+          "assigned_task_count_total": 11,
+          "completed_task_count_total": 10,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 1,
-          "current_compute_queue_delay": 0.017271110274028167,
-          "current_backlog_load": 5,
+          "current_compute_queue_delay": 0.2479517682893908,
+          "current_backlog_load": 0,
           "current_coverage_load": 5,
           "cumulative_tx_queue_delay": 0.0,
-          "cumulative_compute_queue_delay": 0.20693032136870437,
+          "cumulative_compute_queue_delay": 0.5885265463045268,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 1,
-          "remaining_energy_j": 4960.777803951659,
-          "energy_used_j": 39.222196048341175,
+          "remaining_energy_j": 4960.445555406323,
+          "energy_used_j": 39.554444593676635,
           "cache_usage_ratio": 1.0,
           "cache_services": [
-            3,
-            4
+            2,
+            3
           ],
           "cache_scores": {
             "0": 1e-06,
             "1": 1e-06,
-            "2": 1.2977272727272728e-06,
+            "2": 2.184431818181818e-06,
             "3": 1.8483653846153844e-06,
             "4": 1.6019166666666666e-06
           }
@@ -3386,7 +3390,8 @@
           "completed_tasks": 7.0,
           "pending_tasks": 0.0,
           "average_latency": 0.6219727396885707,
-          "cache_hit_rate": 0.42857142857142855,
+          "average_latency_completed": 0.6219727396885707,
+          "cache_hit_rate": 0.14285714285714285,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -3401,40 +3406,42 @@
         {
           "step": 2,
           "generated_tasks": 13.0,
-          "finalized_tasks": 6.0,
-          "completed_tasks": 6.0,
-          "pending_tasks": 7.0,
-          "average_latency": 0.664999065570463,
-          "cache_hit_rate": 0.6666666666666666,
+          "finalized_tasks": 7.0,
+          "completed_tasks": 7.0,
+          "pending_tasks": 6.0,
+          "average_latency": 0.7083849351952894,
+          "average_latency_completed": 0.7083849351952894,
+          "cache_hit_rate": 0.2857142857142857,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 3.668833632745345,
+          "total_energy": 3.772197802831661,
           "uav_move_energy": 0.0,
-          "uav_compute_energy": 0.9485924223565976,
-          "ue_local_energy": 0.514297882577277,
-          "ue_uplink_energy": 1.7650754767129704,
+          "uav_compute_energy": 1.059799601136449,
+          "ue_local_energy": 0.3474871144074997,
+          "ue_uplink_energy": 1.9240432361892128,
           "bs_compute_energy": 0.2527559846171569,
           "relay_fetch_energy": 0.18811186648134276
         },
         {
           "step": 3,
           "generated_tasks": 10.0,
-          "finalized_tasks": 13.0,
-          "completed_tasks": 13.0,
+          "finalized_tasks": 12.0,
+          "completed_tasks": 12.0,
           "pending_tasks": 4.0,
-          "average_latency": 0.9109713088302072,
-          "cache_hit_rate": 0.6153846153846154,
+          "average_latency": 0.9148974548609662,
+          "average_latency_completed": 0.9148974548609662,
+          "cache_hit_rate": 0.16666666666666666,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 41.02344792636102,
-          "uav_move_energy": 37.80000000000007,
+          "total_energy": 41.02327194032983,
+          "uav_move_energy": 37.80000000000005,
           "uav_compute_energy": 0.9265065849345921,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 1.8795814768126564,
+          "ue_uplink_energy": 1.868405490781488,
           "bs_compute_energy": 0.269897517715455,
-          "relay_fetch_energy": 0.1474623468982473
+          "relay_fetch_energy": 0.1584623468982473
         },
         {
           "step": 4,
@@ -3442,16 +3449,17 @@
           "finalized_tasks": 10.0,
           "completed_tasks": 10.0,
           "pending_tasks": 0.0,
-          "average_latency": 0.8478016984378357,
-          "cache_hit_rate": 0.6,
+          "average_latency": 0.8440802461960171,
+          "average_latency_completed": 0.8440802461960171,
+          "cache_hit_rate": 0.3,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 39.6035514228131,
-          "uav_move_energy": 37.79999999999998,
+          "total_energy": 39.60749108041932,
+          "uav_move_energy": 37.800000000000026,
           "uav_compute_energy": 0.532364167356292,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 1.0362320047697942,
+          "ue_uplink_energy": 1.04017166237597,
           "bs_compute_energy": 0.16940401863508298,
           "relay_fetch_energy": 0.06555123205194924
         },
@@ -3461,47 +3469,49 @@
           "finalized_tasks": 7.0,
           "completed_tasks": 7.0,
           "pending_tasks": 5.0,
-          "average_latency": 0.7410439093733042,
-          "cache_hit_rate": 0.2857142857142857,
+          "average_latency": 0.7244130549079536,
+          "average_latency_completed": 0.7244130549079536,
+          "cache_hit_rate": 0.14285714285714285,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 3.80904686968747,
+          "total_energy": 3.854231952980654,
           "uav_move_energy": 0.0,
-          "uav_compute_energy": 1.1298338038360265,
+          "uav_compute_energy": 1.1310269064653735,
           "ue_local_energy": 0.0,
-          "ue_uplink_energy": 2.154469319705528,
-          "bs_compute_energy": 0.36731621133272746,
-          "relay_fetch_energy": 0.15742753481318794
+          "ue_uplink_energy": 2.1506701080504884,
+          "bs_compute_energy": 0.3666003497551193,
+          "relay_fetch_energy": 0.20593458870967252
         },
         {
           "step": 6,
           "generated_tasks": 10.0,
-          "finalized_tasks": 9.0,
-          "completed_tasks": 9.0,
-          "pending_tasks": 6.0,
-          "average_latency": 1.0280595070014469,
-          "cache_hit_rate": 0.6666666666666666,
-          "completion_rate": 1.0,
+          "finalized_tasks": 15.0,
+          "completed_tasks": 10.0,
+          "pending_tasks": 0.0,
+          "average_latency": 1.0851583702554513,
+          "average_latency_completed": 1.0306713933964697,
+          "cache_hit_rate": 0.13333333333333333,
+          "completion_rate": 0.6666666666666666,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
-          "total_energy": 40.91657107331426,
-          "uav_move_energy": 37.800000000000004,
-          "uav_compute_energy": 1.0865702025111452,
+          "total_energy": 40.90600170599889,
+          "uav_move_energy": 37.799999999999976,
+          "uav_compute_energy": 1.1058761230158356,
           "ue_local_energy": 0.18982413883330485,
-          "ue_uplink_energy": 1.5151470634996655,
-          "bs_compute_energy": 0.18111836572409223,
-          "relay_fetch_energy": 0.14391130274604336
+          "ue_uplink_energy": 1.4906138795966495,
+          "bs_compute_energy": 0.16953481342127805,
+          "relay_fetch_energy": 0.15015275113184562
         }
       ],
       "energy_breakdown": {
         "episode_totals": {
           "uav_move_energy": 113.40000000000006,
-          "uav_compute_energy": 5.2424693667150475,
-          "ue_local_energy": 0.7041220214105819,
-          "ue_uplink_energy": 9.556119808521803,
-          "bs_compute_energy": 1.3753465663092896,
-          "relay_fetch_energy": 0.7464642829907706
+          "uav_compute_energy": 5.374175568628937,
+          "ue_local_energy": 0.5373112532408045,
+          "ue_uplink_energy": 9.679518844014998,
+          "bs_compute_energy": 1.3630471524288672,
+          "relay_fetch_energy": 0.8122127852730574
         },
         "step_breakdown": [
           {
@@ -3516,47 +3526,47 @@
           {
             "step": 2,
             "uav_move_energy": 0.0,
-            "uav_compute_energy": 0.9485924223565976,
-            "ue_local_energy": 0.514297882577277,
-            "ue_uplink_energy": 1.7650754767129704,
+            "uav_compute_energy": 1.059799601136449,
+            "ue_local_energy": 0.3474871144074997,
+            "ue_uplink_energy": 1.9240432361892128,
             "bs_compute_energy": 0.2527559846171569,
             "relay_fetch_energy": 0.18811186648134276
           },
           {
             "step": 3,
-            "uav_move_energy": 37.80000000000007,
+            "uav_move_energy": 37.80000000000005,
             "uav_compute_energy": 0.9265065849345921,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 1.8795814768126564,
+            "ue_uplink_energy": 1.868405490781488,
             "bs_compute_energy": 0.269897517715455,
-            "relay_fetch_energy": 0.1474623468982473
+            "relay_fetch_energy": 0.1584623468982473
           },
           {
             "step": 4,
-            "uav_move_energy": 37.79999999999998,
+            "uav_move_energy": 37.800000000000026,
             "uav_compute_energy": 0.532364167356292,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 1.0362320047697942,
+            "ue_uplink_energy": 1.04017166237597,
             "bs_compute_energy": 0.16940401863508298,
             "relay_fetch_energy": 0.06555123205194924
           },
           {
             "step": 5,
             "uav_move_energy": 0.0,
-            "uav_compute_energy": 1.1298338038360265,
+            "uav_compute_energy": 1.1310269064653735,
             "ue_local_energy": 0.0,
-            "ue_uplink_energy": 2.154469319705528,
-            "bs_compute_energy": 0.36731621133272746,
-            "relay_fetch_energy": 0.15742753481318794
+            "ue_uplink_energy": 2.1506701080504884,
+            "bs_compute_energy": 0.3666003497551193,
+            "relay_fetch_energy": 0.20593458870967252
           },
           {
             "step": 6,
-            "uav_move_energy": 37.800000000000004,
-            "uav_compute_energy": 1.0865702025111452,
+            "uav_move_energy": 37.799999999999976,
+            "uav_compute_energy": 1.1058761230158356,
             "ue_local_energy": 0.18982413883330485,
-            "ue_uplink_energy": 1.5151470634996655,
-            "bs_compute_energy": 0.18111836572409223,
-            "relay_fetch_energy": 0.14391130274604336
+            "ue_uplink_energy": 1.4906138795966495,
+            "bs_compute_energy": 0.16953481342127805,
+            "relay_fetch_energy": 0.15015275113184562
           }
         ]
       },
@@ -3601,8 +3611,8 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.2650998719612021,
-              "backlog_load": 5,
+              "compute_queue_delay": 0.10524410027622011,
+              "backlog_load": 1,
               "coverage_load": 10
             },
             {
@@ -3610,8 +3620,8 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.00940512597148091,
-              "backlog_load": 2,
+              "compute_queue_delay": 0.4065738715788587,
+              "backlog_load": 1,
               "coverage_load": 10
             },
             {
@@ -3619,8 +3629,8 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.015610721180918219,
-              "backlog_load": 3,
+              "compute_queue_delay": 0.015610721180918663,
+              "backlog_load": 1,
               "coverage_load": 2
             }
           ]
@@ -3633,8 +3643,8 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.03456068551597191,
-              "backlog_load": 2,
+              "compute_queue_delay": 0.1383109929815407,
+              "backlog_load": 1,
               "coverage_load": 10
             },
             {
@@ -3642,8 +3652,8 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.14294464695718867,
-              "backlog_load": 2,
+              "compute_queue_delay": 0.05396967921302753,
+              "backlog_load": 1,
               "coverage_load": 10
             },
             {
@@ -3651,8 +3661,8 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.06154337219566708,
-              "backlog_load": 3,
+              "compute_queue_delay": 0.026255856278625256,
+              "backlog_load": 1,
               "coverage_load": 3
             }
           ]
@@ -3697,7 +3707,7 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.3951200886449593,
+              "compute_queue_delay": 0.20436156218040935,
               "backlog_load": 1,
               "coverage_load": 10
             },
@@ -3706,7 +3716,7 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.2341441891539322,
+              "compute_queue_delay": 0.10660779469493598,
               "backlog_load": 1,
               "coverage_load": 10
             },
@@ -3715,8 +3725,8 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.11250511771809091,
-              "backlog_load": 4,
+              "compute_queue_delay": 0.2987082005555921,
+              "backlog_load": 1,
               "coverage_load": 4
             }
           ]
@@ -3729,17 +3739,17 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.1821172891883398,
-              "backlog_load": 2,
+              "compute_queue_delay": 0.023793276071988778,
+              "backlog_load": 0,
               "coverage_load": 10
             },
             {
               "uav_id": 1,
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
-              "compute_queue_length": 2,
-              "compute_queue_delay": 0.34414078099683554,
-              "backlog_load": 3,
+              "compute_queue_length": 1,
+              "compute_queue_delay": 0.33220773962534533,
+              "backlog_load": 0,
               "coverage_load": 10
             },
             {
@@ -3747,8 +3757,8 @@
               "tx_queue_length": 0,
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
-              "compute_queue_delay": 0.017271110274028167,
-              "backlog_load": 5,
+              "compute_queue_delay": 0.2479517682893908,
+              "backlog_load": 0,
               "coverage_load": 5
             }
           ]
@@ -3837,15 +3847,15 @@
         },
         {
           "step": 2,
-          "uav_id": 0,
+          "uav_id": 1,
           "action": "evict",
-          "service_type": 0,
+          "service_type": 4,
           "value_score": 1e-06,
           "reason": "low_value"
         },
         {
           "step": 2,
-          "uav_id": 0,
+          "uav_id": 1,
           "action": "admit",
           "service_type": 3,
           "value_score": 1e-06,
@@ -3853,25 +3863,9 @@
         },
         {
           "step": 2,
-          "uav_id": 0,
-          "action": "evict",
-          "service_type": 3,
-          "value_score": 1e-06,
-          "reason": "refresh"
-        },
-        {
-          "step": 2,
-          "uav_id": 0,
-          "action": "admit",
-          "service_type": 0,
-          "value_score": 1e-06,
-          "reason": "refresh"
-        },
-        {
-          "step": 2,
           "uav_id": 1,
           "action": "evict",
-          "service_type": 4,
+          "service_type": 3,
           "value_score": 1e-06,
           "reason": "refresh"
         },
@@ -3882,6 +3876,22 @@
           "service_type": 2,
           "value_score": 1e-06,
           "reason": "refresh"
+        },
+        {
+          "step": 3,
+          "uav_id": 0,
+          "action": "evict",
+          "service_type": 0,
+          "value_score": 1e-06,
+          "reason": "low_value"
+        },
+        {
+          "step": 3,
+          "uav_id": 0,
+          "action": "admit",
+          "service_type": 2,
+          "value_score": 1.2977272727272728e-06,
+          "reason": "opportunistic_admission"
         },
         {
           "step": 3,
@@ -3901,46 +3911,14 @@
         },
         {
           "step": 3,
-          "uav_id": 2,
+          "uav_id": 0,
           "action": "evict",
-          "service_type": 3,
-          "value_score": 1e-06,
-          "reason": "low_value"
-        },
-        {
-          "step": 3,
-          "uav_id": 2,
-          "action": "admit",
           "service_type": 2,
-          "value_score": 1e-06,
-          "reason": "opportunistic_admission"
-        },
-        {
-          "step": 3,
-          "uav_id": 0,
-          "action": "evict",
-          "service_type": 0,
-          "value_score": 1e-06,
+          "value_score": 1.2977272727272728e-06,
           "reason": "low_value"
         },
         {
           "step": 3,
-          "uav_id": 0,
-          "action": "admit",
-          "service_type": 3,
-          "value_score": 1.098076923076923e-06,
-          "reason": "opportunistic_admission"
-        },
-        {
-          "step": 4,
-          "uav_id": 0,
-          "action": "evict",
-          "service_type": 3,
-          "value_score": 1.098076923076923e-06,
-          "reason": "low_value"
-        },
-        {
-          "step": 4,
           "uav_id": 0,
           "action": "admit",
           "service_type": 0,
@@ -3948,6 +3926,38 @@
           "reason": "opportunistic_admission"
         },
         {
+          "step": 3,
+          "uav_id": 2,
+          "action": "evict",
+          "service_type": 3,
+          "value_score": 1e-06,
+          "reason": "low_value"
+        },
+        {
+          "step": 3,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 2,
+          "value_score": 1e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 3,
+          "uav_id": 1,
+          "action": "evict",
+          "service_type": 2,
+          "value_score": 1e-06,
+          "reason": "low_value"
+        },
+        {
+          "step": 3,
+          "uav_id": 1,
+          "action": "admit",
+          "service_type": 3,
+          "value_score": 1.098076923076923e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
           "step": 4,
           "uav_id": 2,
           "action": "evict",
@@ -3962,6 +3972,22 @@
           "service_type": 1,
           "value_score": 1e-06,
           "reason": "refresh"
+        },
+        {
+          "step": 5,
+          "uav_id": 1,
+          "action": "evict",
+          "service_type": 3,
+          "value_score": 1.098076923076923e-06,
+          "reason": "low_value"
+        },
+        {
+          "step": 5,
+          "uav_id": 1,
+          "action": "admit",
+          "service_type": 2,
+          "value_score": 1.2977272727272728e-06,
+          "reason": "opportunistic_admission"
         },
         {
           "step": 5,
@@ -3981,6 +4007,38 @@
         },
         {
           "step": 5,
+          "uav_id": 2,
+          "action": "evict",
+          "service_type": 3,
+          "value_score": 1.098076923076923e-06,
+          "reason": "low_value"
+        },
+        {
+          "step": 5,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 2,
+          "value_score": 1.2977272727272728e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 6,
+          "uav_id": 2,
+          "action": "evict",
+          "service_type": 2,
+          "value_score": 1.2977272727272728e-06,
+          "reason": "low_value"
+        },
+        {
+          "step": 6,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 3,
+          "value_score": 1.8483653846153844e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 6,
           "uav_id": 1,
           "action": "evict",
           "service_type": 2,
@@ -3988,27 +4046,43 @@
           "reason": "low_value"
         },
         {
-          "step": 5,
+          "step": 6,
+          "uav_id": 1,
+          "action": "admit",
+          "service_type": 3,
+          "value_score": 1.8483653846153844e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 6,
+          "uav_id": 2,
+          "action": "evict",
+          "service_type": 4,
+          "value_score": 1.6019166666666666e-06,
+          "reason": "low_value"
+        },
+        {
+          "step": 6,
+          "uav_id": 2,
+          "action": "admit",
+          "service_type": 2,
+          "value_score": 2.184431818181818e-06,
+          "reason": "opportunistic_admission"
+        },
+        {
+          "step": 6,
+          "uav_id": 1,
+          "action": "evict",
+          "service_type": 3,
+          "value_score": 1.8483653846153844e-06,
+          "reason": "low_value"
+        },
+        {
+          "step": 6,
           "uav_id": 1,
           "action": "admit",
           "service_type": 0,
           "value_score": 2.039285714285714e-06,
-          "reason": "opportunistic_admission"
-        },
-        {
-          "step": 5,
-          "uav_id": 0,
-          "action": "evict",
-          "service_type": 0,
-          "value_score": 2.039285714285714e-06,
-          "reason": "low_value"
-        },
-        {
-          "step": 5,
-          "uav_id": 0,
-          "action": "admit",
-          "service_type": 2,
-          "value_score": 2.184431818181818e-06,
           "reason": "opportunistic_admission"
         }
       ],
@@ -4023,15 +4097,15 @@
         {
           "step": 2,
           "new_tasks": 13,
-          "pending_tasks": 7,
-          "completed_tasks": 6,
+          "pending_tasks": 6,
+          "completed_tasks": 7,
           "expired_tasks": 0
         },
         {
           "step": 3,
           "new_tasks": 10,
           "pending_tasks": 4,
-          "completed_tasks": 13,
+          "completed_tasks": 12,
           "expired_tasks": 0
         },
         {
@@ -4051,9 +4125,9 @@
         {
           "step": 6,
           "new_tasks": 10,
-          "pending_tasks": 6,
-          "completed_tasks": 9,
-          "expired_tasks": 0
+          "pending_tasks": 0,
+          "completed_tasks": 10,
+          "expired_tasks": 5
         }
       ]
     },
@@ -4066,9 +4140,12 @@
       "assignment_rule": "least_loaded_uav",
       "global_metrics": {
         "completion_rate": 0.9814814814814815,
-        "average_latency": 0.8114098267683478,
+        "average_latency": 0.8330011092459143,
+        "average_latency_finalized": 0.8330011092459143,
+        "average_latency_completed": 0.8267194461413355,
+        "latency_per_generated_task": 0.8330011092459143,
         "total_energy": 168.75452511623715,
-        "cache_hit_rate": 0.5370370370370371,
+        "cache_hit_rate": 0.24074074074074073,
         "fairness_user_completion": 0.9974212034383956,
         "fairness_uav_load": 0.9813620071684588,
         "deadline_violation_rate": 0.0,
@@ -4085,20 +4162,20 @@
           "agent_id": "uav_0",
           "uav_id": 0,
           "served_task_count_total": 14,
-          "assigned_task_count_total": 16,
+          "assigned_task_count_total": 14,
           "completed_task_count_total": 14,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
           "current_compute_queue_length": 0,
           "current_compute_queue_delay": 0.0,
-          "current_backlog_load": 1,
+          "current_backlog_load": 0,
           "current_coverage_load": 10,
           "cumulative_tx_queue_delay": 0.0,
           "cumulative_compute_queue_delay": 0.7817321403278661,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 2,
-          "remaining_energy_j": 4947.096166883669,
-          "energy_used_j": 52.90383311633104,
+          "remaining_energy_j": 4946.945056890472,
+          "energy_used_j": 53.05494310952781,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             0,
@@ -4116,7 +4193,7 @@
           "agent_id": "uav_1",
           "uav_id": 1,
           "served_task_count_total": 13,
-          "assigned_task_count_total": 25,
+          "assigned_task_count_total": 13,
           "completed_task_count_total": 13,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
@@ -4128,8 +4205,8 @@
           "cumulative_compute_queue_delay": 0.3265685698574914,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 1,
-          "remaining_energy_j": 4947.781631731367,
-          "energy_used_j": 52.21836826863273,
+          "remaining_energy_j": 4947.53142820742,
+          "energy_used_j": 52.468571792580406,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             0,
@@ -4147,7 +4224,7 @@
           "agent_id": "uav_2",
           "uav_id": 2,
           "served_task_count_total": 10,
-          "assigned_task_count_total": 13,
+          "assigned_task_count_total": 10,
           "completed_task_count_total": 10,
           "current_tx_queue_length": 0,
           "current_tx_queue_delay": 0.0,
@@ -4159,8 +4236,8 @@
           "cumulative_compute_queue_delay": 0.2911596616850929,
           "max_tx_queue_length": 0,
           "max_compute_queue_length": 1,
-          "remaining_energy_j": 4948.1417400868195,
-          "energy_used_j": 51.85825991318052,
+          "remaining_energy_j": 4947.900116832441,
+          "energy_used_j": 52.0998831675588,
           "cache_usage_ratio": 1.0,
           "cache_services": [
             2,
@@ -4540,7 +4617,8 @@
           "completed_tasks": 6.0,
           "pending_tasks": 5.0,
           "average_latency": 0.7285870878011247,
-          "cache_hit_rate": 0.5,
+          "average_latency_completed": 0.7285870878011247,
+          "cache_hit_rate": 0.16666666666666666,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -4559,7 +4637,8 @@
           "completed_tasks": 11.0,
           "pending_tasks": 3.0,
           "average_latency": 0.932933952246335,
-          "cache_hit_rate": 0.5454545454545454,
+          "average_latency_completed": 0.932933952246335,
+          "cache_hit_rate": 0.2727272727272727,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -4578,7 +4657,8 @@
           "completed_tasks": 10.0,
           "pending_tasks": 3.0,
           "average_latency": 0.8336611567518284,
-          "cache_hit_rate": 0.8,
+          "average_latency_completed": 0.8336611567518284,
+          "cache_hit_rate": 0.5,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -4597,7 +4677,8 @@
           "completed_tasks": 9.0,
           "pending_tasks": 0.0,
           "average_latency": 0.8565916161553587,
-          "cache_hit_rate": 0.4444444444444444,
+          "average_latency_completed": 0.8565916161553587,
+          "cache_hit_rate": 0.2222222222222222,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -4616,7 +4697,8 @@
           "completed_tasks": 7.0,
           "pending_tasks": 2.0,
           "average_latency": 0.7389292545532988,
-          "cache_hit_rate": 0.42857142857142855,
+          "average_latency_completed": 0.7389292545532988,
+          "cache_hit_rate": 0.14285714285714285,
           "completion_rate": 1.0,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
@@ -4631,12 +4713,13 @@
         {
           "step": 6,
           "generated_tasks": 9.0,
-          "finalized_tasks": 10.0,
+          "finalized_tasks": 11.0,
           "completed_tasks": 10.0,
-          "pending_tasks": 1.0,
-          "average_latency": 0.7963893749184734,
-          "cache_hit_rate": 0.5,
-          "completion_rate": 1.0,
+          "pending_tasks": 0.0,
+          "average_latency": 0.8299839093612114,
+          "average_latency_completed": 0.7963893749184734,
+          "cache_hit_rate": 0.09090909090909091,
+          "completion_rate": 0.9090909090909091,
           "deadline_violation_rate": 0.0,
           "reliability_violation_rate": 0.0,
           "total_energy": 40.54552409214089,
@@ -4724,7 +4807,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 2,
               "compute_queue_delay": 0.4210478803624924,
-              "backlog_load": 3,
+              "backlog_load": 2,
               "coverage_load": 10
             },
             {
@@ -4733,7 +4816,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.3152900519811559,
-              "backlog_load": 2,
+              "backlog_load": 1,
               "coverage_load": 10
             },
             {
@@ -4742,7 +4825,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.2493360657925865,
-              "backlog_load": 2,
+              "backlog_load": 1,
               "coverage_load": 2
             }
           ]
@@ -4756,7 +4839,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 1,
               "compute_queue_delay": 0.10550460258911842,
-              "backlog_load": 2,
+              "backlog_load": 1,
               "coverage_load": 10
             },
             {
@@ -4774,7 +4857,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
-              "backlog_load": 2,
+              "backlog_load": 0,
               "coverage_load": 2
             }
           ]
@@ -4797,7 +4880,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
-              "backlog_load": 2,
+              "backlog_load": 0,
               "coverage_load": 10
             },
             {
@@ -4870,7 +4953,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
-              "backlog_load": 2,
+              "backlog_load": 0,
               "coverage_load": 6
             }
           ]
@@ -4884,7 +4967,7 @@
               "tx_queue_delay": 0.0,
               "compute_queue_length": 0,
               "compute_queue_delay": 0.0,
-              "backlog_load": 1,
+              "backlog_load": 0,
               "coverage_load": 10
             },
             {
@@ -5221,9 +5304,9 @@
         {
           "step": 6,
           "new_tasks": 9,
-          "pending_tasks": 1,
+          "pending_tasks": 0,
           "completed_tasks": 10,
-          "expired_tasks": 0
+          "expired_tasks": 1
         }
       ]
     }

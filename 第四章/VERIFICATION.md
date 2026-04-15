@@ -622,25 +622,26 @@ python -m venv .venv
   - `average_latency=0.3384`
   - `total_energy=15.1212`
 - `assignment rule` 在敏感场景下重新拉开差异:
-  - `u2 nearest_uav total_energy = 136.2366 +/- 11.4120`
+  - `u2 nearest_uav total_energy = 134.1836 +/- 10.0652`
   - `u2 least_loaded_uav total_energy = 130.1174 +/- 0.5214`
-  - `u3 nearest_uav total_energy = 182.5985 +/- 1.5442`
-  - `u3 least_loaded_uav total_energy = 149.7612 +/- 4.5148`
+  - `u3 nearest_uav total_energy = 182.0858 +/- 1.9352`
+  - `u3 least_loaded_uav total_energy = 149.7891 +/- 4.5289`
 - `PPO vs heuristic`:
   - `u2 + nearest_uav`
     - PPO `completion_rate=0.9846 +/- 0.0137`
-    - PPO `average_latency=0.3975 +/- 0.0523`
-    - PPO `total_energy=45.9111 +/- 13.5810`
+    - PPO `average_latency=0.4082 +/- 0.0540`
+    - PPO `total_energy=28.6199 +/- 7.2119`
     - heuristic `total_energy=16.5777 +/- 16.3382`
   - `u3 + nearest_uav`
-    - PPO `completion_rate=0.9896 +/- 0.0104`
-    - PPO `average_latency=0.4141 +/- 0.0163`
-    - PPO `total_energy=78.7638 +/- 23.5569`
+    - PPO `completion_rate=0.9931 +/- 0.0120`
+    - PPO `average_latency=0.4314 +/- 0.0427`
+    - PPO `total_energy=46.2983 +/- 15.4309`
     - heuristic `total_energy=40.6808 +/- 28.0994`
 - `消融`:
-  - `main total_energy=45.9111 +/- 13.5810`
-  - `no_energy_shaped_reward total_energy=48.0319 +/- 17.2182`
-  - `no_movement_budget total_energy=112.3080 +/- 44.1639`
+  - `main total_energy=28.6199 +/- 7.2119`
+  - `no_energy_shaped_reward total_energy=27.7935 +/- 11.4441`
+  - `no_movement_budget total_energy=111.0782 +/- 7.9667`
+  - `compare_ch4` 中 `fairness_uav_load` 在单 UAV 对齐实验里保持 `delta=null`，不再被写成 `0.0`
 
 ### 新增/更新结果文件
 

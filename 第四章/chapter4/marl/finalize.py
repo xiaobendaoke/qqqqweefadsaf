@@ -110,7 +110,12 @@ def _aggregate_rows(
         entry = {group_key: value for group_key, value in zip(group_keys, key)}
         entry["num_seeds"] = len(group)
         for metric in metrics:
-            values = [float(item[metric]) for item in group]
+            values = [float(item[metric]) for item in group if item.get(metric) is not None]
+            if not values:
+                entry[f"{metric}_mean"] = None
+                entry[f"{metric}_std"] = None
+                entry[f"{metric}_mean_std"] = "null"
+                continue
             mean, std = _metric_stats(values)
             entry[f"{metric}_mean"] = mean
             entry[f"{metric}_std"] = std
@@ -181,7 +186,7 @@ def _run_compare_ch4(seeds: list[int]) -> tuple[list[dict[str, Any]], list[dict[
                 {
                     "seed": seed,
                     "metric": metric,
-                    "delta": 0.0 if payload["delta"] is None else float(payload["delta"]),
+                    "delta": None if payload["delta"] is None else float(payload["delta"]),
                 }
             )
     aggregated = _aggregate_rows(raw_rows, group_keys=["metric"], metrics=["delta"])

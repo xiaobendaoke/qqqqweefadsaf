@@ -2,6 +2,6 @@
   "mode": "scheduler_contract",
   "status": "ok",
   "decision_target": "bs",
-  "decision_total_latency": 0.3032819491836381,
-  "decision_success_probability": 0.9934801081257654
+  "decision_total_latency": 0.19444474224284647,
+  "decision_success_probability": 0.9231932189341198
 }

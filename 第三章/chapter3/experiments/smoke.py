@@ -4,6 +4,7 @@ from typing import Any
 
 from common.uav_mec.comms.pathloss import received_power_dbm
 from common.uav_mec.comms.reliability import success_probability
+from common.uav_mec.scheduler.compute_queue import ComputeQueue
 from common.uav_mec.scheduler.offloading import decide_offloading
 from common.uav_mec.scheduler.tdma import TDMAQueue
 from common.uav_mec.simulation.result_exporter import export_smoke_result
@@ -62,13 +63,14 @@ def run_smoke(mode: str, *, seed: int = 42) -> dict[str, Any]:
         decision = decide_offloading(
             task=tasks[0],
             ue=env.users[tasks[0].user_id],
-            uav=env.uavs[0],
+            associated_uav=env.uavs[0],
             all_uavs=env.uavs,
             bs=env.bs,
             service_catalog=env.service_catalog,
             config=env.config,
             current_time=0.0,
             tdma_queue=TDMAQueue(),
+            compute_queue=ComputeQueue(),
         )
         payload = {
             "mode": mode,

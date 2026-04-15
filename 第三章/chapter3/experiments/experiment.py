@@ -136,7 +136,7 @@ def run_experiment(
             last_step = env.step(actions)
             step_index += 1
             if recorder is not None:
-                recorder.record_step(step_index=step_index, metrics=last_step["metrics"])
+                recorder.record_step(step_index=step_index, metrics=last_step["step_metrics"])
             observations = last_step["observations"]
             if last_step["terminated"] or last_step["truncated"]:
                 break
