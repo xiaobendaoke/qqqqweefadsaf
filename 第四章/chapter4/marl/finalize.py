@@ -195,6 +195,7 @@ def _run_train_eval(
     output_tag: str,
     eval_episodes: int,
     overrides: dict[str, Any],
+    device: str = "auto",
 ) -> dict[str, Any]:
     train_episodes = int(overrides["train_episodes"])
     train_payload = run_marl_training(
@@ -202,7 +203,7 @@ def _run_train_eval(
         train_episodes=train_episodes,
         num_uavs=num_uavs,
         assignment_rule=assignment_rule,
-        overrides={**overrides, "output_tag": output_tag},
+        overrides={**overrides, "output_tag": output_tag, "device": device},
     )
     eval_payload = run_marl_evaluation(
         seed=eval_seed,
@@ -213,6 +214,7 @@ def _run_train_eval(
         overrides={
             "output_tag": output_tag,
             "use_movement_budget": bool(overrides.get("use_movement_budget", True)),
+            "device": device,
         },
     )
     return {"train": train_payload, "eval": eval_payload}
@@ -266,7 +268,12 @@ def _run_assignment_multiseed(seeds: list[int], *, eval_episodes: int) -> tuple[
     return raw_rows, aggregated
 
 
-def _run_main_multiseed(seeds: list[int], *, eval_episodes: int) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, list[list[dict[str, Any]]]]]:
+def _run_main_multiseed(
+    seeds: list[int],
+    *,
+    eval_episodes: int,
+    device: str = "auto",
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, list[list[dict[str, Any]]]]]:
     raw_rows: list[dict[str, Any]] = []
     training_logs: dict[str, list[list[dict[str, Any]]]] = {"main": []}
     for seed in seeds:
@@ -283,6 +290,7 @@ def _run_main_multiseed(seeds: list[int], *, eval_episodes: int) -> tuple[list[d
                 output_tag=output_tag,
                 eval_episodes=eval_episodes,
                 overrides=dict(FINAL_MAIN_CONFIG),
+                device=device,
             )
             marl_metrics = train_eval["eval"]["marl_metrics"]
             heuristic_metrics = train_eval["eval"]["heuristic_metrics"]
@@ -322,6 +330,7 @@ def _run_ablation_multiseed(
     seeds: list[int],
     *,
     eval_episodes: int,
+    device: str = "auto",
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, list[list[dict[str, Any]]]]]:
     raw_rows: list[dict[str, Any]] = []
     training_logs: dict[str, list[list[dict[str, Any]]]] = {}
@@ -338,6 +347,7 @@ def _run_ablation_multiseed(
                 output_tag=output_tag,
                 eval_episodes=eval_episodes,
                 overrides=dict(ablation["overrides"]),
+                device=device,
             )
             marl_metrics = train_eval["eval"]["marl_metrics"]
             heuristic_metrics = train_eval["eval"]["heuristic_metrics"]
@@ -970,7 +980,7 @@ def _write_tables(
     }
 
 
-def run_final_paper_package(*, seeds: list[int] | None = None, eval_episodes: int = 4) -> dict[str, Any]:
+def run_final_paper_package(*, seeds: list[int] | None = None, eval_episodes: int = 4, device: str = "auto") -> dict[str, Any]:
     seeds = list(seeds or DEFAULT_SEEDS)
     FINAL_DIR.mkdir(parents=True, exist_ok=True)
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
@@ -978,8 +988,8 @@ def run_final_paper_package(*, seeds: list[int] | None = None, eval_episodes: in
 
     compare_raw, compare_agg = _run_compare_ch4(seeds, episodes=eval_episodes)
     assignment_raw, assignment_agg = _run_assignment_multiseed(seeds, eval_episodes=eval_episodes)
-    main_raw, main_agg, main_training_logs = _run_main_multiseed(seeds, eval_episodes=eval_episodes)
-    ablation_raw, ablation_agg, ablation_training_logs = _run_ablation_multiseed(seeds, eval_episodes=eval_episodes)
+    main_raw, main_agg, main_training_logs = _run_main_multiseed(seeds, eval_episodes=eval_episodes, device=device)
+    ablation_raw, ablation_agg, ablation_training_logs = _run_ablation_multiseed(seeds, eval_episodes=eval_episodes, device=device)
     per_uav_diag = _collect_per_uav_diagnostics(main_raw)
 
     training_return_path = FIGURES_DIR / "final_training_return_curve.png"
@@ -1031,11 +1041,12 @@ def run_final_paper_package(*, seeds: list[int] | None = None, eval_episodes: in
         "final_main_config": FINAL_MAIN_CONFIG,
         "seeds": seeds,
         "eval_episodes": eval_episodes,
+        "device_request": device,
         "one_click_commands": [
             "python -m venv .venv",
             ".\\.venv\\Scripts\\python.exe -m pip install -r 第四章/requirements.txt",
             ".\\.venv\\Scripts\\python.exe 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42",
-            ".\\.venv\\Scripts\\python.exe 第四章/run_finalize_paper.py --seeds 42 52 62 --eval-episodes 4",
+            ".\\.venv\\Scripts\\python.exe 第四章/run_finalize_paper.py --seeds 42 52 62 --eval-episodes 4 --device auto",
         ],
         "result_directories": {
             "stage5": str(RESULTS_DIR / "paper_stage5"),
@@ -1070,6 +1081,7 @@ def run_final_paper_package(*, seeds: list[int] | None = None, eval_episodes: in
     return {
         "final_main_config": FINAL_MAIN_CONFIG,
         "seeds": seeds,
+        "device_request": device,
         "compare_ch4_summary_path": str(FINAL_DIR / "compare_ch4_multiseed_summary.json"),
         "assignment_summary_path": str(FINAL_DIR / "assignment_multiseed_summary.json"),
         "ppo_vs_heuristic_summary_path": str(FINAL_DIR / "ppo_vs_heuristic_multiseed_summary.json"),

@@ -19,7 +19,12 @@
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r 第四章/requirements.txt
+.\.venv\Scripts\python.exe -c "import torch; print({'torch': torch.__version__, 'cuda_available': torch.cuda.is_available(), 'gpu': torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'cpu'})"
 ```
+
+默认 `device=auto`。安装 CUDA 版 `torch` 且 `torch.cuda.is_available()` 为 `True` 时，第四章 MARL 训练与评估会自动落到 `cuda:0`；也可以通过 `--device auto|cpu|cuda|cuda:0` 显式指定设备。
+
+注意：PPO 网络前向、反向与 batch 更新会使用 GPU，但统一环境仿真、任务调度和启发式 baseline 仍然是 Python 侧 CPU 逻辑，因此整体耗时不一定会与 GPU 利用率等比例变化。
 
 ## 一键复现实验
 
@@ -27,12 +32,13 @@ python -m venv .venv
 
 ```powershell
 .\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42
+.\.venv\Scripts\python.exe 第四章/run_train_marl.py --seed 42 --train-episodes 24 --num-uavs 2 --assignment-rule nearest_uav --device auto
 ```
 
 再复现最终论文结果包：
 
 ```powershell
-.\.venv\Scripts\python.exe 第四章/run_finalize_paper.py --seeds 42 52 62 --eval-episodes 4
+.\.venv\Scripts\python.exe 第四章/run_finalize_paper.py --seeds 42 52 62 --eval-episodes 4 --device auto
 ```
 
 说明:

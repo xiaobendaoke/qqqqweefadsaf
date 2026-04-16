@@ -23,11 +23,13 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--eval-seed", type=int, default=142)
     parser.add_argument("--eval-episodes", type=int, default=4)
+    parser.add_argument("--device", type=str, default="auto", help="Torch device request: auto, cpu, cuda, or cuda:N.")
     args = parser.parse_args()
     result = run_paper_experiments(
         seed=args.seed,
         eval_seed=args.eval_seed,
         eval_episodes=args.eval_episodes,
+        device=args.device,
     )
     print(json.dumps(result, indent=2, ensure_ascii=False))
 

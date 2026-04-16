@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-import torch
 
 from common.uav_mec.logging_utils import write_json
 
@@ -159,6 +158,7 @@ def run_training(config: MinimalMARLConfig) -> dict[str, Any]:
         device=config.device,
     )
     agent.configure_optimizers(actor_lr=config.actor_lr, critic_lr=config.critic_lr)
+    runtime_device = agent.runtime_device_info()
 
     episode_logs: list[dict[str, Any]] = []
     training_log: list[dict[str, Any]] = []
@@ -228,9 +228,8 @@ def run_training(config: MinimalMARLConfig) -> dict[str, Any]:
         "algorithm": "shared_ppo_centralized_critic",
         "source_inspiration": "minimal PPO/MAPPO-style shared actor with centralized critic, implemented in torch for the unified multi-UAV environment",
         "framework": {
-            "torch_version": torch.__version__,
             "numpy_version": np.__version__,
-            "device": config.device,
+            **runtime_device,
         },
         "config": config.to_dict(),
         "training_signal": {

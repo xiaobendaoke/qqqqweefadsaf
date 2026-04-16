@@ -9,6 +9,8 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from typing import Any
 
+from .device import normalize_device_request
+
 
 @dataclass(slots=True)
 class MinimalMARLConfig:
@@ -33,7 +35,7 @@ class MinimalMARLConfig:
     value_clip_eps: float = 0.2
     value_loss_coef: float = 0.5
     minibatch_size: int = 64
-    device: str = "cpu"
+    device: str = "auto"
     reward_completion_weight: float = 1.0
     reward_cache_hit_weight: float = 0.10
     reward_latency_weight: float = 0.05
@@ -60,5 +62,7 @@ def build_marl_config(overrides: dict[str, Any] | None = None) -> MinimalMARLCon
     for key, value in overrides.items():
         if not hasattr(config, key):
             raise KeyError(f"Unknown MARL config key: {key}")
+        if key == "device":
+            value = normalize_device_request(None if value is None else str(value))
         setattr(config, key, value)
     return config

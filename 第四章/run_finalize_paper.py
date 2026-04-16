@@ -22,8 +22,9 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--seeds", type=int, nargs="+", default=[42, 52, 62])
     parser.add_argument("--eval-episodes", type=int, default=4)
+    parser.add_argument("--device", type=str, default="auto", help="Torch device request: auto, cpu, cuda, or cuda:N.")
     args = parser.parse_args()
-    result = run_final_paper_package(seeds=args.seeds, eval_episodes=args.eval_episodes)
+    result = run_final_paper_package(seeds=args.seeds, eval_episodes=args.eval_episodes, device=args.device)
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
 

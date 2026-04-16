@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-import torch
 
 from common.uav_mec.logging_utils import write_json
 from common.uav_mec.simulation.experiment_runner import compare_metric_dicts
@@ -61,6 +60,7 @@ def run_evaluation(config: MinimalMARLConfig, *, model_path: str | Path) -> dict
     assert model.obs_dim == obs_dim
     assert model.action_dim == action_dim
     assert model.num_agents == config.num_uavs
+    runtime_device = model.runtime_device_info()
 
     marl_episode_logs: list[dict[str, Any]] = []
     marl_metrics: list[dict[str, float | None]] = []
@@ -86,9 +86,8 @@ def run_evaluation(config: MinimalMARLConfig, *, model_path: str | Path) -> dict
     payload = {
         "algorithm": "shared_ppo_centralized_critic",
         "framework": {
-            "torch_version": torch.__version__,
             "numpy_version": np.__version__,
-            "device": config.device,
+            **runtime_device,
         },
         "config": config.to_dict(),
         "model_path": str(model_path),

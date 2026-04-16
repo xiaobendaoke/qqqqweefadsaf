@@ -183,11 +183,12 @@ def _select_best_candidate(rows: list[dict[str, Any]]) -> dict[str, Any]:
     )
 
 
-def _build_eval_overrides(train_payload: dict[str, Any], *, output_tag: str) -> dict[str, Any]:
+def _build_eval_overrides(train_payload: dict[str, Any], *, output_tag: str, device: str) -> dict[str, Any]:
     config = train_payload["config"]
     return {
         "output_tag": output_tag,
         "use_movement_budget": bool(config.get("use_movement_budget", True)),
+        "device": device,
     }
 
 
@@ -200,10 +201,12 @@ def _run_train_eval(
     assignment_rule: str,
     output_tag: str,
     overrides: dict[str, Any],
+    device: str = "auto",
 ) -> dict[str, Any]:
     merged = dict(overrides)
     train_episodes = int(merged.pop("train_episodes"))
     merged["output_tag"] = output_tag
+    merged["device"] = device
     train_payload = run_marl_training(
         seed=seed,
         train_episodes=train_episodes,
@@ -217,7 +220,7 @@ def _run_train_eval(
         num_uavs=num_uavs,
         assignment_rule=assignment_rule,
         model_path=train_payload["checkpoint_path"],
-        overrides=_build_eval_overrides(train_payload, output_tag=output_tag),
+        overrides=_build_eval_overrides(train_payload, output_tag=output_tag, device=device),
     )
     return {
         "train": train_payload,
@@ -585,7 +588,7 @@ def _make_markdown_summary(
     return "\n".join(lines)
 
 
-def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes: int = 4) -> dict[str, Any]:
+def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes: int = 4, device: str = "auto") -> dict[str, Any]:
     PAPER_DIR.mkdir(parents=True, exist_ok=True)
 
     tuning_raw_rows: list[dict[str, Any]] = []
@@ -600,6 +603,7 @@ def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes
             assignment_rule=MAIN_ASSIGNMENT_RULE,
             output_tag=output_tag,
             overrides=candidate["overrides"],
+            device=device,
         )
         row = _summarize_eval_result(label=candidate["name"], train_eval=train_eval)
         row["description"] = candidate["description"]
@@ -619,6 +623,7 @@ def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes
             "num_uavs": MAIN_NUM_UAVS,
             "assignment_rule": MAIN_ASSIGNMENT_RULE,
             "output_tag": f"paper_{selected_tuning_row['label']}_u{MAIN_NUM_UAVS}",
+            "device": device,
         }
     ).to_dict()
 
@@ -634,6 +639,7 @@ def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes
             assignment_rule=MAIN_ASSIGNMENT_RULE,
             output_tag=output_tag,
             overrides=final_overrides,
+            device=device,
         )
         row = _summarize_eval_result(label=f"paper_main_u{num_uavs}", train_eval=train_eval)
         row["description"] = "stage5 main experiment"
@@ -696,6 +702,7 @@ def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes
             assignment_rule=MAIN_ASSIGNMENT_RULE,
             output_tag=output_tag,
             overrides=ablation["overrides"],
+            device=device,
         )
         row = _summarize_eval_result(label=ablation["label"], train_eval=train_eval)
         row["description"] = ablation["description"]
@@ -820,6 +827,7 @@ def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes
             "tuning_seed": seed,
             "eval_seed": eval_seed,
             "eval_episodes": eval_episodes,
+            "device_request": device,
             "selection_rule": "highest completion_rate, then lowest total_energy, then lowest average_latency",
             "main_setting": {
                 "num_uavs": MAIN_NUM_UAVS,
@@ -869,6 +877,7 @@ def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes
         "best_observed_tuning_candidate": best_tuning_row["label"],
         "tuning_seed": seed,
         "eval_seed": eval_seed,
+        "device_request": device,
         "compare_ch4_summary_path": str(compare_json),
         "tuning_summary_path": str(tuning_json),
         "main_matrix_path": str(main_json),

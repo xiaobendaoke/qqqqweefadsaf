@@ -21,6 +21,10 @@ from torch.distributions import Normal
 
 from .buffer import RolloutBatch
 from .config import MinimalMARLConfig
+from .device import configure_torch_runtime
+from .device import describe_runtime_device
+from .device import normalize_device_request
+from .device import resolve_device
 
 
 LOG_STD_MIN = math.log(0.03)
@@ -134,7 +138,7 @@ class MinimalMultiAgentActorCritic:
         hidden_dim: int = 128,
         max_user_blocks: int = 3,
         user_feature_dim: int = 5,
-        device: str = "cpu",
+        device: str = "auto",
     ) -> None:
         self.obs_dim = obs_dim
         self.action_dim = action_dim
@@ -145,8 +149,13 @@ class MinimalMultiAgentActorCritic:
         self.use_movement_budget = bool(use_movement_budget)
         self.max_user_blocks = int(max_user_blocks)
         self.user_feature_dim = int(user_feature_dim)
-        self.device = torch.device(device)
+        self.requested_device = normalize_device_request(device)
+        self.resolved_device = resolve_device(self.requested_device)
+        configure_torch_runtime(self.resolved_device)
+        self.device = torch.device(self.resolved_device)
         torch.manual_seed(seed)
+        if self.device.type == "cuda":
+            torch.cuda.manual_seed_all(seed)
         np.random.seed(seed)
         self.actor = SharedActor(
             obs_dim=obs_dim,
@@ -295,7 +304,8 @@ class MinimalMultiAgentActorCritic:
             "action_dim": self.action_dim,
             "num_agents": self.num_agents,
             "state_dim": self.state_dim,
-            "device": str(self.device),
+            "device": self.resolved_device,
+            "requested_device": self.requested_device,
             "actor_state": self.actor.state_dict(),
             "critic_state": self.critic.state_dict(),
             "actor_optimizer": self.actor_optimizer.state_dict() if self.actor_optimizer else None,
@@ -309,8 +319,11 @@ class MinimalMultiAgentActorCritic:
         torch.save(payload, target)
 
     @classmethod
-    def load(cls, path: str | Path, *, seed: int, device: str = "cpu") -> "MinimalMultiAgentActorCritic":
-        payload = torch.load(Path(path), map_location=device, weights_only=False)
+    def load(cls, path: str | Path, *, seed: int, device: str = "auto") -> "MinimalMultiAgentActorCritic":
+        requested_device = normalize_device_request(device)
+        resolved_device = resolve_device(requested_device)
+        configure_torch_runtime(resolved_device)
+        payload = torch.load(Path(path), map_location=resolved_device, weights_only=False)
         log_std = payload["actor_state"]["log_std"]
         action_std_init = float(torch.exp(log_std).mean().item())
         model = cls(
@@ -325,11 +338,15 @@ class MinimalMultiAgentActorCritic:
             hidden_dim=int(payload["actor_state"]["backbone.0.weight"].shape[0]),
             max_user_blocks=int(payload.get("max_user_blocks", 3)),
             user_feature_dim=int(payload.get("user_feature_dim", 5)),
-            device=device,
+            device=requested_device,
         )
         model.actor.load_state_dict(payload["actor_state"])
         model.critic.load_state_dict(payload["critic_state"])
         return model
+
+    def runtime_device_info(self) -> dict[str, Any]:
+        """导出当前模型实例实际使用的 torch 设备信息。"""
+        return describe_runtime_device(self.requested_device, resolved_device=self.resolved_device)
 
     def tensor_contract(self) -> dict[str, Any]:
         """导出训练日志中使用的批维度契约。"""
