@@ -1,3 +1,9 @@
+"""服务缓存管理模块。
+
+该模块负责维护 UAV 侧服务请求热度、价值分数、机会式准入和周期性刷新策略，
+用于近似建模有限缓存容量下的服务驻留与替换过程。
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -8,6 +14,8 @@ from ..entities import ServiceCatalog, UAVNode
 
 @dataclass(slots=True)
 class CacheEvent:
+    """记录缓存保留、驱逐与准入事件，便于离线分析策略行为。"""
+
     uav_id: int
     action: str
     service_type: int
@@ -16,10 +24,12 @@ class CacheEvent:
 
 
 def cache_lookup(uav: UAVNode, service_type: int) -> bool:
+    """判断目标服务当前是否已经驻留在 UAV 本地缓存。"""
     return service_type in uav.service_cache
 
 
 def record_service_request(uav: UAVNode, service_type: int, *, config: SystemConfig, service_catalog: ServiceCatalog) -> float:
+    """更新服务请求统计与价值分数，为后续缓存替换提供依据。"""
     request_count = uav.cache_request_counts.get(service_type, 0) + 1
     uav.cache_request_counts[service_type] = request_count
     previous_ema = uav.cache_ema_scores.get(service_type, 0.0)
@@ -42,6 +52,7 @@ def apply_service_cache_policy(
     service_catalog: ServiceCatalog,
     opportunistic: bool = True,
 ) -> list[CacheEvent]:
+    """在执行路径上按服务价值做机会式缓存准入与替换。"""
     events: list[CacheEvent] = []
     value = record_service_request(uav, service_type, config=config, service_catalog=service_catalog)
     if service_type in uav.service_cache:
@@ -59,6 +70,7 @@ def apply_service_cache_policy(
         return events
 
     if len(uav.service_cache) >= uav.service_cache_capacity and uav.service_cache:
+        # 驱逐优先淘汰价值分数最低、近期热度也最低的服务。
         victim = min(
             uav.service_cache,
             key=lambda candidate: (
@@ -100,6 +112,7 @@ def refresh_service_cache(
     config: SystemConfig,
     service_catalog: ServiceCatalog,
 ) -> list[CacheEvent]:
+    """按刷新周期重排缓存内容，使热点服务在 episode 内逐步稳定下来。"""
     if uav.service_cache_capacity <= 0:
         uav.service_cache.clear()
         return []

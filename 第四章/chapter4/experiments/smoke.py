@@ -1,3 +1,9 @@
+"""第四章 smoke test 模块。
+
+该模块提供第四章多 UAV 环境的最小化验证流程，
+用于快速检查环境重置、观测构造、单步推进和完整 episode 运行是否正常。
+"""
+
 from __future__ import annotations
 
 from typing import Any
@@ -10,13 +16,14 @@ from ..policies.mobility_heuristic_multi import select_actions
 
 def run_smoke(mode: str, *, seed: int = 42, num_uavs: int = 1, assignment_rule: str = "nearest_uav") -> dict[str, Any]:
     results_dir = "第四章/results"
-    env = Chapter4Env({"seed": seed, "num_uavs": num_uavs, "assignment_rule": assignment_rule})
-    reset_result = env.reset(seed=seed)
 
     if mode == "import_only":
         payload = {"mode": mode, "status": "ok", "chapter": "chapter4"}
         export_smoke_result(results_dir, mode, payload)
         return payload
+
+    env = Chapter4Env({"seed": seed, "num_uavs": num_uavs, "assignment_rule": assignment_rule})
+    reset_result = env.reset(seed=seed)
 
     if mode == "env_step":
         actions = select_actions(reset_result["observations"])
@@ -29,7 +36,7 @@ def run_smoke(mode: str, *, seed: int = 42, num_uavs: int = 1, assignment_rule: 
             "metrics": step_result["metrics"],
             "info": step_result["info"],
         }
-        export_smoke_result(results_dir, mode, payload)
+        export_smoke_result(results_dir, f"{mode}_u{num_uavs}_{assignment_rule}_seed{seed}", payload)
         return payload
 
     if mode == "observation":
@@ -43,7 +50,7 @@ def run_smoke(mode: str, *, seed: int = 42, num_uavs: int = 1, assignment_rule: 
             "uav_states": env.get_uav_states(),
             "observation_samples": reset_result["observations"],
         }
-        export_smoke_result(results_dir, f"{mode}_u{num_uavs}", payload)
+        export_smoke_result(results_dir, f"{mode}_u{num_uavs}_{assignment_rule}_seed{seed}", payload)
         return payload
 
     if mode == "episode":
@@ -64,7 +71,7 @@ def run_smoke(mode: str, *, seed: int = 42, num_uavs: int = 1, assignment_rule: 
             "summary": summary,
             "last_info": last_step["info"] if last_step else {},
         }
-        export_smoke_result(results_dir, mode, payload)
+        export_smoke_result(results_dir, f"{mode}_u{num_uavs}_{assignment_rule}_seed{seed}", payload)
         return payload
 
     raise ValueError(f"Unsupported smoke mode: {mode}")

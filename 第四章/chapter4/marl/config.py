@@ -1,3 +1,9 @@
+"""第四章 MARL 配置模块。
+
+该模块定义 shared-actor centralized-critic 训练与评估流程所需的关键超参数，
+包括 PPO 更新参数、奖励塑形权重、设备选择和结果命名规则。
+"""
+
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass

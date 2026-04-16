@@ -1,3 +1,9 @@
+"""封装统一 UAV-MEC 环境的基础交互接口。
+
+该模块负责组织 reset、step、观测生成和 episode 日志导出，
+为第三章和第四章环境提供共享运行时骨架。
+"""
+
 from __future__ import annotations
 
 import random
@@ -15,6 +21,8 @@ from .simulation.engine import run_step
 
 
 class BaseEnv:
+    """统一封装 UAV-MEC 环境的 reset/step 接口与日志导出能力。"""
+
     def __init__(self, config: SystemConfig) -> None:
         self.config = config
         self.rng = random.Random(config.seed)
@@ -36,9 +44,11 @@ class BaseEnv:
         self.task_lifecycle_history: list[dict[str, int]] = []
 
     def reset(self, seed: int | None = None) -> dict[str, Any]:
+        """重建 episode 级状态，并返回首个时刻的观测与环境信息。"""
         if seed is not None:
             self.rng = random.Random(seed)
         self.current_step = 0
+        self.bs = BaseStation.from_config(self.config)
         self.tdma_queue.reset()
         self.compute_queue.reset()
         self.metrics = MetricTracker(num_uavs=self.config.num_uavs)
@@ -69,6 +79,7 @@ class BaseEnv:
         }
 
     def step(self, actions: list[list[float]] | list[tuple[float, float]]) -> dict[str, Any]:
+        """推进一个时隙，执行移动、任务调度、指标更新与日志累积。"""
         normalized_actions = normalize_actions(actions, num_agents=self.config.num_uavs)
         execution = run_step(
             config=self.config,
@@ -98,6 +109,7 @@ class BaseEnv:
         step_metrics = self.metrics.step_snapshot()
         self.step_metrics_history.append({"step": self.current_step, **step_metrics})
         self.energy_breakdown_history.append({"step": self.current_step, **execution.energy_breakdown})
+        # 队列与负载分解用于论文中的过程分析，因此在 step 级单独保留。
         self.queue_breakdown_history.append(
             {
                 "step": self.current_step,
@@ -171,6 +183,7 @@ class BaseEnv:
         return episode_log_schema(self.config, self.get_agent_ids())
 
     def export_episode_log(self, *, episode_index: int, seed: int) -> dict[str, Any]:
+        """导出带 schema 的完整 episode 日志，供分析脚本与论文图表复用。"""
         return {
             "chapter_name": self.config.chapter_name,
             "episode_index": episode_index,

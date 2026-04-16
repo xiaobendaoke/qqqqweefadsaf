@@ -1,3 +1,9 @@
+"""MARL 评估执行模块。
+
+该模块负责加载训练好的策略模型，在统一多 UAV 环境中运行评估 episode，
+并汇总评估指标、日志和与启发式基线的对比结果。
+"""
+
 from __future__ import annotations
 
 from pathlib import Path

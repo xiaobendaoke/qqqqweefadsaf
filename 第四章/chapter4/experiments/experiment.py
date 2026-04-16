@@ -1,3 +1,13 @@
+"""第四章启发式实验模块。
+
+该模块负责组织第四章多 UAV 场景下的启发式基线实验，
+包括 default/hard 场景运行、sensitive 布局实验以及结果文件导出。
+
+输入输出与关键参数：
+主要输入包括随机种子、episode 数、场景 profile、UAV 数量和关联规则；
+输出为包含平均指标、episode 日志和实验标识信息的结果字典。
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -13,6 +23,18 @@ CHAPTER4_RESULTS = Path(__file__).resolve().parents[2] / "results"
 
 
 def run_experiment(*, seed: int, episodes: int, hard: bool, num_uavs: int, assignment_rule: str) -> dict[str, Any]:
+    """运行第四章启发式主实验。
+
+    参数：
+        seed: 实验起始随机种子。
+        episodes: 需要运行的 episode 数量。
+        hard: 是否启用 hard 场景配置。
+        num_uavs: 参与实验的 UAV 数量。
+        assignment_rule: 用户关联 UAV 的规则名称。
+
+    返回：
+        包含平均指标、日志和实验标签的结果字典。
+    """
     overrides = {"num_uavs": num_uavs, "assignment_rule": assignment_rule}
     if hard:
         overrides.update(
@@ -53,6 +75,17 @@ def run_experiment(*, seed: int, episodes: int, hard: bool, num_uavs: int, assig
 
 
 def run_sensitive_experiment(*, seed: int, episodes: int, num_uavs: int, assignment_rule: str) -> dict[str, Any]:
+    """运行第四章固定布局的 sensitive 实验。
+
+    参数：
+        seed: 实验起始随机种子。
+        episodes: 需要运行的 episode 数量。
+        num_uavs: 参与实验的 UAV 数量。
+        assignment_rule: 用户关联 UAV 的规则名称。
+
+    返回：
+        包含固定布局实验结果与平均指标的结果字典。
+    """
     fixed_uavs = (
         (130.0, 200.0),
         (220.0, 200.0),
@@ -87,7 +120,6 @@ def run_sensitive_experiment(*, seed: int, episodes: int, num_uavs: int, assignm
         "uav_service_cache_capacity": 2,
         "fixed_uav_positions": fixed_uavs[:num_uavs],
         "fixed_user_positions": fixed_users,
-        "observation_max_neighbors": max(0, num_uavs - 1),
     }
     result = run_short_experiment(
         env_factory=Chapter4Env,

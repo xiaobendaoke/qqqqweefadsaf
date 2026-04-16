@@ -1,3 +1,5 @@
+"""实现第三章单 UAV 的轻量 MPC shell 候选动作优化器。"""
+
 from __future__ import annotations
 
 import math
@@ -7,6 +9,8 @@ from typing import Any
 
 @dataclass(slots=True)
 class MPCShellOptimizer:
+    """基于有限候选动作和滚动时域打分的轻量 MPC shell 优化器。"""
+
     horizon: int = 4
     temporal_decay: float = 0.84
     completion_weight: float = 1.15
@@ -22,6 +26,7 @@ class MPCShellOptimizer:
     _last_action: list[float] | None = None
 
     def plan_action(self, observation: list[float], env: Any) -> list[float]:
+        """读取统一观测编码，在候选动作集合中选出预测回报最高的方向。"""
         schema = env.get_observation_schema()
         user_start = int(schema["section_slices"]["associated_user_state"][0])
         user_end = int(schema["section_slices"]["associated_user_state"][1])
@@ -54,6 +59,7 @@ class MPCShellOptimizer:
             predicted_position = list(current_position)
             for step_index in range(self.horizon):
                 weight = self.temporal_decay ** step_index
+                # 这里不展开完整环境仿真，而是用位置滚动预测近似 horizon 内收益。
                 predicted_position[0] = min(
                     max(predicted_position[0] + action[0] * max_step_distance, 0.0),
                     env.config.area_width,
@@ -85,6 +91,7 @@ class MPCShellOptimizer:
         return best_action
 
     def _parse_user_blocks(self, values: list[float]) -> list[dict[str, float]]:
+        """把观测里的定长用户块切成便于打分的结构化字典。"""
         blocks: list[dict[str, float]] = []
         for offset in range(0, len(values), 5):
             block = values[offset : offset + 5]
@@ -102,6 +109,7 @@ class MPCShellOptimizer:
         return blocks
 
     def _candidate_actions(self, user_blocks: list[dict[str, float]], *, previous_action: list[float]) -> list[list[float]]:
+        """混合规则网格、延续动作和指向用户的方向，生成有限候选集合。"""
         candidate_map: dict[tuple[float, float], list[float]] = {}
 
         def add_candidate(action: list[float]) -> None:
@@ -154,6 +162,7 @@ class MPCShellOptimizer:
         current_time: float,
         coverage_radius: float,
     ) -> float:
+        """综合能耗、排队、覆盖、缓存与紧迫度近似单步价值。"""
         score = -self.energy_weight * action_norm
         prev_norm = math.hypot(previous_action[0], previous_action[1])
         if prev_norm > 1e-6 and action_norm > 1e-6:

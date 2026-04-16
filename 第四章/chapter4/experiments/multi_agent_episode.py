@@ -1,3 +1,9 @@
+"""第四章多 UAV 单回合演示模块。
+
+该模块用于运行一个多 UAV episode，
+并导出便于展示和调试的单回合日志结果，适合作为行为示例或快速检查工具。
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -25,7 +31,7 @@ def run_multi_agent_episode(*, seed: int, num_uavs: int, assignment_rule: str) -
             break
 
     episode_log = env.export_episode_log(episode_index=0, seed=seed)
-    output_path = RESULTS_DIR / f"multi_agent_episode_u{num_uavs}_{assignment_rule}.json"
+    output_path = RESULTS_DIR / f"multi_agent_episode_u{num_uavs}_{assignment_rule}_seed{seed}.json"
     write_json(output_path, episode_log)
     return {
         "status": "ok",

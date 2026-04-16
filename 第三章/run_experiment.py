@@ -1,3 +1,9 @@
+"""第三章实验命令行入口模块。
+
+该模块负责解析第三章实验命令行参数，
+并调度普通实验或与第四章的退化一致性比较流程。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -13,6 +19,7 @@ from chapter3.experiments import compare_with_chapter4, run_experiment
 
 
 def main() -> None:
+    """解析命令行参数并执行第三章实验入口。"""
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--episodes", type=int, default=1)

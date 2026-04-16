@@ -35,6 +35,11 @@ python -m venv .venv
 .\.venv\Scripts\python.exe 第四章/run_finalize_paper.py --seeds 42 52 62 --eval-episodes 4
 ```
 
+说明:
+
+- stage6 会使用训练种子 `42/52/62`，并在评估阶段固定采用对应 held-out 种子 `142/152/162`。
+- `observation / uav_state / episode_log` schema 在主实验与 sensitive profile 下保持一致；缺失邻居槽位使用零填充。
+
 ## 固定主配置
 
 - `train_episodes=30`
@@ -60,6 +65,7 @@ python -m venv .venv
 
 - `cache_hit_rate` 只统计 UAV 执行链路上的服务缓存命中；`local` 与 `BS` 分支不计入缓存命中。
 - episode 到达终局时，剩余未完成任务会被统一转为 `expired` 并纳入最终 episode 指标，避免 summary 漏掉终局 pending 任务。
+- `relay_fetch_energy` 只统计 UAV 发起的协同中继与 peer fetch 发射能耗；`BS -> UAV` 的 fetch 仅计入时延，不并入该能耗项。
 - 协同中继与 peer fetch 的发射能耗会回写到对应发送 UAV 的剩余能量状态中，因此多 UAV 观测里的能量状态与实际能耗链路保持一致。
 
 ## 结果目录说明

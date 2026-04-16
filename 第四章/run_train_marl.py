@@ -1,3 +1,9 @@
+"""第四章 MARL 训练命令行入口模块。
+
+该模块负责解析训练参数并触发单次 MARL 训练流程，
+适用于快速迭代和 checkpoint 生成。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -13,6 +19,7 @@ from chapter4.marl import run_marl_training
 
 
 def main() -> None:
+    """解析命令行参数并执行 MARL 训练。"""
     parser = argparse.ArgumentParser(
         description="Train the shared-PPO Chapter 4 agent. The CLI defaults are for quick iteration and are not the final paper preset."
     )

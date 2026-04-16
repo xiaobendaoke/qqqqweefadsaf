@@ -1,3 +1,9 @@
+"""Episode 日志 schema 定义模块。
+
+该模块负责描述 episode 日志导出的字段结构，
+并汇总每架 UAV 在整个 episode 内的服务、负载和队列表现，便于论文分析和结果复现。
+"""
+
 from __future__ import annotations
 
 from ..config import SystemConfig

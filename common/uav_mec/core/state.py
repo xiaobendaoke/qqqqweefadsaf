@@ -1,3 +1,12 @@
+"""UAV 状态编码与 schema 定义模块。
+
+该模块负责把 UAV 的位置、能量、队列和缓存状态组织为结构化状态，
+并生成与之对应的扁平化字段 schema，供观测构造、日志导出和训练接口复用。
+
+边界说明：
+该模块只描述状态编码方式，不直接推进环境状态演化。
+"""
+
 from __future__ import annotations
 
 import math
@@ -8,6 +17,7 @@ from ..scheduler.service_cache import cache_score_snapshot
 
 
 def _safe_norm(value: float, scale: float) -> float:
+    """避免零除的归一化辅助函数。"""
     if scale <= 0:
         return 0.0
     return float(value) / float(scale)
@@ -24,6 +34,7 @@ def _cache_score_norm(uav: UAVNode, config: SystemConfig) -> list[float]:
 
 
 def build_uav_state(*, uav: UAVNode, all_uavs: list[UAVNode], config: SystemConfig) -> dict[str, list[float] | dict[str, list[float]]]:
+    """构造单架 UAV 的结构化状态，再供观测拼接或日志导出使用。"""
     own_state = [
         uav.position[0] / config.area_width,
         uav.position[1] / config.area_height,
@@ -49,6 +60,7 @@ def build_uav_state(*, uav: UAVNode, all_uavs: list[UAVNode], config: SystemConf
     neighbor_blocks: list[list[float]] = []
     neighbors = [other for other in all_uavs if other.uav_id != uav.uav_id]
     neighbors.sort(key=lambda item: math.dist((item.position[0], item.position[1]), (uav.position[0], uav.position[1])))
+    # 邻居槽位固定长度，缺失位置用零填充，保证多配置下 schema 稳定。
     for neighbor in neighbors[: config.observation_max_neighbors]:
         neighbor_blocks.append(
             [
@@ -140,6 +152,7 @@ def _base_section_defs(config: SystemConfig) -> list[tuple[str, list[str], int]]
 
 
 def observation_schema(config: SystemConfig) -> dict[str, object]:
+    """返回完整观测向量的字段展开方式与切片位置。"""
     sections = _base_section_defs(config)
     frozen = _flat_schema(sections)
     return {
@@ -150,6 +163,7 @@ def observation_schema(config: SystemConfig) -> dict[str, object]:
 
 
 def uav_state_schema(config: SystemConfig) -> dict[str, object]:
+    """返回不含用户 backlog 块的 UAV 状态 schema。"""
     base = _base_section_defs(config)
     sections = base[:-1]
     frozen = _flat_schema(sections)

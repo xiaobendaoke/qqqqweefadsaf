@@ -1,3 +1,9 @@
+"""全局指标累计模块。
+
+该模块负责在 step 与 episode 两个粒度上累计任务完成率、平均时延、能耗分解、
+缓存命中率、可靠性违约率和公平性指标，是实验结果汇总的核心数据来源。
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -6,6 +12,7 @@ from .task import Task
 
 
 def _jain(values: list[float]) -> float | None:
+    """计算 Jain 公平性指标；空输入时返回 None 以保留语义。"""
     if not values:
         return None
     denom = len(values) * sum(v * v for v in values)
@@ -20,6 +27,8 @@ def _sum_energy_breakdown(breakdown: dict[str, float]) -> float:
 
 @dataclass(slots=True)
 class MetricTracker:
+    """累计 step 与 episode 两级指标，并统一维护能耗口径。"""
+
     num_uavs: int = 1
     user_generated: dict[int, int] = field(default_factory=dict)
     user_completed: dict[int, int] = field(default_factory=dict)
@@ -31,6 +40,7 @@ class MetricTracker:
     total_completed_latency: float = 0.0
     total_energy: float = 0.0
     total_cache_hits: int = 0
+    total_cache_eligible: int = 0
     deadline_violations: int = 0
     reliability_violations: int = 0
     uav_move_energy: float = 0.0
@@ -42,11 +52,13 @@ class MetricTracker:
     last_step_metrics: dict[str, float | None] = field(default_factory=dict)
 
     def record_generated(self, tasks: list[Task]) -> None:
+        """登记本 step 新生成的任务数与用户侧生成计数。"""
         for task in tasks:
             self.total_generated += 1
             self.user_generated[task.user_id] = self.user_generated.get(task.user_id, 0) + 1
 
     def record_assignment(self, task: Task) -> None:
+        """仅统计真正由 UAV 执行的负载，用于多 UAV 公平性分析。"""
         if task.execution_target in {"uav", "collaborator"} and task.assigned_uav_id is not None:
             self.uav_loads[task.assigned_uav_id] = self.uav_loads.get(task.assigned_uav_id, 0) + 1
 
@@ -58,10 +70,14 @@ class MetricTracker:
         pending_tasks: list[Task],
         energy_breakdown: dict[str, float],
     ) -> dict[str, float | None]:
+        """根据本 step 的任务结局与能耗分解更新累计指标。"""
         self.record_generated(generated_tasks)
         self.total_finalized += len(finalized_tasks)
+        cache_eligible_count = 0
         for task in finalized_tasks:
             self.total_latency += float(task.total_latency)
+            if task.execution_target in {"uav", "collaborator"}:
+                cache_eligible_count += 1
             if task.cache_hit:
                 self.total_cache_hits += 1
             if task.completed:
@@ -81,12 +97,14 @@ class MetricTracker:
         self.bs_compute_energy += float(energy_breakdown.get("bs_compute_energy", 0.0))
         self.relay_fetch_energy += float(energy_breakdown.get("relay_fetch_energy", 0.0))
         self.total_energy += _sum_energy_breakdown(energy_breakdown)
+        self.total_cache_eligible += cache_eligible_count
 
         generated_count = len(generated_tasks)
         finalized_count = len(finalized_tasks)
         completed_count = sum(1 for task in finalized_tasks if task.completed)
         step_latency = sum(float(task.total_latency) for task in finalized_tasks) / finalized_count if finalized_count else 0.0
         step_cache_hits = sum(1 for task in finalized_tasks if task.cache_hit)
+        step_cache_eligible = sum(1 for task in finalized_tasks if task.execution_target in {"uav", "collaborator"})
         step_deadline_violations = sum(1 for task in finalized_tasks if task.total_latency > task.slack)
         step_reliability_violations = sum(1 for task in finalized_tasks if task.success_probability < task.required_reliability)
         self.last_step_metrics = {
@@ -95,12 +113,14 @@ class MetricTracker:
             "completed_tasks": float(completed_count),
             "pending_tasks": float(len(pending_tasks)),
             "average_latency": step_latency,
+            # 完成任务均时延和全部 finalized 任务均时延同时保留，
+            # 方便区分“系统结局”与“成功完成体验”两个口径。
             "average_latency_completed": (
                 sum(float(task.total_latency) for task in finalized_tasks if task.completed) / completed_count
                 if completed_count
                 else 0.0
             ),
-            "cache_hit_rate": (step_cache_hits / finalized_count) if finalized_count else 0.0,
+            "cache_hit_rate": (step_cache_hits / step_cache_eligible) if step_cache_eligible else 0.0,
             "completion_rate": (completed_count / finalized_count) if finalized_count else 0.0,
             "deadline_violation_rate": (step_deadline_violations / finalized_count) if finalized_count else 0.0,
             "reliability_violation_rate": (step_reliability_violations / finalized_count) if finalized_count else 0.0,
@@ -128,11 +148,12 @@ class MetricTracker:
         }
 
     def snapshot(self) -> dict[str, float | None]:
+        """输出 episode 截至当前时刻的累计指标快照。"""
         completion_rate = self.total_completed / self.total_generated if self.total_generated else 0.0
         average_latency_finalized = self.total_latency / self.total_finalized if self.total_finalized else 0.0
         average_latency_completed = self.total_completed_latency / self.total_completed if self.total_completed else 0.0
         latency_per_generated_task = self.total_latency / self.total_generated if self.total_generated else 0.0
-        cache_hit_rate = self.total_cache_hits / self.total_generated if self.total_generated else 0.0
+        cache_hit_rate = self.total_cache_hits / self.total_cache_eligible if self.total_cache_eligible else 0.0
         deadline_violation_rate = self.deadline_violations / self.total_generated if self.total_generated else 0.0
         reliability_violation_rate = self.reliability_violations / self.total_generated if self.total_generated else 0.0
         user_ratios = [

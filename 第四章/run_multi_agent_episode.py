@@ -1,3 +1,9 @@
+"""第四章多 UAV 单回合演示命令行入口模块。
+
+该模块用于从命令行快速运行一个多 UAV episode，
+便于调试环境行为和查看单回合日志结果。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -13,6 +19,7 @@ from chapter4.experiments import run_multi_agent_episode
 
 
 def main() -> None:
+    """解析命令行参数并执行单回合演示。"""
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--num-uavs", type=int, default=2)

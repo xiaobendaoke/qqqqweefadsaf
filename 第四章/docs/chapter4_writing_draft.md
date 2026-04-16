@@ -6,11 +6,11 @@
 
 ## 第四章方法段落草稿
 
-第四章采用共享策略参数的多智能体 PPO 方法，并使用中心化 critic 估计团队状态价值。具体而言，每架 UAV 使用相同的 actor 网络，根据本地观测独立输出二维移动动作；critic 则接收所有 UAV 观测拼接形成的全局状态，用于评估团队回报，从而在训练阶段利用更多全局信息稳定优势估计。在环境内部决策上，本文已经将卸载逻辑统一为 `local / associated UAV / collaborator UAV / BS` 四分支，并在服务未命中时允许执行 UAV 从基站或其他已缓存该服务的邻居 UAV 拉取服务镜像，因此协同服务缓存不再只是概念性设定，而是进入了实际时延计算链路。在奖励设计上，本文保持团队奖励机制不变，将任务完成率作为正向激励，并联合考虑缓存命中率、平均时延、增量能耗、截止期违约率、可靠性违约率与动作幅度惩罚，构成统一的 shaped team reward。为抑制无效大幅移动，方法中进一步保留了 movement budget 约束，使动作幅度随用户相对位置与任务紧迫度自适应变化。需要说明的是，第四章不再引入新的机制或第二种学习算法，最终固定采用 `energy_e30` 配置下的 `shared_ppo_centralized_critic` 作为论文主方法。
+第四章采用共享策略参数的多智能体 PPO 方法，并使用中心化 critic 估计团队状态价值。具体而言，每架 UAV 使用相同的 actor 网络，根据本地观测独立输出二维移动动作；critic 则接收所有 UAV 观测拼接形成的全局状态，用于评估团队回报，从而在训练阶段利用更多全局信息稳定优势估计。在环境内部决策上，本文已经将卸载逻辑统一为 `local / associated UAV / collaborator UAV / BS` 四分支，并在服务未命中时允许执行 UAV 从基站或其他已缓存该服务的邻居 UAV 拉取服务镜像，因此协同服务缓存不再只是概念性设定，而是进入了实际时延计算链路。对于多跳卸载路径，链路可靠性按端到端成功概率联合计算；而 `relay_fetch_energy` 仅统计 UAV 发起的协同中继与 peer fetch 发射能耗，`BS -> UAV` 的服务拉取只进入时延链路而不混入该能耗项。在奖励设计上，本文保持团队奖励机制不变，将任务完成率作为正向激励，并联合考虑缓存命中率、平均时延、增量能耗、截止期违约率、可靠性违约率与动作幅度惩罚，构成统一的 shaped team reward。为抑制无效大幅移动，方法中进一步保留了 movement budget 约束，使动作幅度随用户相对位置与任务紧迫度自适应变化。需要说明的是，第四章不再引入新的机制或第二种学习算法，最终固定采用 `energy_e30` 配置下的 `shared_ppo_centralized_critic` 作为论文主方法。
 
 ## 第四章实验设置草稿
 
-实验均基于第三章与第四章共享的统一环境实现展开，冻结 `action / observation / uav_state / episode_log` schema。PPO 主配置固定为：`train_episodes=30`、`actor_lr=2.5e-4`、`critic_lr=8.0e-4`、`clip_ratio=0.18`、`entropy_coef=0.008`、`value_coef=0.6`、`reward_energy_weight=1.5`、`reward_action_magnitude_weight=0.2`、`use_movement_budget=True`。最终复跑采用 `seed={42, 52, 62}` 三组随机种子，评估 episode 数固定为 `4`。主实验矩阵包括三部分：其一，验证第三章与第四章在 `NUM_UAVS=1` 下的一致性；其二，在敏感配置下比较 `nearest_uav` 与 `least_loaded_uav` 两种任务分配规则；其三，在 `NUM_UAVS=2` 和 `NUM_UAVS=3` 场景下比较 PPO 主方法与 heuristic baseline。消融实验固定为两项：去除 energy-shaped reward，以及去除 movement budget，其余设置均与主配置保持一致。第三章方面，在启发式控制之外，本文补入了一个基于统一观测的 MPC shell，用于体现“单 UAV 优化器壳子”这一章节定位。
+实验均基于第三章与第四章共享的统一环境实现展开，冻结 `action / observation / uav_state / episode_log` schema；sensitive profile 不再缩短邻居观测维度，而是沿用相同 schema 并对缺失邻居槽位做零填充。PPO 主配置固定为：`train_episodes=30`、`actor_lr=2.5e-4`、`critic_lr=8.0e-4`、`clip_ratio=0.18`、`entropy_coef=0.008`、`value_coef=0.6`、`reward_energy_weight=1.5`、`reward_action_magnitude_weight=0.2`、`use_movement_budget=True`。最终复跑采用训练种子 `seed={42, 52, 62}` 三组随机种子，并在评估阶段固定使用对应 held-out 种子 `{142, 152, 162}`；评估 episode 数固定为 `4`。主实验矩阵包括三部分：其一，验证第三章与第四章在 `NUM_UAVS=1` 下的一致性；其二，在敏感配置下比较 `nearest_uav` 与 `least_loaded_uav` 两种任务分配规则；其三，在 `NUM_UAVS=2` 和 `NUM_UAVS=3` 场景下比较 PPO 主方法与 heuristic baseline。消融实验固定为两项：去除 energy-shaped reward，以及去除 movement budget，其余设置均与主配置保持一致。第三章方面，在启发式控制之外，本文补入了一个基于统一观测的 MPC shell，用于体现“单 UAV 优化器壳子”这一章节定位。
 
 ## 第四章结果分析草稿
 

@@ -1,3 +1,9 @@
+"""第四章多 UAV 启发式协同移动策略模块。
+
+该模块根据多 UAV 局部观测中的用户积压、邻居状态和局部负载信息，
+为每架 UAV 生成启发式移动方向，作为多 UAV 实验中的轻量基线方法。
+"""
+
 from __future__ import annotations
 
 import math

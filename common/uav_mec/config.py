@@ -1,3 +1,13 @@
+"""共享 UAV-MEC 系统配置模块。
+
+该模块定义贯穿第三章与第四章的统一配置对象，
+涵盖场景规模、节点能力、任务生成、通信参数、缓存约束与观测维度等核心实验设定。
+
+输入输出与关键参数：
+外部可通过 `build_config` 传入覆盖项构造配置实例；
+输出为 `SystemConfig` 对象，供环境、调度器、实验脚本和日志导出模块共同使用。
+"""
+
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
@@ -6,6 +16,8 @@ from typing import Any
 
 @dataclass(slots=True)
 class SystemConfig:
+    """统一维护仿真环境、通信链路与任务生成的基础配置。"""
+
     seed: int = 42
     num_uavs: int = 1
     num_users: int = 6
@@ -56,15 +68,24 @@ class SystemConfig:
     chapter_name: str = "common"
 
     def to_dict(self) -> dict[str, Any]:
+        """导出可序列化配置，便于日志记录与结果复现。"""
         return asdict(self)
 
 
 def build_config(overrides: dict[str, Any] | None = None) -> SystemConfig:
+    """基于默认配置构造实例，并校验派生字段的一致性。"""
     config = SystemConfig()
     if not overrides:
+        config.num_service_types = len(config.service_size_bits)
         return config
     for key, value in overrides.items():
         if not hasattr(config, key):
             raise KeyError(f"Unknown config key: {key}")
         setattr(config, key, value)
+    derived_num_service_types = len(config.service_size_bits)
+    if "num_service_types" in overrides and int(config.num_service_types) != derived_num_service_types:
+        raise ValueError(
+            "num_service_types must match len(service_size_bits) to keep task generation and observation schema consistent."
+        )
+    config.num_service_types = derived_num_service_types
     return config

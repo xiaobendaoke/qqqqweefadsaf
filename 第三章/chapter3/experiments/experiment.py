@@ -1,3 +1,13 @@
+"""第三章实验主流程模块。
+
+该模块负责组织第三章单 UAV 实验的完整运行流程，
+包括环境创建、策略执行、episode 结果汇总、轨迹导出以及与第四章退化一致性的对比实验。
+
+输入输出与关键参数：
+实验入口支持随机种子、episode 数、hard/default 场景配置、策略类型、
+轨迹导出开关和每回合步数等参数；输出为包含平均指标、episode 日志和轨迹文件路径的结果字典。
+"""
+
 from __future__ import annotations
 
 import importlib
@@ -23,6 +33,7 @@ CHAPTER3_TRAJECTORIES = CHAPTER3_RESULTS / "trajectories"
 
 
 def _find_chapter4_package_dir(search_root: Path) -> Path:
+    """在仓库内定位 `chapter4` 包目录，供退化一致性实验复用。"""
     candidates = sorted(
         path.parent for path in search_root.rglob("__init__.py") if path.parent.name == "chapter4"
     )
@@ -32,6 +43,7 @@ def _find_chapter4_package_dir(search_root: Path) -> Path:
 
 
 def _ensure_chapter4_package_loaded(repo_root: Path) -> None:
+    """确保第四章包能被当前进程导入，而不依赖外部安装。"""
     package_dir = _find_chapter4_package_dir(repo_root)
     package_root = package_dir.parent
     init_file = package_dir / "__init__.py"
@@ -47,6 +59,7 @@ def _ensure_chapter4_package_loaded(repo_root: Path) -> None:
         if module_file and Path(module_file).resolve().parent == package_dir:
             return
 
+    # 这里显式构造 module spec，是为了在论文仓库的本地目录结构下稳定导入 chapter4。
     spec = importlib.util.spec_from_file_location(
         "chapter4",
         init_file,
@@ -60,6 +73,7 @@ def _ensure_chapter4_package_loaded(repo_root: Path) -> None:
 
 
 def _mean(values: list[float]) -> float | None:
+    """对非空数值列表求均值，空列表保留为 None。"""
     if not values:
         return None
     return sum(values) / len(values)
@@ -74,8 +88,22 @@ def run_experiment(
     export_trajectory: bool = True,
     steps_per_episode: int | None = None,
 ) -> dict[str, Any]:
+    """运行第三章实验并写出结果文件。
+
+    参数：
+        seed: 实验起始随机种子。
+        episodes: 需要运行的 episode 数量。
+        hard: 是否启用更高负载、更严格约束的 hard 场景。
+        policy: 采用的策略名称，可选 heuristic、mpc、fixed_point、fixed_patrol。
+        export_trajectory: 是否导出 UAV/UE 轨迹 JSON 与 PNG。
+        steps_per_episode: 可选的每回合步数覆盖值。
+
+    返回：
+        包含平均指标、每回合摘要、episode 日志和轨迹导出信息的结果字典。
+    """
     overrides = {}
     if hard:
+        # hard profile 用更高任务强度和更紧资源约束模拟更苛刻场景。
         overrides = {
             "num_users": 10,
             "steps_per_episode": 10,
@@ -129,10 +157,7 @@ def run_experiment(
         last_step = None
         step_index = 0
         while True:
-            try:
-                actions = policy_fn(observations, env)
-            except TypeError:
-                actions = policy_fn(observations)
+            actions = policy_fn(observations, env)
             last_step = env.step(actions)
             step_index += 1
             if recorder is not None:
@@ -200,13 +225,21 @@ def run_experiment(
 
 
 def compare_with_chapter4(*, seed: int, episodes: int) -> dict[str, Any]:
+    """比较第三章与第四章在单 UAV 条件下的结果一致性。
+
+    参数：
+        seed: 实验起始随机种子。
+        episodes: 用于比较的 episode 数量。
+
+    返回：
+        包含第三章指标、第四章指标及其逐项差值的比较结果字典。
+    """
     _ensure_chapter4_package_loaded(REPO_ROOT)
     importlib.invalidate_caches()
     chapter4_env_module = importlib.import_module("chapter4.env")
-    chapter4_policy_module = importlib.import_module("chapter4.policies.mobility_heuristic_multi")
     Chapter4Env = chapter4_env_module.Chapter4Env
-    select_actions_ch4 = chapter4_policy_module.select_actions
 
+    # 两侧都使用共享 heuristic 和相同随机种子，尽量把差异约束在环境实现本身。
     left = run_short_experiment(
         env_factory=Chapter3Env,
         policy_fn=select_actions_heuristic,
@@ -216,7 +249,7 @@ def compare_with_chapter4(*, seed: int, episodes: int) -> dict[str, Any]:
     )
     right = run_short_experiment(
         env_factory=Chapter4Env,
-        policy_fn=select_actions_ch4,
+        policy_fn=select_actions_heuristic,
         overrides={"num_uavs": 1},
         episodes=episodes,
         seed=seed,
@@ -224,6 +257,7 @@ def compare_with_chapter4(*, seed: int, episodes: int) -> dict[str, Any]:
     comparison = {
         "seed": seed,
         "episodes": episodes,
+        "validation_policy": "chapter3_heuristic_shared",
         "chapter3_metrics": left["averaged_metrics"],
         "chapter4_metrics": right["averaged_metrics"],
         "comparison": compare_metric_dicts(left["averaged_metrics"], right["averaged_metrics"]),

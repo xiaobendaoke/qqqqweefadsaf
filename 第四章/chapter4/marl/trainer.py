@@ -1,3 +1,9 @@
+"""第四章 MARL 训练执行模块。
+
+该模块负责收集多 UAV 环境中的 rollout，构造团队奖励，
+并执行 shared-actor centralized-critic PPO 更新与训练日志导出。
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -18,12 +24,14 @@ RESULTS_DIR = Path(__file__).resolve().parents[2] / "results"
 
 
 def _mean_action_norm(actions: list[list[float]]) -> float:
+    """统计一步内联合动作的平均幅度，用于 reward regularization。"""
     if not actions:
         return 0.0
     return float(sum((action[0] ** 2 + action[1] ** 2) ** 0.5 for action in actions) / len(actions))
 
 
 def _max_step_move_energy(env: Chapter4Env) -> float:
+    """给移动能耗提供一个按 UAV 数量缩放的归一化基准。"""
     base = (
         env.config.num_uavs
         * env.config.uav_speed
@@ -40,6 +48,7 @@ def _shape_team_reward(
     step_result: dict[str, Any],
     actions: list[list[float]],
 ) -> tuple[float, dict[str, float]]:
+    """将环境 step 指标转换为 MARL 训练使用的 shaped team reward。"""
     step_metrics = step_result["step_metrics"]
     delta_energy = float(step_metrics["total_energy"])
     normalized_energy = delta_energy / _max_step_move_energy(env)
@@ -76,6 +85,7 @@ def _collect_episode(
     config: MinimalMARLConfig,
     episode_index: int,
 ) -> tuple[RolloutBuffer, dict[str, Any], float]:
+    """采集一个完整 episode 的 rollout、日志与训练侧附加信息。"""
     env = Chapter4Env(
         {
             "seed": config.seed + episode_index,
@@ -129,6 +139,7 @@ def _collect_episode(
 
 
 def run_training(config: MinimalMARLConfig) -> dict[str, Any]:
+    """执行 shared-actor centralized-critic 训练流程并导出结果文件。"""
     probe_env = Chapter4Env({"num_uavs": config.num_uavs, "assignment_rule": config.assignment_rule, "seed": config.seed})
     reset_result = probe_env.reset(seed=config.seed)
     obs_dim = len(reset_result["observations"][0])

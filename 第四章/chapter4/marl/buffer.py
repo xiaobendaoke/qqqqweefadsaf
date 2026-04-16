@@ -1,3 +1,9 @@
+"""MARL rollout 缓冲区模块。
+
+该模块定义 PPO 更新所需的轨迹缓存与批数据结构，
+负责在 episode 结束后计算优势函数并整理训练批次。
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -10,6 +16,8 @@ FloatArray = np.ndarray
 
 @dataclass(slots=True)
 class RolloutBatch:
+    """PPO 更新阶段使用的定型批数据。"""
+
     states: FloatArray
     observations: FloatArray
     actions: FloatArray
@@ -43,6 +51,8 @@ class RolloutBatch:
 
 
 class RolloutBuffer:
+    """按时间顺序收集 team reward 轨迹，并在 episode 结束后计算 GAE。"""
+
     def __init__(self) -> None:
         self.states: list[list[float]] = []
         self.observations: list[list[list[float]]] = []
@@ -63,6 +73,7 @@ class RolloutBuffer:
         done: bool,
         value: float,
     ) -> None:
+        """追加一个时间步的中心化状态、局部观测和联合动作。"""
         self.states.append([float(item) for item in state])
         self.observations.append([[float(item) for item in row] for row in observations])
         self.actions.append([[float(item) for item in row] for row in actions])
@@ -72,6 +83,7 @@ class RolloutBuffer:
         self.values.append(float(value))
 
     def finalize(self, *, gamma: float, gae_lambda: float, last_value: float) -> RolloutBatch:
+        """基于 GAE 计算优势与回报，并整理成训练批次。"""
         rewards = np.asarray(self.rewards, dtype=np.float32)
         dones = np.asarray(self.dones, dtype=np.float32)
         values = np.asarray(self.values, dtype=np.float32)

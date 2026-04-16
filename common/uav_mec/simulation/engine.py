@@ -1,3 +1,9 @@
+"""单时隙仿真引擎模块。
+
+该模块负责在一个离散时隙内完成用户移动、UAV 移动、任务生成、卸载决策、
+缓存更新、任务结算和指标回写，是整个环境动态演化的核心执行单元。
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -18,6 +24,8 @@ from .task_generator import generate_tasks
 
 @dataclass(slots=True)
 class StepExecution:
+    """汇总单个时隙执行结果，供环境层更新状态和日志。"""
+
     generated_tasks: list[Task]
     finalized_tasks: list[Task]
     pending_tasks: list[Task]
@@ -33,6 +41,7 @@ def _finalize_remaining_tasks_at_episode_end(
     expired_tasks: list[Task],
     episode_end_time: float,
 ) -> list[Task]:
+    """在 episode 结束时强制清算剩余任务，避免终局 pending 漏统。"""
     forced_finalized: list[Task] = []
     for task in list(pending_tasks):
         pending_tasks.remove(task)
@@ -56,6 +65,7 @@ def _refresh_runtime_counters(
     current_time: float,
     accumulate_delay: bool = False,
 ) -> None:
+    """刷新 UAV 的瞬时队列/覆盖/积压计数，供观测与日志共享。"""
     for uav in uavs:
         uav.current_tx_queue_length = tdma_queue.get_queue_length(queue_id=f"uav:{uav.uav_id}", current_time=current_time)
         uav.current_tx_queue_delay = tdma_queue.estimate_wait(current_time, queue_id=f"uav:{uav.uav_id}")
@@ -96,6 +106,7 @@ def run_step(
     actions: list[list[float]],
     rng: random.Random,
 ) -> StepExecution:
+    """执行一个完整时隙：移动、生成任务、卸载决策、任务结算与指标统计。"""
     current_time = current_step * config.time_slot_duration
     next_time = (current_step + 1) * config.time_slot_duration
     for user in users:
@@ -148,6 +159,7 @@ def run_step(
             uavs=uavs,
             ue=ue,
             tdma_queue=tdma_queue,
+            compute_queue=compute_queue,
             current_time=current_time,
             coverage_radius=config.uav_coverage_radius,
             rule=config.assignment_rule,
@@ -204,6 +216,7 @@ def run_step(
         ue.spend_local_compute_energy(decision.ue_local_energy)
         ue.spend_uplink_energy(decision.ue_uplink_energy)
         if decision.assigned_uav_id is not None:
+            # 计算能耗与协同转发能耗分别回写到对应 UAV，保持能量状态与链路选择一致。
             executed_uav = uav_lookup[decision.assigned_uav_id]
             executed_uav.remaining_energy_j = max(0.0, executed_uav.remaining_energy_j - decision.uav_compute_energy)
             for source_uav_id, relay_energy in (decision.uav_tx_energy_by_id or {}).items():
@@ -253,6 +266,7 @@ def run_step(
         if not should_finalize:
             continue
         pending_tasks.remove(task)
+        # 只有在 deadline 前完成且完成时刻已到达当前时隙末尾时才记为 completed。
         if task.completed and finish_time <= task.deadline and finish_time <= next_time:
             task.status = "completed"
             completed_tasks.append(task)

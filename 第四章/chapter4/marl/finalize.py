@@ -1,3 +1,9 @@
+"""第四章终稿复现实验打包模块。
+
+该模块负责组织 stage-6 多随机种子复现实验，
+生成终稿统计表、图表和可复现性结果包。
+"""
+
 from __future__ import annotations
 
 import csv

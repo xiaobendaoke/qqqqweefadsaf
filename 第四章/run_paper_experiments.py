@@ -1,3 +1,8 @@
+"""第四章 stage-5 论文实验命令行入口模块。
+
+该模块负责从命令行触发论文阶段的实验矩阵、调参和图表生成流程。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -13,6 +18,7 @@ from chapter4.marl import run_paper_experiments
 
 
 def main() -> None:
+    """解析命令行参数并执行 stage-5 论文实验。"""
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--eval-seed", type=int, default=142)

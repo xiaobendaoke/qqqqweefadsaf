@@ -1,3 +1,13 @@
+"""第三章 smoke test 模块。
+
+该模块提供第三章最小化验证流程，
+用于快速检查导入链路、通信公式、卸载决策和环境主循环是否保持可运行状态。
+
+输入输出与关键参数：
+主要输入为 smoke 模式 `mode` 和随机种子 `seed`；
+输出为不同模式下的最小结果字典，并同步写入 `第三章/results` 目录。
+"""
+
 from __future__ import annotations
 
 from typing import Any
@@ -15,6 +25,15 @@ from ..policies.mobility_heuristic import select_actions
 
 
 def run_smoke(mode: str, *, seed: int = 42) -> dict[str, Any]:
+    """运行第三章 smoke test。
+
+    参数：
+        mode: smoke 模式，可选导入检查、任务契约、通信契约、调度契约、单步环境和完整 episode。
+        seed: 验证过程使用的随机种子。
+
+    返回：
+        对应 smoke 模式的最小结果字典。
+    """
     env = Chapter3Env({"seed": seed})
     results_dir = "第三章/results"
 
@@ -25,6 +44,7 @@ def run_smoke(mode: str, *, seed: int = 42) -> dict[str, Any]:
 
     reset_result = env.reset(seed=seed)
     if mode == "task_contract":
+        # 这里只验证观测维度和关键任务字段是否齐全，不做完整行为测试。
         payload = {
             "mode": mode,
             "status": "ok",
@@ -42,6 +62,7 @@ def run_smoke(mode: str, *, seed: int = 42) -> dict[str, Any]:
         return payload
 
     if mode == "scheduler_contract":
+        # 若当前随机种子未生成任务，则临时抬高到达率，确保调度链路能被覆盖到。
         tasks = generate_tasks(
             users=env.users,
             current_time=0.0,
@@ -83,6 +104,7 @@ def run_smoke(mode: str, *, seed: int = 42) -> dict[str, Any]:
         return payload
 
     if mode == "env_step":
+        # 单步推进环境，验证 step 返回结构与指标字段。
         actions = select_actions(reset_result["observations"])
         step_result = env.step(actions)
         payload = {
@@ -96,6 +118,7 @@ def run_smoke(mode: str, *, seed: int = 42) -> dict[str, Any]:
         return payload
 
     if mode == "episode":
+        # 运行完整 episode，确保 reset/step/export 三段链路能串通。
         observations = reset_result["observations"]
         last_step = None
         while True:

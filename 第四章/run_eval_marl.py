@@ -1,3 +1,9 @@
+"""第四章 MARL 评估命令行入口模块。
+
+该模块负责解析命令行参数并触发已训练模型的评估流程，
+适用于单次 checkpoint 验证和与启发式基线的快速比较。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -13,6 +19,7 @@ from chapter4.marl import run_marl_evaluation
 
 
 def main() -> None:
+    """解析命令行参数并执行 MARL 评估。"""
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=142)
     parser.add_argument("--eval-episodes", type=int, default=4)

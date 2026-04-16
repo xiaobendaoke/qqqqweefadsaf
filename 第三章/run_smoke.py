@@ -1,3 +1,9 @@
+"""第三章 smoke test 命令行入口模块。
+
+该模块用于从命令行触发第三章最小验证流程，
+便于快速检查环境与核心依赖是否正常工作。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -13,6 +19,7 @@ from chapter3.experiments.smoke import run_smoke
 
 
 def main() -> None:
+    """解析命令行参数并执行第三章 smoke test。"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--mode",

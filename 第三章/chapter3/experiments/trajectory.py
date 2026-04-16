@@ -1,3 +1,13 @@
+"""第三章轨迹记录与可视化模块。
+
+该模块负责记录单 UAV episode 过程中 UAV 和用户的轨迹样本，
+并将其导出为 JSON 与可选 PNG，用于论文插图和过程分析。
+
+输入输出与关键参数：
+输入包括环境对象、episode 编号、随机种子、策略名和实验 profile；
+输出为轨迹载荷或轨迹文件路径信息。
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -7,6 +17,8 @@ from common.uav_mec.logging_utils import write_json
 
 
 class EpisodeTrajectoryRecorder:
+    """采集单 UAV episode 过程中的 UAV/UE 位置轨迹与关键 step 指标。"""
+
     def __init__(self, *, env: Any, episode_index: int, seed: int, policy: str, profile: str) -> None:
         self.env = env
         self.episode_index = episode_index
@@ -23,6 +35,7 @@ class EpisodeTrajectoryRecorder:
         self._capture(step_index=0)
 
     def _capture(self, *, step_index: int) -> None:
+        """记录当前时刻的 UAV 和所有用户位置快照。"""
         if self.env.uavs:
             uav = self.env.uavs[0]
             self.uav_path.append(
@@ -43,6 +56,7 @@ class EpisodeTrajectoryRecorder:
             )
 
     def record_step(self, *, step_index: int, metrics: dict[str, float | None]) -> None:
+        """追加一步轨迹样本，并保留论文常用的过程指标。"""
         self._capture(step_index=step_index)
         self.step_metrics.append(
             {
@@ -55,6 +69,7 @@ class EpisodeTrajectoryRecorder:
         )
 
     def build_payload(self, *, summary_metrics: dict[str, float | None]) -> dict[str, Any]:
+        """整理轨迹导出所需的统一 JSON 载荷。"""
         return {
             "chapter": "chapter3",
             "profile": self.profile,
@@ -77,6 +92,7 @@ def export_trajectory_artifacts(
     summary_metrics: dict[str, float | None],
     output_dir: Path,
 ) -> dict[str, str]:
+    """同时导出轨迹 JSON 与可选 PNG，可在缺少 matplotlib 时优雅降级。"""
     output_dir.mkdir(parents=True, exist_ok=True)
     stem = f"trajectory_{recorder.profile}_{recorder.policy}_seed{recorder.seed}_ep{recorder.episode_index}"
     json_path = output_dir / f"{stem}.json"
@@ -97,6 +113,7 @@ def export_trajectory_artifacts(
 
 
 def _plot_trajectory(*, payload: dict[str, Any], output_path: Path) -> None:
+    """根据轨迹载荷绘制单 UAV 路径图。"""
     import matplotlib
 
     matplotlib.use("Agg")
@@ -122,6 +139,7 @@ def _plot_trajectory(*, payload: dict[str, Any], output_path: Path) -> None:
     axis.grid(alpha=0.25, linestyle="--", linewidth=0.6)
 
     for user_trace in user_paths:
+        # 用户轨迹只作为背景参考，因此使用较浅的灰色弱化视觉权重。
         samples = user_trace["samples"]
         xs = [sample["x"] for sample in samples]
         ys = [sample["y"] for sample in samples]
@@ -137,6 +155,7 @@ def _plot_trajectory(*, payload: dict[str, Any], output_path: Path) -> None:
 
     label_stride = max(1, len(uav_path) // 8)
     for index, sample in enumerate(uav_path):
+        # 只抽样标注部分 step，避免长轨迹时标签过密。
         if index % label_stride != 0 and index != len(uav_path) - 1:
             continue
         axis.annotate(
@@ -163,6 +182,7 @@ def _plot_trajectory(*, payload: dict[str, Any], output_path: Path) -> None:
 
 
 def _format_metric(value: float | None) -> str:
+    """把浮点指标格式化成适合图标题展示的短字符串。"""
     if value is None:
         return "null"
     return f"{float(value):.3f}"

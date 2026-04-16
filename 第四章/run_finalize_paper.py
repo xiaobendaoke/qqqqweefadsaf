@@ -1,3 +1,8 @@
+"""第四章终稿复现实验命令行入口模块。
+
+该模块负责从命令行触发 stage-6 多随机种子复现实验与结果打包流程。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -13,6 +18,7 @@ from chapter4.marl import run_final_paper_package
 
 
 def main() -> None:
+    """解析命令行参数并执行终稿复现实验。"""
     parser = argparse.ArgumentParser()
     parser.add_argument("--seeds", type=int, nargs="+", default=[42, 52, 62])
     parser.add_argument("--eval-episodes", type=int, default=4)

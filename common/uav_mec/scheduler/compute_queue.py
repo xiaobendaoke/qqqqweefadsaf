@@ -1,3 +1,9 @@
+"""计算资源排队近似模块。
+
+该模块使用轻量的单服务器排队模型，
+近似描述 UAV 与基站在计算资源上的串行执行过程，用于估计等待时延与队列长度。
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -5,10 +11,13 @@ from dataclasses import dataclass, field
 
 @dataclass(slots=True)
 class ComputeQueue:
+    """按队列 id 串行化计算资源，近似 UAV/BS 的单服务器排队过程。"""
+
     next_available_time_by_queue: dict[str, float] = field(default_factory=dict)
     scheduled_end_times_by_queue: dict[str, list[float]] = field(default_factory=dict)
 
     def _prune(self, current_time: float, queue_id: str) -> None:
+        """清理已完成任务，保证等待时间和队长估计基于当前时刻。"""
         end_times = self.scheduled_end_times_by_queue.get(queue_id, [])
         while end_times and end_times[0] <= current_time:
             end_times.pop(0)
@@ -20,6 +29,7 @@ class ComputeQueue:
         return max(0.0, self.next_available_time_by_queue.get(queue_id, 0.0) - current_time)
 
     def schedule(self, current_time: float, duration: float, queue_id: str = "default") -> tuple[float, float, float]:
+        """在指定队列中登记一段计算占用，并返回开始/结束/等待时间。"""
         self._prune(current_time, queue_id)
         start_time = max(current_time, self.next_available_time_by_queue.get(queue_id, 0.0))
         wait_time = max(0.0, start_time - current_time)

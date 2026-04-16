@@ -107,7 +107,7 @@ python 第四章/run_experiment.py --episodes 1 --profile sensitive --seed 42 --
 
 - observation smoke:
   - `NUM_UAVS=1/2/3` 均可返回 observation schema、per-UAV state 与 observation sample
-  - 当前 observation length 固定为 `46`
+  - 当前 observation length 固定为 `56`
 - `sensitive, NUM_UAVS=2`
   - `nearest_uav`: `fairness_uav_load=0.9411764705882353`
   - `least_loaded_uav`: `fairness_uav_load=0.9993429697766097`

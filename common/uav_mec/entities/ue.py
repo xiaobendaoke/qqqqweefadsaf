@@ -1,3 +1,9 @@
+"""用户终端实体模块。
+
+该模块定义 UE 在仿真中的位置、算力、剩余能量和任务完成统计，
+用于建模本地执行、上行卸载和简单随机移动过程。
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -9,6 +15,8 @@ from ..config import SystemConfig
 
 @dataclass(slots=True)
 class UserEquipment:
+    """表示用户终端的移动、算力与能量状态。"""
+
     user_id: int
     position: list[float]
     compute_hz: float
@@ -21,6 +29,7 @@ class UserEquipment:
 
     @classmethod
     def random_init(cls, user_id: int, config: SystemConfig, rng: random.Random) -> "UserEquipment":
+        """随机或按固定布局初始化用户位置与本地计算能力。"""
         if config.fixed_user_positions and user_id < len(config.fixed_user_positions):
             fixed = config.fixed_user_positions[user_id]
             position = [float(fixed[0]), float(fixed[1])]
@@ -35,6 +44,9 @@ class UserEquipment:
         )
 
     def move(self, config: SystemConfig, rng: random.Random) -> None:
+        """在给定移动半径内做简单随机游走。"""
+        if config.fixed_user_positions and self.user_id < len(config.fixed_user_positions):
+            return
         delta_x = rng.uniform(-config.ue_move_distance, config.ue_move_distance)
         delta_y = rng.uniform(-config.ue_move_distance, config.ue_move_distance)
         self.position[0] = min(max(self.position[0] + delta_x, 0.0), config.area_width)

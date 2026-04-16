@@ -1,3 +1,9 @@
+"""第四章启发式实验命令行入口模块。
+
+该模块负责解析 default、hard 和 sensitive 三类实验参数，
+并调度第四章启发式实验入口。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -13,6 +19,7 @@ from chapter4.experiments import run_experiment, run_sensitive_experiment
 
 
 def main() -> None:
+    """解析命令行参数并执行第四章启发式实验。"""
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--episodes", type=int, default=1)

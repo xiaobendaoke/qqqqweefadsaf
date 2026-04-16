@@ -1,3 +1,13 @@
+"""第四章共享策略与中心化 critic 模型模块。
+
+该模块定义第四章使用的 shared-actor centralized-critic 最小 PPO/MAPPO 风格实现，
+包括动作分布建模、移动预算约束、价值网络和参数保存/加载接口。
+
+输入输出与关键参数：
+关键参数包括观测维度、动作维度、UAV 数量、动作方差调度、隐藏层维度和设备类型；
+输出为策略动作、log-prob、状态价值和模型 checkpoint。
+"""
+
 from __future__ import annotations
 
 import math
@@ -19,12 +29,14 @@ EPS = 1.0e-6
 
 
 def _layer_init(layer: nn.Linear, *, std: float = math.sqrt(2.0), bias_const: float = 0.0) -> nn.Linear:
+    """使用 PPO 常见的正交初始化稳定训练初期尺度。"""
     nn.init.orthogonal_(layer.weight, std)
     nn.init.constant_(layer.bias, bias_const)
     return layer
 
 
 def _movement_budget(observation: list[float], *, max_user_blocks: int, user_feature_dim: int) -> float:
+    """依据观测中的 backlog 强度动态收缩或放宽动作幅度预算。"""
     block_width = max_user_blocks * user_feature_dim
     if block_width <= 0 or len(observation) < block_width:
         return 1.0
@@ -52,6 +64,7 @@ def _movement_budget(observation: list[float], *, max_user_blocks: int, user_fea
 
 
 def _budget_tensor(observations: torch.Tensor, *, max_user_blocks: int, user_feature_dim: int) -> torch.Tensor:
+    """为每条观测批量生成移动预算张量。"""
     budgets = [
         _movement_budget(observation.tolist(), max_user_blocks=max_user_blocks, user_feature_dim=user_feature_dim)
         for observation in observations
@@ -60,11 +73,14 @@ def _budget_tensor(observations: torch.Tensor, *, max_user_blocks: int, user_fea
 
 
 def _atanh(value: torch.Tensor) -> torch.Tensor:
+    """对约束动作做稳定的反双曲正切变换。"""
     clamped = value.clamp(-1.0 + EPS, 1.0 - EPS)
     return 0.5 * (torch.log1p(clamped) - torch.log1p(-clamped))
 
 
 class SharedActor(nn.Module):
+    """所有 UAV 共享的策略网络，输入局部观测，输出高斯动作分布。"""
+
     def __init__(self, *, obs_dim: int, action_dim: int, hidden_dim: int, action_std_init: float) -> None:
         super().__init__()
         self.backbone = nn.Sequential(
@@ -85,6 +101,8 @@ class SharedActor(nn.Module):
 
 
 class CentralCritic(nn.Module):
+    """读取拼接后的全局状态，输出 team value。"""
+
     def __init__(self, *, state_dim: int, hidden_dim: int) -> None:
         super().__init__()
         self.network = nn.Sequential(
@@ -100,6 +118,8 @@ class CentralCritic(nn.Module):
 
 
 class MinimalMultiAgentActorCritic:
+    """最小可运行的 shared-actor centralized-critic PPO/MAPPO 风格实现。"""
+
     def __init__(
         self,
         *,
@@ -139,10 +159,12 @@ class MinimalMultiAgentActorCritic:
         self.critic_optimizer: torch.optim.Optimizer | None = None
 
     def configure_optimizers(self, *, actor_lr: float, critic_lr: float) -> None:
+        """为 actor 和 critic 分别配置 Adam 优化器。"""
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=actor_lr)
         self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=critic_lr)
 
     def _action_and_log_prob(self, observations: torch.Tensor, *, raw_actions: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        """将高斯原始动作压缩到合法范围，并计算修正后的对数概率。"""
         dist = self.actor(observations)
         budgets = _budget_tensor(
             observations,
@@ -157,6 +179,7 @@ class MinimalMultiAgentActorCritic:
         return actions, log_prob
 
     def _raw_actions_from_constrained(self, observations: torch.Tensor, actions: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        """把已受预算约束的动作还原到高斯采样空间，用于 PPO 重算 log-prob。"""
         budgets = _budget_tensor(
             observations,
             max_user_blocks=self.max_user_blocks,
@@ -167,6 +190,7 @@ class MinimalMultiAgentActorCritic:
         return raw_actions, budgets
 
     def act(self, observations: list[list[float]], *, deterministic: bool) -> tuple[list[list[float]], list[float]]:
+        """基于局部观测为所有 UAV 采样或输出确定性动作。"""
         obs_tensor = torch.as_tensor(np.asarray(observations, dtype=np.float32), device=self.device)
         with torch.no_grad():
             dist = self.actor(obs_tensor)
@@ -186,6 +210,7 @@ class MinimalMultiAgentActorCritic:
         return [indices[start : start + minibatch_size] for start in range(0, total_steps, minibatch_size)]
 
     def update(self, *, batch: RolloutBatch, config: MinimalMARLConfig) -> dict[str, float]:
+        """执行多轮 PPO 更新，并同步衰减策略动作方差。"""
         if self.actor_optimizer is None or self.critic_optimizer is None:
             self.configure_optimizers(actor_lr=config.actor_lr, critic_lr=config.critic_lr)
 
@@ -226,6 +251,7 @@ class MinimalMultiAgentActorCritic:
                 actor_loss = -torch.min(unclipped, clipped).mean() - config.entropy_coef * entropy
 
                 values = self.critic(states_mb)
+                # critic 也做 clipping，避免中心化 value 在单次更新中跳动过大。
                 value_delta = values - old_values_mb
                 clipped_values = old_values_mb + value_delta.clamp(-config.value_clip_eps, config.value_clip_eps)
                 critic_loss_unclipped = (values - returns_mb).pow(2)
@@ -261,6 +287,7 @@ class MinimalMultiAgentActorCritic:
         }
 
     def save(self, path: str | Path) -> None:
+        """保存模型参数、优化器状态和关键张量契约。"""
         target = Path(path)
         target.parent.mkdir(parents=True, exist_ok=True)
         payload = {
@@ -305,6 +332,7 @@ class MinimalMultiAgentActorCritic:
         return model
 
     def tensor_contract(self) -> dict[str, Any]:
+        """导出训练日志中使用的批维度契约。"""
         return {
             "observation_batch_shape": ["T", self.num_agents, self.obs_dim],
             "central_state_shape": ["T", self.state_dim],

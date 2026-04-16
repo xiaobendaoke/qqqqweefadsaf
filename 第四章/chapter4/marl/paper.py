@@ -1,6 +1,13 @@
+"""第四章 stage-5 论文实验模块。
+
+该模块负责组织论文阶段的调参、敏感性实验、与第三章对比和图表生成流程，
+用于产出论文撰写所需的实验矩阵、汇总表和可视化结果。
+"""
+
 from __future__ import annotations
 
 import csv
+import statistics
 import sys
 from pathlib import Path
 from typing import Any
@@ -20,6 +27,9 @@ CHAPTER3_DIR = WORKSPACE_ROOT / "第三章"
 
 MAIN_NUM_UAVS = 2
 MAIN_ASSIGNMENT_RULE = "nearest_uav"
+DEFAULT_TUNING_SEEDS = [42, 52, 62]
+TUNING_EVAL_OFFSET = 100
+FINAL_MAIN_CANDIDATE_NAME = "energy_e30"
 
 TUNING_CANDIDATES: list[dict[str, Any]] = [
     {
@@ -81,6 +91,29 @@ TUNING_CANDIDATES: list[dict[str, Any]] = [
 ]
 
 
+def get_tuning_candidate(name: str) -> dict[str, Any]:
+    for candidate in TUNING_CANDIDATES:
+        if candidate["name"] == name:
+            return candidate
+    raise KeyError(f"Unknown tuning candidate: {name}")
+
+
+def get_candidate_overrides(name: str) -> dict[str, Any]:
+    return dict(get_tuning_candidate(name)["overrides"])
+
+
+def _normalize_seeds(seeds: list[int] | None) -> list[int]:
+    resolved = list(seeds or DEFAULT_TUNING_SEEDS)
+    unique: list[int] = []
+    for seed in resolved:
+        normalized = int(seed)
+        if normalized not in unique:
+            unique.append(normalized)
+    if not unique:
+        raise ValueError("At least one tuning seed is required.")
+    return unique
+
+
 def _load_matplotlib() -> Any:
     try:
         import matplotlib.pyplot as plt
@@ -115,6 +148,18 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writerows(rows)
 
 
+def _metric_stats(values: list[float]) -> tuple[float, float]:
+    mean = float(statistics.fmean(values))
+    std = float(statistics.stdev(values)) if len(values) > 1 else 0.0
+    return mean, std
+
+
+def _format_mean_std(mean: float | None, std: float | None, digits: int = 4) -> str:
+    if mean is None or std is None:
+        return "null"
+    return f"{mean:.{digits}f} +/- {std:.{digits}f}"
+
+
 def _metric_sort_value(value: float | None, *, prefer_high: bool) -> tuple[int, float]:
     if value is None:
         return (1, 0.0)
@@ -122,12 +167,18 @@ def _metric_sort_value(value: float | None, *, prefer_high: bool) -> tuple[int, 
 
 
 def _select_best_candidate(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    def _value(row: dict[str, Any], *, mean_key: str, raw_key: str) -> float | None:
+        if mean_key in row:
+            return row.get(mean_key)
+        return row.get(raw_key)
+
     return min(
         rows,
         key=lambda row: (
-            _metric_sort_value(row["completion_rate"], prefer_high=True),
-            _metric_sort_value(row["total_energy"], prefer_high=False),
-            _metric_sort_value(row["average_latency"], prefer_high=False),
+            _metric_sort_value(_value(row, mean_key="completion_rate_mean", raw_key="completion_rate"), prefer_high=True),
+            _metric_sort_value(_value(row, mean_key="total_energy_mean", raw_key="total_energy"), prefer_high=False),
+            _metric_sort_value(_value(row, mean_key="average_latency_mean", raw_key="average_latency"), prefer_high=False),
+            _metric_sort_value(row.get("completion_rate_std", 0.0), prefer_high=False),
         ),
     )
 
@@ -215,59 +266,195 @@ def _summarize_eval_result(
     }
 
 
+def _append_metric_summary(entry: dict[str, Any], group: list[dict[str, Any]], field: str) -> None:
+    values = [float(item[field]) for item in group if item.get(field) is not None]
+    if not values:
+        entry[f"{field}_mean"] = None
+        entry[f"{field}_std"] = None
+        entry[f"{field}_mean_std"] = "null"
+        return
+    mean, std = _metric_stats(values)
+    entry[f"{field}_mean"] = mean
+    entry[f"{field}_std"] = std
+    entry[f"{field}_mean_std"] = _format_mean_std(mean, std)
+
+
+def _aggregate_tuning_rows(raw_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for row in raw_rows:
+        grouped.setdefault(str(row["label"]), []).append(row)
+
+    summary_rows: list[dict[str, Any]] = []
+    metric_fields = [
+        "completion_rate",
+        "average_latency",
+        "total_energy",
+        "cache_hit_rate",
+        "fairness_uav_load",
+        "heuristic_completion_rate",
+        "heuristic_average_latency",
+        "heuristic_total_energy",
+        "heuristic_cache_hit_rate",
+        "heuristic_fairness_uav_load",
+        "delta_completion_rate",
+        "delta_average_latency",
+        "delta_total_energy",
+    ]
+    for label, group in grouped.items():
+        template = group[0]
+        entry = {
+            "label": label,
+            "description": template["description"],
+            "num_uavs": template["num_uavs"],
+            "assignment_rule": template["assignment_rule"],
+            "train_episodes": template["train_episodes"],
+            "actor_lr": template["actor_lr"],
+            "critic_lr": template["critic_lr"],
+            "clip_ratio": template["clip_ratio"],
+            "entropy_coef": template["entropy_coef"],
+            "value_coef": template["value_coef"],
+            "reward_energy_weight": template["reward_energy_weight"],
+            "reward_action_magnitude_weight": template["reward_action_magnitude_weight"],
+            "use_movement_budget": template["use_movement_budget"],
+            "num_seeds": len(group),
+            "tuning_seeds": ",".join(str(int(item["tuning_seed"])) for item in group),
+        }
+        for field in metric_fields:
+            _append_metric_summary(entry, group, field)
+        summary_rows.append(entry)
+    summary_rows.sort(key=lambda item: str(item["label"]))
+    return summary_rows
+
+
+def _aggregate_rows(
+    raw_rows: list[dict[str, Any]],
+    *,
+    group_keys: list[str],
+    metric_fields: list[str],
+) -> list[dict[str, Any]]:
+    grouped: dict[tuple[Any, ...], list[dict[str, Any]]] = {}
+    for row in raw_rows:
+        key = tuple(row[group_key] for group_key in group_keys)
+        grouped.setdefault(key, []).append(row)
+
+    summary_rows: list[dict[str, Any]] = []
+    for key, group in grouped.items():
+        template = group[0]
+        entry = {group_key: value for group_key, value in zip(group_keys, key)}
+        for field, value in template.items():
+            if field in entry or field in metric_fields:
+                continue
+            entry[field] = value
+        entry["num_seeds"] = len(group)
+        for field in metric_fields:
+            _append_metric_summary(entry, group, field)
+        summary_rows.append(entry)
+    summary_rows.sort(key=lambda item: tuple(str(item[group_key]) for group_key in group_keys))
+    return summary_rows
+
+
+def _aggregate_training_curve(logs: list[list[dict[str, Any]]], metric: str) -> tuple[list[int], list[float], list[float]]:
+    episodes = [int(entry["episode"]) for entry in logs[0]]
+    means: list[float] = []
+    stds: list[float] = []
+    for index in range(len(episodes)):
+        values = [float(log[index][metric]) for log in logs]
+        mean, std = _metric_stats(values)
+        means.append(mean)
+        stds.append(std)
+    return episodes, means, stds
+
+
+def _style_axis(axis: Any) -> None:
+    axis.grid(alpha=0.25, linestyle="--", linewidth=0.7)
+    axis.spines["top"].set_visible(False)
+    axis.spines["right"].set_visible(False)
+
+
 def _run_tuning(
     *,
-    seed: int,
-    eval_seed: int,
+    tuning_seeds: list[int],
     eval_episodes: int,
-) -> tuple[list[dict[str, Any]], dict[str, Any], dict[str, Any]]:
-    tuning_rows: list[dict[str, Any]] = []
-    tuning_runs: dict[str, Any] = {}
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+    tuning_raw_rows: list[dict[str, Any]] = []
     for candidate in TUNING_CANDIDATES:
-        output_tag = f"tune_{candidate['name']}"
-        train_eval = _run_train_eval(
-            seed=seed,
-            eval_seed=eval_seed,
-            eval_episodes=eval_episodes,
-            num_uavs=MAIN_NUM_UAVS,
-            assignment_rule=MAIN_ASSIGNMENT_RULE,
-            output_tag=output_tag,
-            overrides=candidate["overrides"],
-        )
-        row = _summarize_eval_result(label=candidate["name"], train_eval=train_eval)
-        row["description"] = candidate["description"]
-        tuning_rows.append(row)
-        tuning_runs[candidate["name"]] = train_eval
-    selected_row = _select_best_candidate(tuning_rows)
-    return tuning_rows, selected_row, tuning_runs[selected_row["label"]]
+        for tuning_seed in tuning_seeds:
+            eval_seed = tuning_seed + TUNING_EVAL_OFFSET
+            output_tag = f"tune_{candidate['name']}_s{tuning_seed}"
+            train_eval = _run_train_eval(
+                seed=tuning_seed,
+                eval_seed=eval_seed,
+                eval_episodes=eval_episodes,
+                num_uavs=MAIN_NUM_UAVS,
+                assignment_rule=MAIN_ASSIGNMENT_RULE,
+                output_tag=output_tag,
+                overrides=candidate["overrides"],
+            )
+            row = _summarize_eval_result(label=candidate["name"], train_eval=train_eval)
+            row["description"] = candidate["description"]
+            row["tuning_seed"] = tuning_seed
+            row["eval_seed"] = eval_seed
+            tuning_raw_rows.append(row)
+    tuning_summary_rows = _aggregate_tuning_rows(tuning_raw_rows)
+    selected_row = _select_best_candidate(tuning_summary_rows)
+    return tuning_raw_rows, tuning_summary_rows, selected_row
+
+
+def _select_named_candidate(rows: list[dict[str, Any]], *, name: str) -> dict[str, Any]:
+    for row in rows:
+        if str(row.get("label")) == name:
+            return row
+    raise KeyError(f"Named tuning candidate not found in summary rows: {name}")
 
 
 def _plot_training_curves(
     *,
-    main_train_log: list[dict[str, Any]],
-    ablation_logs: dict[str, list[dict[str, Any]]],
+    training_logs: dict[str, list[list[dict[str, Any]]]],
     output_path: Path,
 ) -> None:
     plt = _load_matplotlib()
     figure, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+    colors = {
+        "main": "#2E86AB",
+        "no_energy_shaped_reward": "#E67E22",
+        "no_movement_budget": "#C0392B",
+    }
+    label_map = {
+        "main": "main",
+        "no_energy_shaped_reward": "no_energy_shaped_reward",
+        "no_movement_budget": "no_movement_budget",
+    }
 
-    def plot_series(logs: list[dict[str, Any]], *, label: str, key: str, axis: Any) -> None:
-        axis.plot([entry["episode"] for entry in logs], [entry[key] for entry in logs], label=label, linewidth=2.0)
-
-    plot_series(main_train_log, label="main", key="team_return", axis=axes[0])
-    plot_series(main_train_log, label="main", key="total_energy", axis=axes[1])
-    for label, logs in ablation_logs.items():
-        plot_series(logs, label=label, key="team_return", axis=axes[0])
-        plot_series(logs, label=label, key="total_energy", axis=axes[1])
+    for variant, logs in training_logs.items():
+        episodes, return_mean, return_std = _aggregate_training_curve(logs, "team_return")
+        _, energy_mean, energy_std = _aggregate_training_curve(logs, "total_energy")
+        color = colors.get(variant, "#555555")
+        label = label_map.get(variant, variant)
+        axes[0].plot(episodes, return_mean, label=label, color=color, linewidth=2.0)
+        axes[0].fill_between(
+            episodes,
+            [value - delta for value, delta in zip(return_mean, return_std)],
+            [value + delta for value, delta in zip(return_mean, return_std)],
+            color=color,
+            alpha=0.14,
+        )
+        axes[1].plot(episodes, energy_mean, label=label, color=color, linewidth=2.0)
+        axes[1].fill_between(
+            episodes,
+            [value - delta for value, delta in zip(energy_mean, energy_std)],
+            [value + delta for value, delta in zip(energy_mean, energy_std)],
+            color=color,
+            alpha=0.14,
+        )
 
     axes[0].set_ylabel("Team Return")
-    axes[0].set_title("PPO Training Curves")
-    axes[0].grid(alpha=0.3)
-    axes[0].legend()
+    axes[0].set_title("PPO Training Curves (mean +/- std)")
+    _style_axis(axes[0])
+    axes[0].legend(frameon=False)
     axes[1].set_xlabel("Episode")
     axes[1].set_ylabel("Total Energy")
-    axes[1].grid(alpha=0.3)
-    axes[1].legend()
+    _style_axis(axes[1])
+    axes[1].legend(frameon=False)
     figure.tight_layout()
     figure.savefig(output_path, dpi=200, bbox_inches="tight")
     plt.close(figure)
@@ -276,16 +463,18 @@ def _plot_training_curves(
 def _plot_assignment_rules(rows: list[dict[str, Any]], output_path: Path) -> None:
     plt = _load_matplotlib()
     labels = [f"u{row['num_uavs']}-{row['assignment_rule']}" for row in rows]
-    energy = [row["total_energy"] for row in rows]
-    fairness = [row["fairness_uav_load"] if row["fairness_uav_load"] is not None else 0.0 for row in rows]
+    energy = [row["total_energy_mean"] for row in rows]
+    energy_std = [row["total_energy_std"] for row in rows]
+    fairness = [row["fairness_uav_load_mean"] for row in rows]
+    fairness_std = [row["fairness_uav_load_std"] for row in rows]
     positions = list(range(len(labels)))
 
     figure, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
-    axes[0].bar(positions, energy, color="#4C78A8")
+    axes[0].bar(positions, energy, yerr=energy_std, color="#4C78A8", capsize=4)
     axes[0].set_ylabel("Total Energy")
     axes[0].set_title("Assignment Rule Comparison (Sensitive Profile)")
     axes[0].grid(axis="y", alpha=0.3)
-    axes[1].bar(positions, fairness, color="#F58518")
+    axes[1].bar(positions, fairness, yerr=fairness_std, color="#F58518", capsize=4)
     axes[1].set_ylabel("Fairness")
     axes[1].set_xticks(positions, labels, rotation=20)
     axes[1].grid(axis="y", alpha=0.3)
@@ -297,16 +486,18 @@ def _plot_assignment_rules(rows: list[dict[str, Any]], output_path: Path) -> Non
 def _plot_main_comparison(rows: list[dict[str, Any]], output_path: Path) -> None:
     plt = _load_matplotlib()
     labels = [f"u{row['num_uavs']}-ppo" for row in rows] + [f"u{row['num_uavs']}-heuristic" for row in rows]
-    energy = [row["total_energy"] for row in rows] + [row["heuristic_total_energy"] for row in rows]
-    latency = [row["average_latency"] for row in rows] + [row["heuristic_average_latency"] for row in rows]
+    energy = [row["total_energy_mean"] for row in rows] + [row["heuristic_total_energy_mean"] for row in rows]
+    energy_std = [row["total_energy_std"] for row in rows] + [row["heuristic_total_energy_std"] for row in rows]
+    latency = [row["average_latency_mean"] for row in rows] + [row["heuristic_average_latency_mean"] for row in rows]
+    latency_std = [row["average_latency_std"] for row in rows] + [row["heuristic_average_latency_std"] for row in rows]
     positions = list(range(len(labels)))
 
     figure, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
-    axes[0].bar(positions, energy, color=["#54A24B"] * len(rows) + ["#E45756"] * len(rows))
+    axes[0].bar(positions, energy, yerr=energy_std, color=["#54A24B"] * len(rows) + ["#E45756"] * len(rows), capsize=4)
     axes[0].set_ylabel("Total Energy")
     axes[0].set_title("PPO vs Heuristic")
     axes[0].grid(axis="y", alpha=0.3)
-    axes[1].bar(positions, latency, color=["#54A24B"] * len(rows) + ["#E45756"] * len(rows))
+    axes[1].bar(positions, latency, yerr=latency_std, color=["#54A24B"] * len(rows) + ["#E45756"] * len(rows), capsize=4)
     axes[1].set_ylabel("Average Latency")
     axes[1].set_xticks(positions, labels, rotation=20)
     axes[1].grid(axis="y", alpha=0.3)
@@ -318,18 +509,20 @@ def _plot_main_comparison(rows: list[dict[str, Any]], output_path: Path) -> None
 def _make_markdown_summary(
     *,
     final_config: dict[str, Any],
-    chapter_compare: dict[str, Any],
+    selected_tuning_row: dict[str, Any],
+    tuning_seeds: list[int],
+    chapter_compare_rows: list[dict[str, Any]],
     assignment_rows: list[dict[str, Any]],
     main_rows: list[dict[str, Any]],
     ablation_rows: list[dict[str, Any]],
 ) -> str:
-    comparison = chapter_compare["comparison"]
     lines = [
         "# 第五阶段实验汇总",
         "",
         "## 最终 PPO 主配置",
         "",
-        f"- output_tag: `{final_config['output_tag']}`",
+        f"- selected_candidate: `{selected_tuning_row['label']}`",
+        f"- tuning_seeds: `{', '.join(str(seed) for seed in tuning_seeds)}`",
         f"- train_episodes: `{final_config['train_episodes']}`",
         f"- actor_lr / critic_lr: `{final_config['actor_lr']}` / `{final_config['critic_lr']}`",
         f"- clip_ratio: `{final_config['ppo_clip_eps']}`",
@@ -341,24 +534,24 @@ def _make_markdown_summary(
         "",
         "## A. Chapter3 vs Chapter4(NUM_UAVS=1)",
         "",
-        "| metric | delta |",
+        "| metric | delta mean±std |",
         "| --- | ---: |",
     ]
-    for metric, payload in comparison.items():
-        lines.append(f"| {metric} | {payload['delta']} |")
+    for row in chapter_compare_rows:
+        lines.append(f"| {row['metric']} | {row['delta_mean_std']} |")
 
     lines.extend(
         [
             "",
             "## B. nearest_uav vs least_loaded_uav",
             "",
-            "| setting | completion_rate | average_latency | total_energy | fairness_uav_load |",
+            "| setting | completion_rate mean±std | average_latency mean±std | total_energy mean±std | fairness_uav_load mean±std |",
             "| --- | ---: | ---: | ---: | ---: |",
         ]
     )
     for row in assignment_rows:
         lines.append(
-            f"| u{row['num_uavs']} {row['assignment_rule']} | {row['completion_rate']} | {row['average_latency']} | {row['total_energy']} | {row['fairness_uav_load']} |"
+            f"| u{row['num_uavs']} {row['assignment_rule']} | {row['completion_rate_mean_std']} | {row['average_latency_mean_std']} | {row['total_energy_mean_std']} | {row['fairness_uav_load_mean_std']} |"
         )
 
     lines.extend(
@@ -366,13 +559,13 @@ def _make_markdown_summary(
             "",
             "## C. PPO vs heuristic",
             "",
-            "| setting | PPO completion | PPO latency | PPO energy | heuristic energy | delta energy |",
+            "| setting | PPO completion mean±std | PPO latency mean±std | PPO energy mean±std | heuristic energy mean±std | delta energy mean±std |",
             "| --- | ---: | ---: | ---: | ---: | ---: |",
         ]
     )
     for row in main_rows:
         lines.append(
-            f"| u{row['num_uavs']} {row['assignment_rule']} | {row['completion_rate']} | {row['average_latency']} | {row['total_energy']} | {row['heuristic_total_energy']} | {row['delta_total_energy']} |"
+            f"| u{row['num_uavs']} {row['assignment_rule']} | {row['completion_rate_mean_std']} | {row['average_latency_mean_std']} | {row['total_energy_mean_std']} | {row['heuristic_total_energy_mean_std']} | {row['delta_total_energy_mean_std']} |"
         )
 
     lines.extend(
@@ -380,13 +573,13 @@ def _make_markdown_summary(
             "",
             "## D. 最小消融",
             "",
-            "| variant | completion_rate | average_latency | total_energy | delta energy vs heuristic |",
+            "| variant | completion_rate mean±std | average_latency mean±std | total_energy mean±std | delta energy vs heuristic mean±std |",
             "| --- | ---: | ---: | ---: | ---: |",
         ]
     )
     for row in ablation_rows:
         lines.append(
-            f"| {row['label']} | {row['completion_rate']} | {row['average_latency']} | {row['total_energy']} | {row['delta_total_energy']} |"
+            f"| {row['label']} | {row['completion_rate_mean_std']} | {row['average_latency_mean_std']} | {row['total_energy_mean_std']} | {row['delta_total_energy_mean_std']} |"
         )
     lines.append("")
     return "\n".join(lines)
@@ -395,74 +588,142 @@ def _make_markdown_summary(
 def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes: int = 4) -> dict[str, Any]:
     PAPER_DIR.mkdir(parents=True, exist_ok=True)
 
-    tuning_rows, selected_tuning_row, _ = _run_tuning(seed=seed, eval_seed=eval_seed, eval_episodes=eval_episodes)
+    tuning_raw_rows: list[dict[str, Any]] = []
+    tuning_runs: dict[str, dict[str, Any]] = {}
+    for candidate in TUNING_CANDIDATES:
+        output_tag = f"tune_{candidate['name']}_s{seed}"
+        train_eval = _run_train_eval(
+            seed=seed,
+            eval_seed=eval_seed,
+            eval_episodes=eval_episodes,
+            num_uavs=MAIN_NUM_UAVS,
+            assignment_rule=MAIN_ASSIGNMENT_RULE,
+            output_tag=output_tag,
+            overrides=candidate["overrides"],
+        )
+        row = _summarize_eval_result(label=candidate["name"], train_eval=train_eval)
+        row["description"] = candidate["description"]
+        row["tuning_seed"] = seed
+        row["eval_seed"] = eval_seed
+        tuning_raw_rows.append(row)
+        tuning_runs[candidate["name"]] = train_eval
+    tuning_summary_rows = _aggregate_tuning_rows(tuning_raw_rows)
+    best_tuning_row = _select_best_candidate(tuning_summary_rows)
+    selected_tuning_row = _select_named_candidate(tuning_summary_rows, name=FINAL_MAIN_CANDIDATE_NAME)
 
-    final_overrides = {
-        "train_episodes": int(selected_tuning_row["train_episodes"]),
-        "actor_lr": float(selected_tuning_row["actor_lr"]),
-        "critic_lr": float(selected_tuning_row["critic_lr"]),
-        "ppo_clip_eps": float(selected_tuning_row["clip_ratio"]),
-        "entropy_coef": float(selected_tuning_row["entropy_coef"]),
-        "value_loss_coef": float(selected_tuning_row["value_coef"]),
-        "reward_energy_weight": float(selected_tuning_row["reward_energy_weight"]),
-        "reward_action_magnitude_weight": float(selected_tuning_row["reward_action_magnitude_weight"]),
-        "use_movement_budget": bool(selected_tuning_row["use_movement_budget"]),
+    final_overrides = get_candidate_overrides(str(selected_tuning_row["label"]))
+    final_config = build_marl_config(
+        {
+            **final_overrides,
+            "seed": seed,
+            "num_uavs": MAIN_NUM_UAVS,
+            "assignment_rule": MAIN_ASSIGNMENT_RULE,
+            "output_tag": f"paper_{selected_tuning_row['label']}_u{MAIN_NUM_UAVS}",
+        }
+    ).to_dict()
+
+    main_raw_rows: list[dict[str, Any]] = []
+    main_training_logs: dict[str, list[list[dict[str, Any]]]] = {"main": []}
+    for num_uavs in (2, 3):
+        output_tag = f"paper_main_s{seed}_u{num_uavs}"
+        train_eval = _run_train_eval(
+            seed=seed,
+            eval_seed=eval_seed,
+            eval_episodes=eval_episodes,
+            num_uavs=num_uavs,
+            assignment_rule=MAIN_ASSIGNMENT_RULE,
+            output_tag=output_tag,
+            overrides=final_overrides,
+        )
+        row = _summarize_eval_result(label=f"paper_main_u{num_uavs}", train_eval=train_eval)
+        row["description"] = "stage5 main experiment"
+        row["seed"] = seed
+        row["eval_seed"] = eval_seed
+        main_raw_rows.append(row)
+        if num_uavs == MAIN_NUM_UAVS:
+            main_training_logs["main"].append(train_eval["train"]["training_log"])
+    main_summary_rows = _aggregate_rows(
+        main_raw_rows,
+        group_keys=["num_uavs", "assignment_rule", "label"],
+        metric_fields=[
+            "completion_rate",
+            "average_latency",
+            "total_energy",
+            "cache_hit_rate",
+            "fairness_uav_load",
+            "heuristic_completion_rate",
+            "heuristic_average_latency",
+            "heuristic_total_energy",
+            "heuristic_cache_hit_rate",
+            "heuristic_fairness_uav_load",
+            "delta_completion_rate",
+            "delta_average_latency",
+            "delta_total_energy",
+        ],
+    )
+
+    ablation_raw_rows: list[dict[str, Any]] = []
+    ablation_training_logs: dict[str, list[list[dict[str, Any]]]] = {
+        "no_energy_shaped_reward": [],
+        "no_movement_budget": [],
     }
-
-    main_u2 = _run_train_eval(
-        seed=seed,
-        eval_seed=eval_seed,
-        eval_episodes=eval_episodes,
-        num_uavs=2,
-        assignment_rule=MAIN_ASSIGNMENT_RULE,
-        output_tag="paper_main_u2",
-        overrides=final_overrides,
-    )
-    main_u3 = _run_train_eval(
-        seed=seed,
-        eval_seed=eval_seed,
-        eval_episodes=eval_episodes,
-        num_uavs=3,
-        assignment_rule=MAIN_ASSIGNMENT_RULE,
-        output_tag="paper_main_u3",
-        overrides=final_overrides,
-    )
-    main_rows = [
-        _summarize_eval_result(label="paper_main_u2", train_eval=main_u2),
-        _summarize_eval_result(label="paper_main_u3", train_eval=main_u3),
-    ]
-
-    no_energy = _run_train_eval(
-        seed=seed,
-        eval_seed=eval_seed,
-        eval_episodes=eval_episodes,
-        num_uavs=MAIN_NUM_UAVS,
-        assignment_rule=MAIN_ASSIGNMENT_RULE,
-        output_tag="ablation_no_energy",
-        overrides={
-            **final_overrides,
-            "reward_energy_weight": 0.0,
-            "reward_action_magnitude_weight": 0.0,
+    ablation_settings = [
+        {
+            "label": "no_energy_shaped_reward",
+            "description": "reward_energy_weight=0 and reward_action_magnitude_weight=0",
+            "overrides": {
+                **final_overrides,
+                "reward_energy_weight": 0.0,
+                "reward_action_magnitude_weight": 0.0,
+            },
         },
-    )
-    no_budget = _run_train_eval(
-        seed=seed,
-        eval_seed=eval_seed,
-        eval_episodes=eval_episodes,
-        num_uavs=MAIN_NUM_UAVS,
-        assignment_rule=MAIN_ASSIGNMENT_RULE,
-        output_tag="ablation_no_budget",
-        overrides={
-            **final_overrides,
-            "use_movement_budget": False,
+        {
+            "label": "no_movement_budget",
+            "description": "use_movement_budget=False with all other settings fixed",
+            "overrides": {
+                **final_overrides,
+                "use_movement_budget": False,
+            },
         },
-    )
-    ablation_rows = [
-        _summarize_eval_result(label="no_energy_shaped_reward", train_eval=no_energy),
-        _summarize_eval_result(label="no_movement_budget", train_eval=no_budget),
     ]
+    for ablation in ablation_settings:
+        output_tag = f"paper_{ablation['label']}_s{seed}"
+        train_eval = _run_train_eval(
+            seed=seed,
+            eval_seed=eval_seed,
+            eval_episodes=eval_episodes,
+            num_uavs=MAIN_NUM_UAVS,
+            assignment_rule=MAIN_ASSIGNMENT_RULE,
+            output_tag=output_tag,
+            overrides=ablation["overrides"],
+        )
+        row = _summarize_eval_result(label=ablation["label"], train_eval=train_eval)
+        row["description"] = ablation["description"]
+        row["seed"] = seed
+        row["eval_seed"] = eval_seed
+        ablation_raw_rows.append(row)
+        ablation_training_logs[str(ablation["label"])].append(train_eval["train"]["training_log"])
+    ablation_summary_rows = _aggregate_rows(
+        ablation_raw_rows,
+        group_keys=["label", "description"],
+        metric_fields=[
+            "completion_rate",
+            "average_latency",
+            "total_energy",
+            "cache_hit_rate",
+            "fairness_uav_load",
+            "heuristic_completion_rate",
+            "heuristic_average_latency",
+            "heuristic_total_energy",
+            "heuristic_cache_hit_rate",
+            "heuristic_fairness_uav_load",
+            "delta_completion_rate",
+            "delta_average_latency",
+            "delta_total_energy",
+        ],
+    )
 
-    assignment_rows: list[dict[str, Any]] = []
+    assignment_raw_rows: list[dict[str, Any]] = []
     for num_uavs in (2, 3):
         for assignment_rule in ("nearest_uav", "least_loaded_uav"):
             result = run_sensitive_experiment(
@@ -472,11 +733,12 @@ def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes
                 assignment_rule=assignment_rule,
             )
             metrics = result["averaged_metrics"]
-            assignment_rows.append(
+            assignment_raw_rows.append(
                 {
                     "profile": "sensitive",
                     "num_uavs": num_uavs,
                     "assignment_rule": assignment_rule,
+                    "seed": seed,
                     "completion_rate": _float_or_none(metrics["completion_rate"]),
                     "average_latency": _float_or_none(metrics["average_latency"]),
                     "total_energy": _float_or_none(metrics["total_energy"]),
@@ -485,14 +747,36 @@ def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes
                     "result_path": str(RESULTS_DIR / f"experiment_sensitive_u{num_uavs}_{assignment_rule}.json"),
                 }
             )
+    assignment_summary_rows = _aggregate_rows(
+        assignment_raw_rows,
+        group_keys=["profile", "num_uavs", "assignment_rule"],
+        metric_fields=[
+            "completion_rate",
+            "average_latency",
+            "total_energy",
+            "cache_hit_rate",
+            "fairness_uav_load",
+        ],
+    )
 
     if str(CHAPTER3_DIR) not in sys.path:
         sys.path.insert(0, str(CHAPTER3_DIR))
     from chapter3.experiments import compare_with_chapter4
 
     chapter_compare = compare_with_chapter4(seed=seed, episodes=1)
-    chapter_compare_path = PAPER_DIR / "chapter3_vs_chapter4_num_uavs1.json"
-    write_json(chapter_compare_path, chapter_compare)
+    chapter_compare_raw_rows = [
+        {
+            "seed": seed,
+            "metric": metric,
+            "delta": payload["delta"],
+        }
+        for metric, payload in chapter_compare["comparison"].items()
+    ]
+    chapter_compare_summary_rows = _aggregate_rows(
+        chapter_compare_raw_rows,
+        group_keys=["metric"],
+        metric_fields=["delta"],
+    )
 
     tuning_json = PAPER_DIR / "tuning_summary.json"
     tuning_csv = PAPER_DIR / "tuning_summary.csv"
@@ -502,34 +786,38 @@ def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes
     ablation_csv = PAPER_DIR / "ablation_summary.csv"
     assignment_json = PAPER_DIR / "assignment_rule_matrix.json"
     assignment_csv = PAPER_DIR / "assignment_rule_matrix.csv"
+    compare_json = PAPER_DIR / "chapter3_vs_chapter4_num_uavs1.json"
+    compare_csv = PAPER_DIR / "chapter3_vs_chapter4_num_uavs1.csv"
     config_notes_path = PAPER_DIR / "config_notes.json"
     summary_path = PAPER_DIR / "paper_summary.md"
     training_curve_path = PAPER_DIR / "ppo_training_curves.png"
     assignment_plot_path = PAPER_DIR / "assignment_rule_comparison.png"
     main_plot_path = PAPER_DIR / "ppo_vs_heuristic.png"
 
-    final_config = build_marl_config(
+    write_json(
+        tuning_json,
         {
-            **final_overrides,
-            "seed": seed,
-            "num_uavs": MAIN_NUM_UAVS,
-            "assignment_rule": MAIN_ASSIGNMENT_RULE,
-            "output_tag": "paper_main_u2",
-        }
-    ).to_dict()
-
-    write_json(tuning_json, {"selected_candidate": selected_tuning_row["label"], "rows": tuning_rows})
-    write_json(main_json, {"rows": main_rows})
-    write_json(ablation_json, {"rows": ablation_rows})
-    write_json(assignment_json, {"rows": assignment_rows})
-    _write_csv(tuning_csv, tuning_rows)
-    _write_csv(main_csv, main_rows)
-    _write_csv(ablation_csv, ablation_rows)
-    _write_csv(assignment_csv, assignment_rows)
+            "selected_candidate": selected_tuning_row["label"],
+            "best_observed_candidate": best_tuning_row["label"],
+            "tuning_seed": seed,
+            "eval_seed": eval_seed,
+            "rows": tuning_summary_rows,
+            "raw_rows": tuning_raw_rows,
+        },
+    )
+    write_json(main_json, {"rows": main_summary_rows, "raw_rows": main_raw_rows})
+    write_json(ablation_json, {"rows": ablation_summary_rows, "raw_rows": ablation_raw_rows})
+    write_json(assignment_json, {"rows": assignment_summary_rows, "raw_rows": assignment_raw_rows})
+    write_json(compare_json, {"comparison": chapter_compare["comparison"], "rows": chapter_compare_summary_rows, "raw_rows": chapter_compare_raw_rows})
+    _write_csv(tuning_csv, tuning_summary_rows)
+    _write_csv(main_csv, main_summary_rows)
+    _write_csv(ablation_csv, ablation_summary_rows)
+    _write_csv(assignment_csv, assignment_summary_rows)
+    _write_csv(compare_csv, chapter_compare_summary_rows)
 
     config_notes = {
         "tuning_protocol": {
-            "seed": seed,
+            "tuning_seed": seed,
             "eval_seed": eval_seed,
             "eval_episodes": eval_episodes,
             "selection_rule": "highest completion_rate, then lowest total_energy, then lowest average_latency",
@@ -555,28 +843,33 @@ def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes
 
     summary_text = _make_markdown_summary(
         final_config=final_config,
-        chapter_compare=chapter_compare,
-        assignment_rows=assignment_rows,
-        main_rows=main_rows,
-        ablation_rows=ablation_rows,
+        selected_tuning_row=selected_tuning_row,
+        tuning_seeds=[seed],
+        chapter_compare_rows=chapter_compare_summary_rows,
+        assignment_rows=assignment_summary_rows,
+        main_rows=main_summary_rows,
+        ablation_rows=ablation_summary_rows,
     )
     summary_path.write_text(summary_text, encoding="utf-8")
 
     _plot_training_curves(
-        main_train_log=main_u2["train"]["training_log"],
-        ablation_logs={
-            "no_energy_shaped_reward": no_energy["train"]["training_log"],
-            "no_movement_budget": no_budget["train"]["training_log"],
+        training_logs={
+            "main": main_training_logs["main"],
+            "no_energy_shaped_reward": ablation_training_logs["no_energy_shaped_reward"],
+            "no_movement_budget": ablation_training_logs["no_movement_budget"],
         },
         output_path=training_curve_path,
     )
-    _plot_assignment_rules(assignment_rows, assignment_plot_path)
-    _plot_main_comparison(main_rows, main_plot_path)
+    _plot_assignment_rules(assignment_summary_rows, assignment_plot_path)
+    _plot_main_comparison(main_summary_rows, main_plot_path)
 
     payload = {
         "selected_final_config": final_config,
         "selected_tuning_candidate": selected_tuning_row["label"],
-        "chapter3_vs_chapter4_path": str(chapter_compare_path),
+        "best_observed_tuning_candidate": best_tuning_row["label"],
+        "tuning_seed": seed,
+        "eval_seed": eval_seed,
+        "compare_ch4_summary_path": str(compare_json),
         "tuning_summary_path": str(tuning_json),
         "main_matrix_path": str(main_json),
         "ablation_summary_path": str(ablation_json),
@@ -588,8 +881,8 @@ def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes
             "assignment_rule_comparison": str(assignment_plot_path),
             "ppo_vs_heuristic": str(main_plot_path),
         },
-        "main_rows": main_rows,
-        "ablation_rows": ablation_rows,
+        "main_rows": main_summary_rows,
+        "ablation_rows": ablation_summary_rows,
     }
     write_json(PAPER_DIR / "paper_experiments_summary.json", payload)
     return payload

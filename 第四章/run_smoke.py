@@ -1,3 +1,9 @@
+"""第四章 smoke test 命令行入口模块。
+
+该模块用于从命令行触发第四章环境的最小验证流程，
+便于快速检查多 UAV 场景下的环境与实验链路是否可用。
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -13,6 +19,7 @@ from chapter4.experiments.smoke import run_smoke
 
 
 def main() -> None:
+    """解析命令行参数并执行第四章 smoke test。"""
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", type=str, default="episode", choices=["import_only", "env_step", "observation", "episode"])
     parser.add_argument("--seed", type=int, default=42)

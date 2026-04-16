@@ -1,3 +1,9 @@
+"""任务对象定义模块。
+
+该模块定义任务从生成到完成或过期全过程中的状态字段，
+包括服务类型、时延约束、执行目标、能耗分解和可靠性结果，是环境日志的核心载体。
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -5,6 +11,8 @@ from dataclasses import dataclass
 
 @dataclass(slots=True)
 class Task:
+    """描述单个任务从生成到完成/过期全过程中的状态与成本。"""
+
     task_id: str
     user_id: int
     service_type: int
@@ -63,6 +71,7 @@ class Task:
         bs_compute_energy: float = 0.0,
         relay_fetch_energy: float = 0.0,
     ) -> None:
+        """将一次卸载决策回写到任务对象，形成统一日志记录。"""
         self.execution_target = execution_target
         self.cache_hit = cache_hit
         self.fetch_source = fetch_source
