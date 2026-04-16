@@ -79,6 +79,31 @@ def _mean(values: list[float]) -> float | None:
     return sum(values) / len(values)
 
 
+def _build_profile_overrides(*, hard: bool, steps_per_episode: int | None = None) -> dict[str, Any]:
+    """构造 default/hard 场景的统一覆盖配置。"""
+    overrides: dict[str, Any] = {}
+    if hard:
+        overrides.update(
+            {
+                "num_users": 10,
+                "steps_per_episode": 10,
+                "task_arrival_rate": 0.95,
+                "task_input_size_range_bits": (3.0e6, 6.0e6),
+                "task_cpu_cycles_range": (1.5e9, 4.5e9),
+                "task_slack_range": (0.35, 1.1),
+                "required_reliability": 0.999,
+                "bandwidth_edge_hz": 2.0e6,
+                "bandwidth_backhaul_hz": 4.0e6,
+                "bs_compute_hz": 2.0e9,
+                "uav_compute_hz": 9.0e9,
+                "uav_service_cache_capacity": 2,
+            }
+        )
+    if steps_per_episode is not None:
+        overrides["steps_per_episode"] = int(steps_per_episode)
+    return overrides
+
+
 def run_experiment(
     *,
     seed: int,
@@ -101,25 +126,7 @@ def run_experiment(
     返回：
         包含平均指标、每回合摘要、episode 日志和轨迹导出信息的结果字典。
     """
-    overrides = {}
-    if hard:
-        # hard profile 用更高任务强度和更紧资源约束模拟更苛刻场景。
-        overrides = {
-            "num_users": 10,
-            "steps_per_episode": 10,
-            "task_arrival_rate": 0.95,
-            "task_input_size_range_bits": (3.0e6, 6.0e6),
-            "task_cpu_cycles_range": (1.5e9, 4.5e9),
-            "task_slack_range": (0.35, 1.1),
-            "required_reliability": 0.999,
-            "bandwidth_edge_hz": 2.0e6,
-            "bandwidth_backhaul_hz": 4.0e6,
-            "bs_compute_hz": 2.0e9,
-            "uav_compute_hz": 9.0e9,
-            "uav_service_cache_capacity": 2,
-        }
-    if steps_per_episode is not None:
-        overrides["steps_per_episode"] = int(steps_per_episode)
+    overrides = _build_profile_overrides(hard=hard, steps_per_episode=steps_per_episode)
     if policy not in {"heuristic", "mpc", "fixed_point", "fixed_patrol"}:
         raise ValueError(f"Unsupported Chapter 3 policy: {policy}")
     policy_map = {
@@ -224,12 +231,20 @@ def run_experiment(
     return result
 
 
-def compare_with_chapter4(*, seed: int, episodes: int) -> dict[str, Any]:
+def compare_with_chapter4(
+    *,
+    seed: int,
+    episodes: int,
+    hard: bool = False,
+    steps_per_episode: int | None = None,
+) -> dict[str, Any]:
     """比较第三章与第四章在单 UAV 条件下的结果一致性。
 
     参数：
         seed: 实验起始随机种子。
         episodes: 用于比较的 episode 数量。
+        hard: 是否按 hard 场景覆盖配置运行比较。
+        steps_per_episode: 可选的步数覆盖值；若提供，则第三章与第四章都按相同步数运行。
 
     返回：
         包含第三章指标、第四章指标及其逐项差值的比较结果字典。
@@ -239,18 +254,21 @@ def compare_with_chapter4(*, seed: int, episodes: int) -> dict[str, Any]:
     chapter4_env_module = importlib.import_module("chapter4.env")
     Chapter4Env = chapter4_env_module.Chapter4Env
 
+    chapter3_overrides = _build_profile_overrides(hard=hard, steps_per_episode=steps_per_episode)
+    chapter4_overrides = {"num_uavs": 1, **chapter3_overrides}
+
     # 两侧都使用共享 heuristic 和相同随机种子，尽量把差异约束在环境实现本身。
     left = run_short_experiment(
         env_factory=Chapter3Env,
         policy_fn=select_actions_heuristic,
-        overrides={},
+        overrides=chapter3_overrides,
         episodes=episodes,
         seed=seed,
     )
     right = run_short_experiment(
         env_factory=Chapter4Env,
         policy_fn=select_actions_heuristic,
-        overrides={"num_uavs": 1},
+        overrides=chapter4_overrides,
         episodes=episodes,
         seed=seed,
     )

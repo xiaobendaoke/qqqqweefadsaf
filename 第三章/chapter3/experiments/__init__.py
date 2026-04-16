@@ -5,6 +5,7 @@
 """
 
 from .experiment import compare_with_chapter4, run_experiment
+from .finalize import run_chapter3_figure_package
 from .smoke import run_smoke
 
-__all__ = ["compare_with_chapter4", "run_experiment", "run_smoke"]
+__all__ = ["compare_with_chapter4", "run_chapter3_figure_package", "run_experiment", "run_smoke"]
