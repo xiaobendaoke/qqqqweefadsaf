@@ -29,7 +29,7 @@ MAIN_NUM_UAVS = 2
 MAIN_ASSIGNMENT_RULE = "nearest_uav"
 DEFAULT_TUNING_SEEDS = [42, 52, 62]
 TUNING_EVAL_OFFSET = 100
-FINAL_MAIN_CANDIDATE_NAME = "energy_e30"
+FINAL_MAIN_CANDIDATE_NAME = "freeze_noshaping_240"
 
 TUNING_CANDIDATES: list[dict[str, Any]] = [
     {
@@ -86,6 +86,57 @@ TUNING_CANDIDATES: list[dict[str, Any]] = [
             "value_loss_coef": 0.70,
             "reward_energy_weight": 1.70,
             "reward_action_magnitude_weight": 0.22,
+        },
+    },
+    {
+        "name": "cons_lowlr",
+        "description": "higher training budget with steadier conservative PPO updates",
+        "overrides": {
+            "train_episodes": 120,
+            "actor_lr": 1.0e-4,
+            "critic_lr": 6.0e-4,
+            "ppo_clip_eps": 0.12,
+            "entropy_coef": 0.0008,
+            "value_loss_coef": 0.75,
+            "reward_energy_weight": 4.50,
+            "reward_action_magnitude_weight": 0.65,
+            "action_std_init": 0.10,
+            "action_std_min": 0.015,
+            "action_std_decay": 0.983,
+        },
+    },
+    {
+        "name": "freeze_energy2_240",
+        "description": "ultra-low exploration with stronger energy and action regularization",
+        "overrides": {
+            "train_episodes": 240,
+            "actor_lr": 8.0e-5,
+            "critic_lr": 5.0e-4,
+            "ppo_clip_eps": 0.10,
+            "entropy_coef": 0.0003,
+            "value_loss_coef": 0.82,
+            "reward_energy_weight": 2.00,
+            "reward_action_magnitude_weight": 1.00,
+            "action_std_init": 0.04,
+            "action_std_min": 0.005,
+            "action_std_decay": 0.984,
+        },
+    },
+    {
+        "name": "freeze_noshaping_240",
+        "description": "ultra-low exploration with movement budget and no explicit energy/action shaping",
+        "overrides": {
+            "train_episodes": 240,
+            "actor_lr": 8.0e-5,
+            "critic_lr": 5.0e-4,
+            "ppo_clip_eps": 0.10,
+            "entropy_coef": 0.0003,
+            "value_loss_coef": 0.82,
+            "reward_energy_weight": 0.00,
+            "reward_action_magnitude_weight": 0.00,
+            "action_std_init": 0.04,
+            "action_std_min": 0.005,
+            "action_std_decay": 0.984,
         },
     },
 ]
@@ -419,12 +470,12 @@ def _plot_training_curves(
     figure, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
     colors = {
         "main": "#2E86AB",
-        "no_energy_shaped_reward": "#E67E22",
+        "with_reward_shaping": "#E67E22",
         "no_movement_budget": "#C0392B",
     }
     label_map = {
         "main": "main",
-        "no_energy_shaped_reward": "no_energy_shaped_reward",
+        "with_reward_shaping": "with_reward_shaping",
         "no_movement_budget": "no_movement_budget",
     }
 
@@ -588,7 +639,7 @@ def _make_markdown_summary(
     return "\n".join(lines)
 
 
-def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes: int = 4, device: str = "auto") -> dict[str, Any]:
+def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes: int = 32, device: str = "auto") -> dict[str, Any]:
     PAPER_DIR.mkdir(parents=True, exist_ok=True)
 
     tuning_raw_rows: list[dict[str, Any]] = []
@@ -670,17 +721,17 @@ def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes
 
     ablation_raw_rows: list[dict[str, Any]] = []
     ablation_training_logs: dict[str, list[list[dict[str, Any]]]] = {
-        "no_energy_shaped_reward": [],
+        "with_reward_shaping": [],
         "no_movement_budget": [],
     }
     ablation_settings = [
         {
-            "label": "no_energy_shaped_reward",
-            "description": "reward_energy_weight=0 and reward_action_magnitude_weight=0",
+            "label": "with_reward_shaping",
+            "description": "reward_energy_weight=2.0 and reward_action_magnitude_weight=1.0",
             "overrides": {
                 **final_overrides,
-                "reward_energy_weight": 0.0,
-                "reward_action_magnitude_weight": 0.0,
+                "reward_energy_weight": 2.0,
+                "reward_action_magnitude_weight": 1.0,
             },
         },
         {
@@ -842,7 +893,7 @@ def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes
             "ppo_vs_heuristic_settings": ["u2 nearest_uav", "u3 nearest_uav"],
         },
         "ablations": {
-            "no_energy_shaped_reward": "reward_energy_weight=0.0 and reward_action_magnitude_weight=0.0",
+            "with_reward_shaping": "reward_energy_weight=2.0 and reward_action_magnitude_weight=1.0",
             "no_movement_budget": "use_movement_budget=False with all other main PPO settings fixed",
             "no_centralized_critic": "not included in this stage to keep a single algorithm implementation",
         },
@@ -863,7 +914,7 @@ def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes
     _plot_training_curves(
         training_logs={
             "main": main_training_logs["main"],
-            "no_energy_shaped_reward": ablation_training_logs["no_energy_shaped_reward"],
+            "with_reward_shaping": ablation_training_logs["with_reward_shaping"],
             "no_movement_budget": ablation_training_logs["no_movement_budget"],
         },
         output_path=training_curve_path,

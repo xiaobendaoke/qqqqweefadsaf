@@ -1,6 +1,6 @@
 # 第四章
 
-本目录是基于统一任务模型与统一指标体系构建的多 UAV 扩展版实现。当前默认主方法为 `energy_e30` 配置下的 `shared_ppo_centralized_critic`。在统一环境内核上，第四章已经补齐 collaborator-UAV 分支与 peer UAV service fetch，因此卸载逻辑不再只停留在 `local / associated UAV / BS` 三分支。
+本目录是基于统一任务模型与统一指标体系构建的多 UAV 扩展版实现。当前默认主方法为 `freeze_noshaping_240` 配置下的 `shared_ppo_centralized_critic`。在统一环境内核上，第四章已经补齐 collaborator-UAV 分支与 peer UAV service fetch，因此卸载逻辑不再只停留在 `local / associated UAV / BS` 三分支。
 
 ## 目录说明
 
@@ -32,13 +32,13 @@ python -m venv .venv
 
 ```powershell
 .\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42
-.\.venv\Scripts\python.exe 第四章/run_train_marl.py --seed 42 --train-episodes 24 --num-uavs 2 --assignment-rule nearest_uav --device auto
+.\.venv\Scripts\python.exe 第四章/run_train_marl.py --seed 42 --train-episodes 240 --num-uavs 2 --assignment-rule nearest_uav --device auto
 ```
 
 再复现最终论文结果包：
 
 ```powershell
-.\.venv\Scripts\python.exe 第四章/run_finalize_paper.py --seeds 42 52 62 --eval-episodes 4 --device auto
+.\.venv\Scripts\python.exe 第四章/run_finalize_paper.py --seeds 42 52 62 --eval-episodes 64 --device auto
 ```
 
 说明:
@@ -48,14 +48,17 @@ python -m venv .venv
 
 ## 固定主配置
 
-- `train_episodes=30`
-- `actor_lr=0.00025`
-- `critic_lr=0.0008`
-- `clip_ratio=0.18`
-- `entropy_coef=0.008`
-- `value_coef=0.6`
-- `reward_energy_weight=1.5`
-- `reward_action_magnitude_weight=0.2`
+- `train_episodes=240`
+- `actor_lr=0.00008`
+- `critic_lr=0.0005`
+- `clip_ratio=0.10`
+- `entropy_coef=0.0003`
+- `value_coef=0.82`
+- `action_std_init=0.04`
+- `action_std_min=0.005`
+- `action_std_decay=0.984`
+- `reward_energy_weight=0.0`
+- `reward_action_magnitude_weight=0.0`
 - `use_movement_budget=True`
 
 ## 当前统一卸载逻辑

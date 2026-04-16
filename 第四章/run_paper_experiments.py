@@ -22,7 +22,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--eval-seed", type=int, default=142)
-    parser.add_argument("--eval-episodes", type=int, default=4)
+    parser.add_argument("--eval-episodes", type=int, default=32)
     parser.add_argument("--device", type=str, default="auto", help="Torch device request: auto, cpu, cuda, or cuda:N.")
     args = parser.parse_args()
     result = run_paper_experiments(

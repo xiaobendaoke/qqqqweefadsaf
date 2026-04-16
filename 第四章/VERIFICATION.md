@@ -590,6 +590,78 @@ python -m venv .venv
 - `第四章/results/paper_stage6/figures/final_ppo_vs_heuristic.png`
 - `第四章/results/paper_stage6/figures/final_assignment_comparison.png`
 - `第四章/results/paper_stage6/figures/final_ablation_energy.png`
+
+## 第八阶段 高预算 conservative 主配置定稿
+
+### 运行命令
+
+```powershell
+.\.venv\Scripts\python.exe 第四章/run_finalize_paper.py --seeds 42 52 62 --eval-episodes 32 --device auto
+```
+
+### 固定主配置
+
+- `label=cons_lowlr`
+- `train_episodes=120`
+- `actor_lr=1.0e-4`
+- `critic_lr=6.0e-4`
+- `clip_ratio=0.12`
+- `entropy_coef=0.0008`
+- `value_coef=0.75`
+- `action_std_init=0.10`
+- `action_std_min=0.015`
+- `action_std_decay=0.983`
+- `reward_energy_weight=4.5`
+- `reward_action_magnitude_weight=0.65`
+- `use_movement_budget=True`
+- `eval_episodes=32`
+
+### 关键结果
+
+- `compare-ch4`:
+  - 第三章与第四章 `NUM_UAVS=1` 在 `completion_rate / average_latency / total_energy / cache_hit_rate / energy breakdown` 上继续保持 `delta=0.0000 +/- 0.0000`
+- `PPO vs heuristic`:
+  - `u2 + nearest_uav`
+    - PPO `completion_rate=0.9975 +/- 0.0000`
+    - PPO `average_latency=0.3820 +/- 0.0046`
+    - PPO `total_energy=15.3414 +/- 3.4721`
+    - heuristic `total_energy=6.5512 +/- 1.0846`
+    - `delta_total_energy=8.7901 +/- 2.6614`
+  - `u3 + nearest_uav`
+    - PPO `completion_rate=0.9991 +/- 0.0008`
+    - PPO `average_latency=0.3509 +/- 0.0035`
+    - PPO `total_energy=23.1198 +/- 2.7259`
+    - heuristic `total_energy=5.4402 +/- 2.0744`
+    - `delta_total_energy=17.6796 +/- 3.8993`
+- `assignment rule`:
+  - `u2 nearest_uav total_energy = 14.1602 +/- 0.0342`
+  - `u2 least_loaded_uav total_energy = 14.1986 +/- 0.0197`
+  - `u3 nearest_uav total_energy = 14.6686 +/- 0.0191`
+  - `u3 least_loaded_uav total_energy = 14.8202 +/- 0.0143`
+  - 负载均衡公平性仍由 `least_loaded_uav` 略优
+- `消融`:
+  - `main total_energy=15.3414 +/- 3.4721`
+  - `no_energy_shaped_reward total_energy=14.6431 +/- 2.9893`
+  - `no_movement_budget total_energy=45.7660 +/- 16.7403`
+  - 说明 `movement budget` 仍是控制无效移动的关键机制，而 `energy-shaped reward` 暂未形成稳定增益
+
+### 新增/更新结果文件
+
+- `第四章/results/paper_stage6/compare_ch4_multiseed_summary.json`
+- `第四章/results/paper_stage6/assignment_multiseed_summary.json`
+- `第四章/results/paper_stage6/ppo_vs_heuristic_multiseed_summary.json`
+- `第四章/results/paper_stage6/ablation_multiseed_summary.json`
+- `第四章/results/paper_stage6/reproducibility_package.json`
+- `第四章/results/paper_stage6/tables/table_main_results.md`
+- `第四章/results/paper_stage6/tables/table_assignment_comparison.md`
+- `第四章/results/paper_stage6/tables/table_ppo_vs_heuristic.md`
+- `第四章/results/paper_stage6/tables/table_ablation.md`
+- `第四章/results/paper_stage6/figures/final_training_return_curve.png`
+- `第四章/results/paper_stage6/figures/final_training_energy_curve.png`
+- `第四章/results/paper_stage6/figures/final_training_behavior_overview.png`
+- `第四章/results/paper_stage6/figures/final_ppo_vs_heuristic.png`
+- `第四章/results/paper_stage6/figures/final_assignment_comparison.png`
+- `第四章/results/paper_stage6/figures/final_ablation_energy.png`
 - `第四章/results/paper_stage6/figures/final_comparison_bars.png`
 
 ## 第七阶段统一系统可信度修复：共享环境 v2 与 PPO 正确性修复
@@ -660,3 +732,63 @@ python -m venv .venv
 - `第四章/results/paper_stage6/figures/final_ppo_vs_heuristic.png`
 - `第四章/results/paper_stage6/figures/final_assignment_comparison.png`
 - `第四章/results/paper_stage6/figures/final_ablation_energy.png`
+
+## 2026-04-16 冲结果复跑记录
+
+### 执行命令
+
+```powershell
+.\.venv\Scripts\python.exe 第四章/run_finalize_paper.py --seeds 42 52 62 --eval-episodes 64 --device cuda
+```
+
+在最终全量复跑前，还补做了两组验证：
+
+- `第四章/results/attack_long_budget_validate_3u.json`
+- `第四章/results/attack_long_budget_validate_3u.csv`
+- `第四章/results/attack_ablation_noenergy_validate_3u.json`
+- `第四章/results/attack_ablation_noenergy_validate_3u.csv`
+
+验证结论：
+
+- `freeze_energy2_240` 在 `3-UAV` 上优于此前的 `cons_lowlr` 主配置
+- 进一步将 `reward_energy_weight` 与 `reward_action_magnitude_weight` 同时降为 `0.0` 后，`3-UAV` 总能耗继续从 `17.3555` 降到 `16.9553`
+- 因此最终主配置切换为 `freeze_noshaping_240`
+
+### 最终主配置
+
+- `train_episodes=240`
+- `eval_episodes=64`
+- `actor_lr=8.0e-5`
+- `critic_lr=5.0e-4`
+- `clip_ratio=0.10`
+- `entropy_coef=0.0003`
+- `value_coef=0.82`
+- `action_std_init=0.04`
+- `action_std_min=0.005`
+- `action_std_decay=0.984`
+- `reward_energy_weight=0.0`
+- `reward_action_magnitude_weight=0.0`
+- `use_movement_budget=True`
+
+### 最终结果摘要
+
+- `PPO vs heuristic`:
+  - `u2 + nearest_uav`
+    - PPO `completion_rate=0.9988 +/- 0.0000`
+    - PPO `average_latency=0.3711 +/- 0.0036`
+    - PPO `total_energy=13.7229 +/- 2.3373`
+    - PPO `uav_move_energy=10.6207 +/- 2.3149`
+    - heuristic `total_energy=6.1702 +/- 0.3617`
+  - `u3 + nearest_uav`
+    - PPO `completion_rate=0.9996 +/- 0.0004`
+    - PPO `average_latency=0.3531 +/- 0.0031`
+    - PPO `total_energy=16.9553 +/- 2.5856`
+    - PPO `uav_move_energy=13.8578 +/- 2.4993`
+    - heuristic `total_energy=5.1814 +/- 1.0311`
+
+- `消融`:
+  - `main total_energy=13.7229 +/- 2.3373`
+  - `with_reward_shaping total_energy=14.0853 +/- 2.2260`
+  - `no_movement_budget total_energy=60.3768 +/- 17.5405`
+
+当前最明显的问题仍是 `uav_move_energy` 明显高于 heuristic；不过相较此前 `120 train / 32 eval / cons_lowlr` 的旧版 stage-6，最终主结果已经进一步收敛并刷新了本仓库里当前的主实验最好结果。

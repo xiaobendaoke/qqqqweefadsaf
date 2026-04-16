@@ -29,14 +29,17 @@ CHAPTER3_DIR = WORKSPACE_ROOT / "第三章"
 
 DEFAULT_SEEDS = [42, 52, 62]
 FINAL_MAIN_CONFIG: dict[str, Any] = {
-    "train_episodes": 30,
-    "actor_lr": 2.5e-4,
-    "critic_lr": 8.0e-4,
-    "ppo_clip_eps": 0.18,
-    "entropy_coef": 0.008,
-    "value_loss_coef": 0.60,
-    "reward_energy_weight": 1.50,
-    "reward_action_magnitude_weight": 0.20,
+    "train_episodes": 240,
+    "actor_lr": 8.0e-5,
+    "critic_lr": 5.0e-4,
+    "ppo_clip_eps": 0.10,
+    "entropy_coef": 0.0003,
+    "value_loss_coef": 0.82,
+    "reward_energy_weight": 0.00,
+    "reward_action_magnitude_weight": 0.00,
+    "action_std_init": 0.04,
+    "action_std_min": 0.005,
+    "action_std_decay": 0.984,
     "use_movement_budget": True,
 }
 MAIN_SETTINGS = [
@@ -46,16 +49,16 @@ MAIN_SETTINGS = [
 ABLATION_SETTINGS = [
     {
         "label": "main",
-        "description": "fixed energy_e30 PPO configuration",
+        "description": "fixed freeze_noshaping_240 PPO configuration",
         "overrides": dict(FINAL_MAIN_CONFIG),
     },
     {
-        "label": "no_energy_shaped_reward",
-        "description": "reward_energy_weight=0 and reward_action_magnitude_weight=0",
+        "label": "with_reward_shaping",
+        "description": "reward_energy_weight=2.0 and reward_action_magnitude_weight=1.0",
         "overrides": {
             **FINAL_MAIN_CONFIG,
-            "reward_energy_weight": 0.0,
-            "reward_action_magnitude_weight": 0.0,
+            "reward_energy_weight": 2.0,
+            "reward_action_magnitude_weight": 1.0,
         },
     },
     {
@@ -408,12 +411,12 @@ def _plot_training_metric_curves(
     figure, axis = plt.subplots(figsize=(8.8, 5.0))
     colors = {
         "main": "#2E86AB",
-        "no_energy_shaped_reward": "#E67E22",
+        "with_reward_shaping": "#E67E22",
         "no_movement_budget": "#C0392B",
     }
     label_map = {
         "main": "Main PPO",
-        "no_energy_shaped_reward": "No energy shaping",
+        "with_reward_shaping": "With reward shaping",
         "no_movement_budget": "No movement budget",
     }
     for variant, logs in training_logs.items():
@@ -446,12 +449,12 @@ def _plot_training_behavior_overview(
     figure, axes = plt.subplots(2, 3, figsize=(13.6, 7.8), sharex=True)
     colors = {
         "main": "#2E86AB",
-        "no_energy_shaped_reward": "#E67E22",
+        "with_reward_shaping": "#E67E22",
         "no_movement_budget": "#C0392B",
     }
     label_map = {
         "main": "Main PPO",
-        "no_energy_shaped_reward": "No energy shaping",
+        "with_reward_shaping": "With reward shaping",
         "no_movement_budget": "No movement budget",
     }
     panels = [
@@ -980,7 +983,7 @@ def _write_tables(
     }
 
 
-def run_final_paper_package(*, seeds: list[int] | None = None, eval_episodes: int = 4, device: str = "auto") -> dict[str, Any]:
+def run_final_paper_package(*, seeds: list[int] | None = None, eval_episodes: int = 32, device: str = "auto") -> dict[str, Any]:
     seeds = list(seeds or DEFAULT_SEEDS)
     FINAL_DIR.mkdir(parents=True, exist_ok=True)
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
@@ -1004,7 +1007,7 @@ def run_final_paper_package(*, seeds: list[int] | None = None, eval_episodes: in
     summary_panel_path = FIGURES_DIR / "final_comparison_bars.png"
     training_logs = {
         "main": ablation_training_logs["main"],
-        "no_energy_shaped_reward": ablation_training_logs["no_energy_shaped_reward"],
+        "with_reward_shaping": ablation_training_logs["with_reward_shaping"],
         "no_movement_budget": ablation_training_logs["no_movement_budget"],
     }
     _plot_training_metric_curves(
@@ -1046,7 +1049,7 @@ def run_final_paper_package(*, seeds: list[int] | None = None, eval_episodes: in
             "python -m venv .venv",
             ".\\.venv\\Scripts\\python.exe -m pip install -r 第四章/requirements.txt",
             ".\\.venv\\Scripts\\python.exe 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42",
-            ".\\.venv\\Scripts\\python.exe 第四章/run_finalize_paper.py --seeds 42 52 62 --eval-episodes 4 --device auto",
+            ".\\.venv\\Scripts\\python.exe 第四章/run_finalize_paper.py --seeds 42 52 62 --eval-episodes 64 --device auto",
         ],
         "result_directories": {
             "stage5": str(RESULTS_DIR / "paper_stage5"),
