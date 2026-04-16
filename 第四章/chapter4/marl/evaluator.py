@@ -104,6 +104,8 @@ def run_evaluation(config: MinimalMARLConfig, *, model_path: str | Path) -> dict
         "heuristic_metrics": heuristic_result["averaged_metrics"],
         "comparison": comparison,
         "marl_episode_logs": marl_episode_logs,
+        "heuristic_episode_logs": heuristic_result["episode_logs"],
+        "heuristic_episode_summaries": heuristic_result["episode_summaries"],
     }
     eval_path = RESULTS_DIR / f"marl_eval_shared_ppo_{config.result_suffix()}.json"
     write_json(eval_path, payload)

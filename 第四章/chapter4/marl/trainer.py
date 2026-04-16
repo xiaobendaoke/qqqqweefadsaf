@@ -175,13 +175,43 @@ def run_training(config: MinimalMARLConfig) -> dict[str, Any]:
                 "completion_rate": summary_metrics["completion_rate"],
                 "average_latency": summary_metrics["average_latency"],
                 "total_energy": summary_metrics["total_energy"],
+                "mean_step_completion_rate": float(
+                    np.mean([item["step_completion_rate"] for item in outputs["reward_breakdowns"]])
+                    if outputs["reward_breakdowns"]
+                    else 0.0
+                ),
+                "mean_step_cache_hit_rate": float(
+                    np.mean([item["step_cache_hit_rate"] for item in outputs["reward_breakdowns"]])
+                    if outputs["reward_breakdowns"]
+                    else 0.0
+                ),
+                "mean_step_average_latency": float(
+                    np.mean([item["step_average_latency"] for item in outputs["reward_breakdowns"]])
+                    if outputs["reward_breakdowns"]
+                    else 0.0
+                ),
                 "mean_step_energy": float(
                     np.mean([item["step_energy"] for item in outputs["reward_breakdowns"]])
                     if outputs["reward_breakdowns"]
                     else 0.0
                 ),
+                "mean_step_energy_norm": float(
+                    np.mean([item["step_energy_norm"] for item in outputs["reward_breakdowns"]])
+                    if outputs["reward_breakdowns"]
+                    else 0.0
+                ),
                 "mean_step_action_magnitude": float(
                     np.mean([item["step_action_magnitude"] for item in outputs["reward_breakdowns"]])
+                    if outputs["reward_breakdowns"]
+                    else 0.0
+                ),
+                "mean_step_deadline_violation_rate": float(
+                    np.mean([item["step_deadline_violation_rate"] for item in outputs["reward_breakdowns"]])
+                    if outputs["reward_breakdowns"]
+                    else 0.0
+                ),
+                "mean_step_reliability_violation_rate": float(
+                    np.mean([item["step_reliability_violation_rate"] for item in outputs["reward_breakdowns"]])
                     if outputs["reward_breakdowns"]
                     else 0.0
                 ),

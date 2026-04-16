@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import csv
+import json
 import statistics
 import sys
 from pathlib import Path
@@ -67,6 +68,28 @@ ABLATION_SETTINGS = [
     },
 ]
 
+ENERGY_COMPONENTS = [
+    "uav_move_energy",
+    "uav_compute_energy",
+    "ue_local_energy",
+    "ue_uplink_energy",
+    "bs_compute_energy",
+    "relay_fetch_energy",
+]
+BASE_METRICS = [
+    "completion_rate",
+    "average_latency",
+    "average_latency_completed",
+    "latency_per_generated_task",
+    "total_energy",
+    "cache_hit_rate",
+    "fairness_user_completion",
+    "fairness_uav_load",
+    "deadline_violation_rate",
+    "reliability_violation_rate",
+    *ENERGY_COMPONENTS,
+]
+
 
 def _load_matplotlib() -> Any:
     try:
@@ -98,6 +121,21 @@ def _metric_stats(values: list[float]) -> tuple[float, float]:
 
 def _format_mean_std(mean: float, std: float, digits: int = 4) -> str:
     return f"{mean:.{digits}f} +/- {std:.{digits}f}"
+
+
+def _extract_prefixed_metrics(metrics: dict[str, Any], *, prefix: str) -> dict[str, float]:
+    payload: dict[str, float] = {}
+    for name in BASE_METRICS:
+        value = metrics.get(name)
+        if value is None:
+            continue
+        key = f"{prefix}_{name}" if prefix else name
+        payload[key] = float(value)
+    return payload
+
+
+def _load_json(path: str | Path) -> dict[str, Any]:
+    return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
 def _aggregate_rows(
@@ -180,13 +218,13 @@ def _run_train_eval(
     return {"train": train_payload, "eval": eval_payload}
 
 
-def _run_compare_ch4(seeds: list[int]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def _run_compare_ch4(seeds: list[int], *, episodes: int) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     _ensure_chapter3_import()
     from chapter3.experiments import compare_with_chapter4
 
     raw_rows: list[dict[str, Any]] = []
     for seed in seeds:
-        comparison = compare_with_chapter4(seed=seed, episodes=1)["comparison"]
+        comparison = compare_with_chapter4(seed=seed, episodes=episodes)["comparison"]
         for metric, payload in comparison.items():
             raw_rows.append(
                 {
@@ -217,17 +255,13 @@ def _run_assignment_multiseed(seeds: list[int], *, eval_episodes: int) -> tuple[
                         "profile": "sensitive",
                         "num_uavs": num_uavs,
                         "assignment_rule": assignment_rule,
-                        "completion_rate": float(metrics["completion_rate"]),
-                        "average_latency": float(metrics["average_latency"]),
-                        "total_energy": float(metrics["total_energy"]),
-                        "cache_hit_rate": float(metrics["cache_hit_rate"]),
-                        "fairness_uav_load": float(metrics["fairness_uav_load"]),
+                        **_extract_prefixed_metrics(metrics, prefix=""),
                     }
                 )
     aggregated = _aggregate_rows(
         raw_rows,
         group_keys=["profile", "num_uavs", "assignment_rule"],
-        metrics=["completion_rate", "average_latency", "total_energy", "cache_hit_rate", "fairness_uav_load"],
+        metrics=BASE_METRICS,
     )
     return raw_rows, aggregated
 
@@ -258,16 +292,8 @@ def _run_main_multiseed(seeds: list[int], *, eval_episodes: int) -> tuple[list[d
                     "eval_seed": eval_seed,
                     "num_uavs": num_uavs,
                     "assignment_rule": assignment_rule,
-                    "ppo_completion_rate": float(marl_metrics["completion_rate"]),
-                    "ppo_average_latency": float(marl_metrics["average_latency"]),
-                    "ppo_total_energy": float(marl_metrics["total_energy"]),
-                    "ppo_cache_hit_rate": float(marl_metrics["cache_hit_rate"]),
-                    "ppo_fairness_uav_load": float(marl_metrics["fairness_uav_load"]),
-                    "heuristic_completion_rate": float(heuristic_metrics["completion_rate"]),
-                    "heuristic_average_latency": float(heuristic_metrics["average_latency"]),
-                    "heuristic_total_energy": float(heuristic_metrics["total_energy"]),
-                    "heuristic_cache_hit_rate": float(heuristic_metrics["cache_hit_rate"]),
-                    "heuristic_fairness_uav_load": float(heuristic_metrics["fairness_uav_load"]),
+                    **_extract_prefixed_metrics(marl_metrics, prefix="ppo"),
+                    **_extract_prefixed_metrics(heuristic_metrics, prefix="heuristic"),
                     "delta_completion_rate": float(marl_metrics["completion_rate"]) - float(heuristic_metrics["completion_rate"]),
                     "delta_average_latency": float(marl_metrics["average_latency"]) - float(heuristic_metrics["average_latency"]),
                     "delta_total_energy": float(marl_metrics["total_energy"]) - float(heuristic_metrics["total_energy"]),
@@ -282,16 +308,8 @@ def _run_main_multiseed(seeds: list[int], *, eval_episodes: int) -> tuple[list[d
         raw_rows,
         group_keys=["num_uavs", "assignment_rule"],
         metrics=[
-            "ppo_completion_rate",
-            "ppo_average_latency",
-            "ppo_total_energy",
-            "ppo_cache_hit_rate",
-            "ppo_fairness_uav_load",
-            "heuristic_completion_rate",
-            "heuristic_average_latency",
-            "heuristic_total_energy",
-            "heuristic_cache_hit_rate",
-            "heuristic_fairness_uav_load",
+            *[f"ppo_{metric}" for metric in BASE_METRICS],
+            *[f"heuristic_{metric}" for metric in BASE_METRICS],
             "delta_completion_rate",
             "delta_average_latency",
             "delta_total_energy",
@@ -329,11 +347,7 @@ def _run_ablation_multiseed(
                     "eval_seed": eval_seed,
                     "variant": label,
                     "description": str(ablation["description"]),
-                    "completion_rate": float(marl_metrics["completion_rate"]),
-                    "average_latency": float(marl_metrics["average_latency"]),
-                    "total_energy": float(marl_metrics["total_energy"]),
-                    "cache_hit_rate": float(marl_metrics["cache_hit_rate"]),
-                    "fairness_uav_load": float(marl_metrics["fairness_uav_load"]),
+                    **_extract_prefixed_metrics(marl_metrics, prefix=""),
                     "heuristic_total_energy": float(heuristic_metrics["total_energy"]),
                     "delta_total_energy": float(marl_metrics["total_energy"]) - float(heuristic_metrics["total_energy"]),
                     "checkpoint_path": train_eval["train"]["checkpoint_path"],
@@ -346,11 +360,7 @@ def _run_ablation_multiseed(
         raw_rows,
         group_keys=["variant", "description"],
         metrics=[
-            "completion_rate",
-            "average_latency",
-            "total_energy",
-            "cache_hit_rate",
-            "fairness_uav_load",
+            *BASE_METRICS,
             "heuristic_total_energy",
             "delta_total_energy",
         ],
@@ -417,67 +427,268 @@ def _plot_training_metric_curves(
     plt.close(figure)
 
 
+def _plot_training_behavior_overview(
+    training_logs: dict[str, list[list[dict[str, Any]]]],
+    *,
+    output_path: Path,
+) -> None:
+    plt = _load_matplotlib()
+    figure, axes = plt.subplots(2, 3, figsize=(13.6, 7.8), sharex=True)
+    colors = {
+        "main": "#2E86AB",
+        "no_energy_shaped_reward": "#E67E22",
+        "no_movement_budget": "#C0392B",
+    }
+    label_map = {
+        "main": "Main PPO",
+        "no_energy_shaped_reward": "No energy shaping",
+        "no_movement_budget": "No movement budget",
+    }
+    panels = [
+        ("team_return", "Team Return"),
+        ("completion_rate", "Completion Rate"),
+        ("average_latency", "Average Latency"),
+        ("total_energy", "Total Energy"),
+        ("mean_step_action_magnitude", "Mean Action Magnitude"),
+        ("mean_step_energy_norm", "Mean Normalized Step Energy"),
+    ]
+
+    for axis, (metric, title) in zip(axes.flat, panels):
+        for variant, logs in training_logs.items():
+            episodes, means, stds = _aggregate_training_curve(logs, metric)
+            color = colors.get(variant, "#555555")
+            axis.plot(episodes, means, label=label_map.get(variant, variant), color=color, linewidth=2.0)
+            axis.fill_between(
+                episodes,
+                [value - delta for value, delta in zip(means, stds)],
+                [value + delta for value, delta in zip(means, stds)],
+                color=color,
+                alpha=0.14,
+            )
+        axis.set_title(title)
+        axis.set_xlabel("Training Episode")
+        _style_axis(axis)
+        if "rate" in metric:
+            axis.set_ylim(0.0, 1.05)
+
+    handles, labels = axes[0, 0].get_legend_handles_labels()
+    figure.legend(handles, labels, loc="lower center", ncol=3, frameon=False)
+    figure.suptitle("Training Behaviour Overview (mean +/- std over 3 seeds)", y=0.98)
+    figure.tight_layout(rect=(0.0, 0.05, 1.0, 0.96))
+    figure.savefig(output_path, dpi=220, bbox_inches="tight")
+    plt.close(figure)
+
+
+def _plot_compare_ch4_delta(compare_rows: list[dict[str, Any]], output_path: Path) -> None:
+    plt = _load_matplotlib()
+    filtered = [row for row in compare_rows if row.get("delta_mean") is not None]
+    labels = [str(row["metric"]) for row in filtered]
+    values = [float(row["delta_mean"]) for row in filtered]
+    colors = ["#2A9D8F" if value < 0 else "#E76F51" if value > 0 else "#7A7A7A" for value in values]
+    positions = list(range(len(labels)))
+    max_abs = max([abs(value) for value in values], default=0.0)
+    if max_abs <= 1.0e-12:
+        max_abs = 1.0e-6
+
+    figure, axis = plt.subplots(figsize=(9.8, 6.4))
+    axis.barh(positions, values, color=colors, alpha=0.9)
+    axis.axvline(0.0, color="#444444", linewidth=1.0, linestyle="--")
+    axis.set_yticks(positions, labels)
+    axis.set_xlabel("Chapter3 - Chapter4 Delta")
+    axis.set_title("Chapter3 vs Chapter4 (NUM_UAVS=1) Delta Check")
+    axis.set_xlim(-1.15 * max_abs, 1.15 * max_abs)
+    _style_axis(axis)
+    figure.tight_layout()
+    figure.savefig(output_path, dpi=220, bbox_inches="tight")
+    plt.close(figure)
+
+
+def _plot_energy_breakdown(main_rows: list[dict[str, Any]], output_path: Path) -> None:
+    plt = _load_matplotlib()
+    figure, axes = plt.subplots(1, len(main_rows), figsize=(12.5, 4.8), sharey=True)
+    if len(main_rows) == 1:
+        axes = [axes]
+    colors = {
+        "uav_move_energy": "#457B9D",
+        "uav_compute_energy": "#1D3557",
+        "ue_local_energy": "#E9C46A",
+        "ue_uplink_energy": "#F4A261",
+        "bs_compute_energy": "#E76F51",
+        "relay_fetch_energy": "#2A9D8F",
+    }
+    label_map = {
+        "uav_move_energy": "UAV move",
+        "uav_compute_energy": "UAV compute",
+        "ue_local_energy": "UE local",
+        "ue_uplink_energy": "UE uplink",
+        "bs_compute_energy": "BS compute",
+        "relay_fetch_energy": "Relay/fetch",
+    }
+
+    for axis, row in zip(axes, main_rows):
+        labels = ["PPO", "Heuristic"]
+        positions = [0, 1]
+        bottoms = [0.0, 0.0]
+        for component in ENERGY_COMPONENTS:
+            values = [row[f"ppo_{component}_mean"], row[f"heuristic_{component}_mean"]]
+            axis.bar(
+                positions,
+                values,
+                bottom=bottoms,
+                color=colors[component],
+                width=0.55,
+                label=label_map[component],
+            )
+            bottoms = [bottom + value for bottom, value in zip(bottoms, values)]
+        axis.set_title(f"{int(row['num_uavs'])} UAVs")
+        axis.set_xticks(positions, labels)
+        axis.set_ylabel("Energy")
+        _style_axis(axis)
+
+    handles = [axes[0].containers[index] for index in range(len(ENERGY_COMPONENTS))]
+    labels = [label_map[component] for component in ENERGY_COMPONENTS]
+    figure.legend(handles, labels, loc="lower center", ncol=3, frameon=False)
+    figure.suptitle("Energy Breakdown under Final Configuration", y=0.98)
+    figure.tight_layout(rect=(0.0, 0.10, 1.0, 0.94))
+    figure.savefig(output_path, dpi=220, bbox_inches="tight")
+    plt.close(figure)
+
+
+def _collect_per_uav_diagnostics(main_raw_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    raw_rows: list[dict[str, Any]] = []
+    for row in main_raw_rows:
+        payload = _load_json(str(row["eval_path"]))
+        logs_by_method = {
+            "ppo": payload.get("marl_episode_logs", []),
+            "heuristic": payload.get("heuristic_episode_logs", []),
+        }
+        for method, episode_logs in logs_by_method.items():
+            for episode_log in episode_logs:
+                for item in episode_log.get("per_uav_metrics", []):
+                    raw_rows.append(
+                        {
+                            "num_uavs": int(row["num_uavs"]),
+                            "method": method,
+                            "uav_id": int(item["uav_id"]),
+                            "assigned_task_count_total": float(item["assigned_task_count_total"]),
+                            "completed_task_count_total": float(item["completed_task_count_total"]),
+                            "current_coverage_load": float(item["current_coverage_load"]),
+                            "energy_used_j": float(item["energy_used_j"]),
+                        }
+                    )
+    return _aggregate_rows(
+        raw_rows,
+        group_keys=["num_uavs", "method", "uav_id"],
+        metrics=[
+            "assigned_task_count_total",
+            "completed_task_count_total",
+            "current_coverage_load",
+            "energy_used_j",
+        ],
+    )
+
+
+def _plot_per_uav_diagnostics(diag_rows: list[dict[str, Any]], output_path: Path) -> None:
+    plt = _load_matplotlib()
+    settings = sorted({int(row["num_uavs"]) for row in diag_rows})
+    figure, axes = plt.subplots(len(settings), 4, figsize=(15.2, 4.0 * len(settings)), sharex=False)
+    if len(settings) == 1:
+        axes = [axes]
+    metric_panels = [
+        ("assigned_task_count_total", "Assigned Tasks", "Count"),
+        ("completed_task_count_total", "Completed Tasks", "Count"),
+        ("current_coverage_load", "Coverage Load", "Users in Coverage"),
+        ("energy_used_j", "Energy Used", "J"),
+    ]
+    method_colors = {"ppo": "#2E86AB", "heuristic": "#E76F51"}
+
+    for row_axes, num_uavs in zip(axes, settings):
+        subset = [row for row in diag_rows if int(row["num_uavs"]) == num_uavs]
+        ppo_rows = sorted([row for row in subset if row["method"] == "ppo"], key=lambda item: int(item["uav_id"]))
+        heuristic_rows = sorted([row for row in subset if row["method"] == "heuristic"], key=lambda item: int(item["uav_id"]))
+        labels = [f"UAV {int(row['uav_id'])}" for row in ppo_rows]
+        positions = list(range(len(labels)))
+        width = 0.34
+        for axis, (metric, title, ylabel) in zip(row_axes, metric_panels):
+            axis.bar(
+                [index - width / 2 for index in positions],
+                [row[f"{metric}_mean"] for row in ppo_rows],
+                width=width,
+                yerr=[row[f"{metric}_std"] for row in ppo_rows],
+                color=method_colors["ppo"],
+                label="PPO",
+                capsize=4,
+            )
+            axis.bar(
+                [index + width / 2 for index in positions],
+                [row[f"{metric}_mean"] for row in heuristic_rows],
+                width=width,
+                yerr=[row[f"{metric}_std"] for row in heuristic_rows],
+                color=method_colors["heuristic"],
+                label="Heuristic",
+                capsize=4,
+            )
+            axis.set_title(f"{num_uavs} UAVs - {title}")
+            axis.set_ylabel(ylabel)
+            axis.set_xticks(positions, labels)
+            _style_axis(axis)
+
+    handles, labels = axes[0][0].get_legend_handles_labels() if len(settings) > 1 else axes[0][0].get_legend_handles_labels()
+    figure.legend(handles, labels, loc="lower center", ncol=2, frameon=False)
+    figure.suptitle("Per-UAV Load and Energy Diagnostics", y=0.98)
+    figure.tight_layout(rect=(0.0, 0.05, 1.0, 0.96))
+    figure.savefig(output_path, dpi=220, bbox_inches="tight")
+    plt.close(figure)
+
 def _plot_ppo_vs_heuristic(
     main_rows: list[dict[str, Any]],
     output_path: Path,
 ) -> None:
     plt = _load_matplotlib()
-    figure, axes = plt.subplots(1, 2, figsize=(10.5, 4.6))
+    figure, axes = plt.subplots(2, 3, figsize=(13.4, 7.8), sharex=False)
 
     labels = [f"{int(row['num_uavs'])} UAVs" for row in main_rows]
     positions = list(range(len(labels)))
     width = 0.34
+    metric_panels = [
+        ("completion_rate", "Completion Rate", "Rate"),
+        ("average_latency", "Average Latency", "Latency"),
+        ("total_energy", "Total Energy", "Energy"),
+        ("cache_hit_rate", "Cache Hit Rate", "Rate"),
+        ("fairness_user_completion", "User Fairness", "Jain Fairness"),
+        ("fairness_uav_load", "UAV Load Fairness", "Jain Fairness"),
+    ]
 
-    axes[0].bar(
-        [index - width / 2 for index in positions],
-        [row["ppo_average_latency_mean"] for row in main_rows],
-        width=width,
-        yerr=[row["ppo_average_latency_std"] for row in main_rows],
-        label="PPO",
-        color="#2E86AB",
-        capsize=4,
-    )
-    axes[0].bar(
-        [index + width / 2 for index in positions],
-        [row["heuristic_average_latency_mean"] for row in main_rows],
-        width=width,
-        yerr=[row["heuristic_average_latency_std"] for row in main_rows],
-        label="Heuristic",
-        color="#E76F51",
-        capsize=4,
-    )
-    axes[0].set_title("Average Latency")
-    axes[0].set_ylabel("Latency")
-    axes[0].set_xticks(positions, labels)
-    _style_axis(axes[0])
-    axes[0].legend(frameon=False)
+    for axis, (metric, title, ylabel) in zip(axes.flat, metric_panels):
+        axis.bar(
+            [index - width / 2 for index in positions],
+            [row[f"ppo_{metric}_mean"] for row in main_rows],
+            width=width,
+            yerr=[row[f"ppo_{metric}_std"] for row in main_rows],
+            label="PPO",
+            color="#2E86AB",
+            capsize=4,
+        )
+        axis.bar(
+            [index + width / 2 for index in positions],
+            [row[f"heuristic_{metric}_mean"] for row in main_rows],
+            width=width,
+            yerr=[row[f"heuristic_{metric}_std"] for row in main_rows],
+            label="Heuristic",
+            color="#E76F51",
+            capsize=4,
+        )
+        axis.set_title(title)
+        axis.set_ylabel(ylabel)
+        axis.set_xticks(positions, labels)
+        if "rate" in metric or "fairness" in metric:
+            axis.set_ylim(0.0, 1.05)
+        _style_axis(axis)
 
-    axes[1].bar(
-        [index - width / 2 for index in positions],
-        [row["ppo_total_energy_mean"] for row in main_rows],
-        width=width,
-        yerr=[row["ppo_total_energy_std"] for row in main_rows],
-        label="PPO",
-        color="#2E86AB",
-        capsize=4,
-    )
-    axes[1].bar(
-        [index + width / 2 for index in positions],
-        [row["heuristic_total_energy_mean"] for row in main_rows],
-        width=width,
-        yerr=[row["heuristic_total_energy_std"] for row in main_rows],
-        label="Heuristic",
-        color="#E76F51",
-        capsize=4,
-    )
-    axes[1].set_title("Total Energy")
-    axes[1].set_ylabel("Energy")
-    axes[1].set_xticks(positions, labels)
-    _style_axis(axes[1])
-    axes[1].legend(frameon=False)
-
-    figure.suptitle("PPO vs Heuristic under Final Configuration", y=1.02)
-    figure.tight_layout()
+    handles, labels = axes[0, 0].get_legend_handles_labels()
+    figure.legend(handles, labels, loc="lower center", ncol=2, frameon=False)
+    figure.suptitle("PPO vs Heuristic under Final Configuration", y=0.98)
+    figure.tight_layout(rect=(0.0, 0.05, 1.0, 0.96))
     figure.savefig(output_path, dpi=220, bbox_inches="tight")
     plt.close(figure)
 
@@ -488,63 +699,52 @@ def _plot_assignment_comparison(
     output_path: Path,
 ) -> None:
     plt = _load_matplotlib()
-    figure, axes = plt.subplots(1, 2, figsize=(10.5, 4.6))
+    del main_rows
+    figure, axes = plt.subplots(2, 3, figsize=(13.4, 7.8))
     width = 0.35
     nearest_rows = [row for row in assignment_rows if row["assignment_rule"] == "nearest_uav"]
     balanced_rows = [row for row in assignment_rows if row["assignment_rule"] == "least_loaded_uav"]
     labels = [f"{int(row['num_uavs'])} UAVs" for row in nearest_rows]
     positions = list(range(len(labels)))
+    metric_panels = [
+        ("completion_rate", "Completion Rate", "Rate"),
+        ("average_latency", "Average Latency", "Latency"),
+        ("total_energy", "Total Energy", "Energy"),
+        ("cache_hit_rate", "Cache Hit Rate", "Rate"),
+        ("fairness_user_completion", "User Fairness", "Jain Fairness"),
+        ("fairness_uav_load", "UAV Load Fairness", "Jain Fairness"),
+    ]
 
-    axes[0].bar(
-        [index - width / 2 for index in positions],
-        [row["average_latency_mean"] for row in nearest_rows],
-        width=width,
-        yerr=[row["average_latency_std"] for row in nearest_rows],
-        label="nearest_uav",
-        color="#4C78A8",
-        capsize=4,
-    )
-    axes[0].bar(
-        [index + width / 2 for index in positions],
-        [row["average_latency_mean"] for row in balanced_rows],
-        width=width,
-        yerr=[row["average_latency_std"] for row in balanced_rows],
-        label="least_loaded_uav",
-        color="#59A14F",
-        capsize=4,
-    )
-    axes[0].set_title("Average Latency")
-    axes[0].set_ylabel("Latency")
-    axes[0].set_xticks(positions, labels)
-    _style_axis(axes[0])
-    axes[0].legend(frameon=False)
+    for axis, (metric, title, ylabel) in zip(axes.flat, metric_panels):
+        axis.bar(
+            [index - width / 2 for index in positions],
+            [row[f"{metric}_mean"] for row in nearest_rows],
+            width=width,
+            yerr=[row[f"{metric}_std"] for row in nearest_rows],
+            label="nearest_uav",
+            color="#4C78A8",
+            capsize=4,
+        )
+        axis.bar(
+            [index + width / 2 for index in positions],
+            [row[f"{metric}_mean"] for row in balanced_rows],
+            width=width,
+            yerr=[row[f"{metric}_std"] for row in balanced_rows],
+            label="least_loaded_uav",
+            color="#59A14F",
+            capsize=4,
+        )
+        axis.set_title(title)
+        axis.set_ylabel(ylabel)
+        axis.set_xticks(positions, labels)
+        if "rate" in metric or "fairness" in metric:
+            axis.set_ylim(0.0, 1.05)
+        _style_axis(axis)
 
-    axes[1].bar(
-        [index - width / 2 for index in positions],
-        [row["fairness_uav_load_mean"] for row in nearest_rows],
-        width=width,
-        yerr=[row["fairness_uav_load_std"] for row in nearest_rows],
-        label="nearest_uav",
-        color="#4C78A8",
-        capsize=4,
-    )
-    axes[1].bar(
-        [index + width / 2 for index in positions],
-        [row["fairness_uav_load_mean"] for row in balanced_rows],
-        width=width,
-        yerr=[row["fairness_uav_load_std"] for row in balanced_rows],
-        label="least_loaded_uav",
-        color="#59A14F",
-        capsize=4,
-    )
-    axes[1].set_title("Load Fairness")
-    axes[1].set_ylabel("Jain Fairness")
-    axes[1].set_xticks(positions, labels)
-    _style_axis(axes[1])
-    axes[1].legend(frameon=False)
-
-    figure.suptitle("Assignment Rule Comparison under Sensitive Profile", y=1.02)
-    figure.tight_layout()
+    handles, labels = axes[0, 0].get_legend_handles_labels()
+    figure.legend(handles, labels, loc="lower center", ncol=2, frameon=False)
+    figure.suptitle("Assignment Rule Comparison under Sensitive Profile", y=0.98)
+    figure.tight_layout(rect=(0.0, 0.05, 1.0, 0.96))
     figure.savefig(output_path, dpi=220, bbox_inches="tight")
     plt.close(figure)
 
@@ -776,15 +976,20 @@ def run_final_paper_package(*, seeds: list[int] | None = None, eval_episodes: in
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
-    compare_raw, compare_agg = _run_compare_ch4(seeds)
+    compare_raw, compare_agg = _run_compare_ch4(seeds, episodes=eval_episodes)
     assignment_raw, assignment_agg = _run_assignment_multiseed(seeds, eval_episodes=eval_episodes)
     main_raw, main_agg, main_training_logs = _run_main_multiseed(seeds, eval_episodes=eval_episodes)
     ablation_raw, ablation_agg, ablation_training_logs = _run_ablation_multiseed(seeds, eval_episodes=eval_episodes)
+    per_uav_diag = _collect_per_uav_diagnostics(main_raw)
 
     training_return_path = FIGURES_DIR / "final_training_return_curve.png"
     training_energy_path = FIGURES_DIR / "final_training_energy_curve.png"
+    training_overview_path = FIGURES_DIR / "final_training_behavior_overview.png"
     ppo_vs_heuristic_path = FIGURES_DIR / "final_ppo_vs_heuristic.png"
     assignment_path = FIGURES_DIR / "final_assignment_comparison.png"
+    energy_breakdown_path = FIGURES_DIR / "final_energy_breakdown.png"
+    compare_delta_path = FIGURES_DIR / "final_compare_ch4_delta.png"
+    per_uav_path = FIGURES_DIR / "final_per_uav_diagnostics.png"
     ablation_path = FIGURES_DIR / "final_ablation_energy.png"
     summary_panel_path = FIGURES_DIR / "final_comparison_bars.png"
     training_logs = {
@@ -806,8 +1011,12 @@ def run_final_paper_package(*, seeds: list[int] | None = None, eval_episodes: in
         title="PPO Training Energy (mean ± std over 3 seeds)",
         output_path=training_energy_path,
     )
+    _plot_training_behavior_overview(training_logs, output_path=training_overview_path)
     _plot_ppo_vs_heuristic(main_agg, ppo_vs_heuristic_path)
     _plot_assignment_comparison(main_agg, assignment_agg, assignment_path)
+    _plot_energy_breakdown(main_agg, energy_breakdown_path)
+    _plot_compare_ch4_delta(compare_agg, compare_delta_path)
+    _plot_per_uav_diagnostics(per_uav_diag, per_uav_path)
     _plot_ablation_energy(ablation_agg, ablation_path)
     _plot_summary_panel(main_agg, assignment_agg, ablation_agg, summary_panel_path)
 
@@ -837,8 +1046,12 @@ def run_final_paper_package(*, seeds: list[int] | None = None, eval_episodes: in
         "figures": {
             "training_return_curve": str(training_return_path),
             "training_energy_curve": str(training_energy_path),
+            "training_behavior_overview": str(training_overview_path),
             "ppo_vs_heuristic": str(ppo_vs_heuristic_path),
             "assignment_comparison": str(assignment_path),
+            "energy_breakdown": str(energy_breakdown_path),
+            "compare_ch4_delta": str(compare_delta_path),
+            "per_uav_diagnostics": str(per_uav_path),
             "ablation_energy": str(ablation_path),
             "summary_panel": str(summary_panel_path),
         },
@@ -865,8 +1078,12 @@ def run_final_paper_package(*, seeds: list[int] | None = None, eval_episodes: in
         "figures": {
             "training_return_curve": str(training_return_path),
             "training_energy_curve": str(training_energy_path),
+            "training_behavior_overview": str(training_overview_path),
             "ppo_vs_heuristic": str(ppo_vs_heuristic_path),
             "assignment_comparison": str(assignment_path),
+            "energy_breakdown": str(energy_breakdown_path),
+            "compare_ch4_delta": str(compare_delta_path),
+            "per_uav_diagnostics": str(per_uav_path),
             "ablation_energy": str(ablation_path),
             "summary_panel": str(summary_panel_path),
         },
