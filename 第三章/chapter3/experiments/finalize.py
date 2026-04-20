@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from common.uav_mec.logging_utils import write_json
+from common.uav_mec.plot_i18n import ENERGY_COMPONENT_LABEL_CN, configure_matplotlib_for_chinese, metric_label, policy_label
 
 from .experiment import compare_with_chapter4, run_experiment
 
@@ -24,18 +25,18 @@ TABLES_DIR = FINAL_DIR / "tables"
 FIGURES_DIR = FINAL_DIR / "figures"
 
 POLICY_STYLES = {
-    "heuristic": {"label": "Heuristic", "color": "#2E86AB"},
-    "mpc": {"label": "MPC Shell", "color": "#E67E22"},
-    "fixed_point": {"label": "Fixed Point", "color": "#4CAF50"},
-    "fixed_patrol": {"label": "Fixed Patrol", "color": "#C0392B"},
+    "heuristic": {"label": policy_label("heuristic"), "color": "#2E86AB"},
+    "mpc": {"label": policy_label("mpc"), "color": "#E67E22"},
+    "fixed_point": {"label": policy_label("fixed_point"), "color": "#4CAF50"},
+    "fixed_patrol": {"label": policy_label("fixed_patrol"), "color": "#C0392B"},
 }
 ENERGY_COMPONENTS = [
-    ("uav_move_energy", "UAV Move"),
-    ("uav_compute_energy", "UAV Compute"),
-    ("ue_local_energy", "UE Local"),
-    ("ue_uplink_energy", "UE Uplink"),
-    ("bs_compute_energy", "BS Compute"),
-    ("relay_fetch_energy", "Relay Fetch"),
+    ("uav_move_energy", ENERGY_COMPONENT_LABEL_CN["uav_move_energy"]),
+    ("uav_compute_energy", ENERGY_COMPONENT_LABEL_CN["uav_compute_energy"]),
+    ("ue_local_energy", ENERGY_COMPONENT_LABEL_CN["ue_local_energy"]),
+    ("ue_uplink_energy", ENERGY_COMPONENT_LABEL_CN["ue_uplink_energy"]),
+    ("bs_compute_energy", ENERGY_COMPONENT_LABEL_CN["bs_compute_energy"]),
+    ("relay_fetch_energy", ENERGY_COMPONENT_LABEL_CN["relay_fetch_energy"]),
 ]
 
 
@@ -48,7 +49,7 @@ def _load_matplotlib() -> Any:
             "Use the project virtual environment, for example "
             "`.venv\\Scripts\\python.exe 第三章/run_finalize_chapter3.py ...`."
         ) from exc
-    return plt
+    return configure_matplotlib_for_chinese(plt)
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -129,8 +130,8 @@ def _draw_trajectory(axis: Any, *, payload: dict[str, Any]) -> None:
     axis.set_xlim(0.0, area["width"])
     axis.set_ylim(0.0, area["height"])
     axis.set_aspect("equal", adjustable="box")
-    axis.set_xlabel("X (m)")
-    axis.set_ylabel("Y (m)")
+    axis.set_xlabel("X 坐标 (m)")
+    axis.set_ylabel("Y 坐标 (m)")
     axis.grid(alpha=0.22, linestyle="--", linewidth=0.6)
 
     for user_trace in payload["user_paths"]:
@@ -176,10 +177,10 @@ def _plot_policy_metrics(results_by_policy: dict[str, dict[str, Any]], output_pa
     colors = [POLICY_STYLES[policy]["color"] for policy in policies]
     positions = list(range(len(policies)))
     panels = [
-        ("completion_rate", "Completion Rate", "Rate"),
-        ("average_latency", "Average Latency", "Latency"),
-        ("total_energy", "Total Energy", "Energy"),
-        ("cache_hit_rate", "Cache Hit Rate", "Rate"),
+        ("completion_rate", "任务完成率", "比例"),
+        ("average_latency", "平均时延", "时延"),
+        ("total_energy", "总能耗", "能耗"),
+        ("cache_hit_rate", "缓存命中率", "比例"),
     ]
 
     for axis, (metric, title, ylabel) in zip(axes.flat, panels):
@@ -197,7 +198,7 @@ def _plot_policy_metrics(results_by_policy: dict[str, dict[str, Any]], output_pa
             axis.set_ylim(0.0, 1.05)
         _style_axis(axis)
 
-    figure.suptitle("Chapter 3 Policy Comparison", y=0.98)
+    figure.suptitle("第三章策略对比", y=0.98)
     figure.tight_layout(rect=(0.0, 0.0, 1.0, 0.96))
     figure.savefig(output_path, dpi=220, bbox_inches="tight")
     plt.close(figure)
@@ -207,10 +208,10 @@ def _plot_step_curves(results_by_policy: dict[str, dict[str, Any]], output_path:
     plt = _load_matplotlib()
     figure, axes = plt.subplots(2, 2, figsize=(11.6, 7.8), sharex=True)
     panels = [
-        ("completion_rate", "Step Completion Rate", "Rate"),
-        ("average_latency", "Step Average Latency", "Latency"),
-        ("total_energy", "Step Total Energy", "Energy"),
-        ("cache_hit_rate", "Step Cache Hit Rate", "Rate"),
+        ("completion_rate", "逐步任务完成率", "比例"),
+        ("average_latency", "逐步平均时延", "时延"),
+        ("total_energy", "逐步总能耗", "能耗"),
+        ("cache_hit_rate", "逐步缓存命中率", "比例"),
     ]
 
     for axis, (metric, title, ylabel) in zip(axes.flat, panels):
@@ -227,14 +228,14 @@ def _plot_step_curves(results_by_policy: dict[str, dict[str, Any]], output_path:
             )
         axis.set_title(title)
         axis.set_ylabel(ylabel)
-        axis.set_xlabel("Step")
+        axis.set_xlabel("步骤")
         if metric in {"completion_rate", "cache_hit_rate"}:
             axis.set_ylim(0.0, 1.05)
         _style_axis(axis)
 
     handles, labels = axes[0, 0].get_legend_handles_labels()
     figure.legend(handles, labels, loc="lower center", ncol=4, frameon=False)
-    figure.suptitle("Chapter 3 Step-wise Behaviour (mean +/- std)", y=0.98)
+    figure.suptitle("第三章逐步行为曲线（均值 ± 标准差）", y=0.98)
     figure.tight_layout(rect=(0.0, 0.05, 1.0, 0.96))
     figure.savefig(output_path, dpi=220, bbox_inches="tight")
     plt.close(figure)
@@ -273,8 +274,8 @@ def _plot_energy_breakdown(results_by_policy: dict[str, dict[str, Any]], output_
         axis.text(position, total, f"{total:.1f}", ha="center", va="bottom", fontsize=9, color="#222222")
 
     axis.set_xticks(positions, labels, rotation=12)
-    axis.set_ylabel("Energy (J)")
-    axis.set_title("Chapter 3 Energy Breakdown by Policy")
+    axis.set_ylabel("能耗 (J)")
+    axis.set_title("第三章各策略能耗分解")
     _style_axis(axis)
     axis.legend(loc="upper left", bbox_to_anchor=(1.01, 1.0), frameon=False)
     figure.tight_layout()
@@ -291,11 +292,11 @@ def _plot_trajectory_grid(results_by_policy: dict[str, dict[str, Any]], output_p
         summary = payload["summary_metrics"]
         axis.set_title(
             f"{POLICY_STYLES[policy]['label']}\n"
-            f"completion={_format_metric(summary.get('completion_rate'), digits=3)}  "
-            f"energy={_format_metric(summary.get('total_energy'), digits=3)}"
+            f"完成率={_format_metric(summary.get('completion_rate'), digits=3)}  "
+            f"总能耗={_format_metric(summary.get('total_energy'), digits=3)}"
         )
 
-    figure.suptitle("Chapter 3 Single-UAV Trajectory Comparison", y=0.98)
+    figure.suptitle("第三章单无人机轨迹对比", y=0.98)
     figure.tight_layout(rect=(0.0, 0.0, 1.0, 0.96))
     figure.savefig(output_path, dpi=220, bbox_inches="tight")
     plt.close(figure)
@@ -308,7 +309,7 @@ def _plot_compare_delta(compare_result: dict[str, Any], output_path: Path) -> No
         for metric, payload in compare_result["comparison"].items()
         if payload["delta"] is not None
     ]
-    labels = [str(row["metric"]) for row in rows]
+    labels = [metric_label(str(row["metric"])) for row in rows]
     values = [float(row["delta"]) for row in rows]
     colors = ["#7A7A7A" if math.isclose(value, 0.0, abs_tol=1e-12) else "#E76F51" for value in values]
     max_abs = max((abs(value) for value in values), default=0.0)
@@ -322,14 +323,14 @@ def _plot_compare_delta(compare_result: dict[str, Any], output_path: Path) -> No
     axis.scatter([0.0] * len(positions), positions, color="#444444", s=18, zorder=3)
     axis.axvline(0.0, color="#444444", linewidth=1.0, linestyle="--")
     axis.set_yticks(positions, labels)
-    axis.set_xlabel("Chapter3 - Chapter4 Delta")
+    axis.set_xlabel("第三章 - 第四章 指标差值")
     axis.set_xlim(-1.15 * max_abs, 1.15 * max_abs)
-    axis.set_title("Chapter 3 vs Chapter 4 (NUM_UAVS=1) Delta Check")
+    axis.set_title("第三章与第四章（无人机数量=1）差值校验")
     if all_zero:
         axis.text(
             0.98,
             0.04,
-            "All compared metrics match exactly (delta = 0).",
+            "所有对比指标完全一致（差值 = 0）。",
             transform=axis.transAxes,
             ha="right",
             va="bottom",

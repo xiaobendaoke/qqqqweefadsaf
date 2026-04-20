@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from common.uav_mec.logging_utils import write_json
+from common.uav_mec.plot_i18n import assignment_rule_label, configure_matplotlib_for_chinese, variant_label
 
 from ..experiments import run_sensitive_experiment
 from .config import build_marl_config
@@ -149,8 +150,37 @@ def get_tuning_candidate(name: str) -> dict[str, Any]:
     raise KeyError(f"Unknown tuning candidate: {name}")
 
 
-def get_candidate_overrides(name: str) -> dict[str, Any]:
-    return dict(get_tuning_candidate(name)["overrides"])
+def _scaled_candidate(candidate: dict[str, Any], train_episode_scale: float) -> dict[str, Any]:
+    resolved_scale = float(train_episode_scale)
+    if resolved_scale <= 0.0:
+        raise ValueError("train_episode_scale must be positive.")
+    overrides = dict(candidate["overrides"])
+    overrides["train_episodes"] = max(1, int(round(int(overrides["train_episodes"]) * resolved_scale)))
+    return {
+        "name": candidate["name"],
+        "description": candidate["description"],
+        "overrides": overrides,
+    }
+
+
+def _resolve_tuning_candidates(train_episode_scale: float = 1.0) -> list[dict[str, Any]]:
+    if abs(float(train_episode_scale) - 1.0) < 1.0e-12:
+        return [
+            {
+                "name": item["name"],
+                "description": item["description"],
+                "overrides": dict(item["overrides"]),
+            }
+            for item in TUNING_CANDIDATES
+        ]
+    return [_scaled_candidate(candidate, train_episode_scale) for candidate in TUNING_CANDIDATES]
+
+
+def get_candidate_overrides(name: str, *, train_episode_scale: float = 1.0) -> dict[str, Any]:
+    for candidate in _resolve_tuning_candidates(train_episode_scale):
+        if candidate["name"] == name:
+            return dict(candidate["overrides"])
+    raise KeyError(f"Unknown tuning candidate: {name}")
 
 
 def _normalize_seeds(seeds: list[int] | None) -> list[int]:
@@ -172,7 +202,7 @@ def _load_matplotlib() -> Any:
         raise RuntimeError(
             "matplotlib is required for stage-5 paper plots. Install dependencies from 第四章/requirements.txt first."
         ) from exc
-    return plt
+    return configure_matplotlib_for_chinese(plt)
 
 
 def _float_or_none(value: Any) -> float | None:
@@ -429,9 +459,11 @@ def _run_tuning(
     *,
     tuning_seeds: list[int],
     eval_episodes: int,
+    tuning_candidates: list[dict[str, Any]] | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+    candidates = tuning_candidates or _resolve_tuning_candidates()
     tuning_raw_rows: list[dict[str, Any]] = []
-    for candidate in TUNING_CANDIDATES:
+    for candidate in candidates:
         for tuning_seed in tuning_seeds:
             eval_seed = tuning_seed + TUNING_EVAL_OFFSET
             output_tag = f"tune_{candidate['name']}_s{tuning_seed}"
@@ -474,9 +506,9 @@ def _plot_training_curves(
         "no_movement_budget": "#C0392B",
     }
     label_map = {
-        "main": "main",
-        "with_reward_shaping": "with_reward_shaping",
-        "no_movement_budget": "no_movement_budget",
+        "main": variant_label("main"),
+        "with_reward_shaping": variant_label("with_reward_shaping"),
+        "no_movement_budget": variant_label("no_movement_budget"),
     }
 
     for variant, logs in training_logs.items():
@@ -501,12 +533,12 @@ def _plot_training_curves(
             alpha=0.14,
         )
 
-    axes[0].set_ylabel("Team Return")
-    axes[0].set_title("PPO Training Curves (mean +/- std)")
+    axes[0].set_ylabel("团队回报")
+    axes[0].set_title("本文方法（PPO）训练曲线（均值 ± 标准差）")
     _style_axis(axes[0])
     axes[0].legend(frameon=False)
-    axes[1].set_xlabel("Episode")
-    axes[1].set_ylabel("Total Energy")
+    axes[1].set_xlabel("训练回合")
+    axes[1].set_ylabel("总能耗")
     _style_axis(axes[1])
     axes[1].legend(frameon=False)
     figure.tight_layout()
@@ -516,7 +548,7 @@ def _plot_training_curves(
 
 def _plot_assignment_rules(rows: list[dict[str, Any]], output_path: Path) -> None:
     plt = _load_matplotlib()
-    labels = [f"u{row['num_uavs']}-{row['assignment_rule']}" for row in rows]
+    labels = [f"{int(row['num_uavs'])} 无人机-{assignment_rule_label(str(row['assignment_rule']))}" for row in rows]
     energy = [row["total_energy_mean"] for row in rows]
     energy_std = [row["total_energy_std"] for row in rows]
     fairness = [row["fairness_uav_load_mean"] for row in rows]
@@ -525,11 +557,11 @@ def _plot_assignment_rules(rows: list[dict[str, Any]], output_path: Path) -> Non
 
     figure, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
     axes[0].bar(positions, energy, yerr=energy_std, color="#4C78A8", capsize=4)
-    axes[0].set_ylabel("Total Energy")
-    axes[0].set_title("Assignment Rule Comparison (Sensitive Profile)")
+    axes[0].set_ylabel("总能耗")
+    axes[0].set_title("任务分配规则对比（敏感场景）")
     axes[0].grid(axis="y", alpha=0.3)
     axes[1].bar(positions, fairness, yerr=fairness_std, color="#F58518", capsize=4)
-    axes[1].set_ylabel("Fairness")
+    axes[1].set_ylabel("公平性")
     axes[1].set_xticks(positions, labels, rotation=20)
     axes[1].grid(axis="y", alpha=0.3)
     figure.tight_layout()
@@ -539,7 +571,7 @@ def _plot_assignment_rules(rows: list[dict[str, Any]], output_path: Path) -> Non
 
 def _plot_main_comparison(rows: list[dict[str, Any]], output_path: Path) -> None:
     plt = _load_matplotlib()
-    labels = [f"u{row['num_uavs']}-ppo" for row in rows] + [f"u{row['num_uavs']}-heuristic" for row in rows]
+    labels = [f"{int(row['num_uavs'])} 无人机-PPO" for row in rows] + [f"{int(row['num_uavs'])} 无人机-启发式" for row in rows]
     energy = [row["total_energy_mean"] for row in rows] + [row["heuristic_total_energy_mean"] for row in rows]
     energy_std = [row["total_energy_std"] for row in rows] + [row["heuristic_total_energy_std"] for row in rows]
     latency = [row["average_latency_mean"] for row in rows] + [row["heuristic_average_latency_mean"] for row in rows]
@@ -548,11 +580,11 @@ def _plot_main_comparison(rows: list[dict[str, Any]], output_path: Path) -> None
 
     figure, axes = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
     axes[0].bar(positions, energy, yerr=energy_std, color=["#54A24B"] * len(rows) + ["#E45756"] * len(rows), capsize=4)
-    axes[0].set_ylabel("Total Energy")
-    axes[0].set_title("PPO vs Heuristic")
+    axes[0].set_ylabel("总能耗")
+    axes[0].set_title("本文方法（PPO）与启发式对比")
     axes[0].grid(axis="y", alpha=0.3)
     axes[1].bar(positions, latency, yerr=latency_std, color=["#54A24B"] * len(rows) + ["#E45756"] * len(rows), capsize=4)
-    axes[1].set_ylabel("Average Latency")
+    axes[1].set_ylabel("平均时延")
     axes[1].set_xticks(positions, labels, rotation=20)
     axes[1].grid(axis="y", alpha=0.3)
     figure.tight_layout()
@@ -639,12 +671,20 @@ def _make_markdown_summary(
     return "\n".join(lines)
 
 
-def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes: int = 32, device: str = "auto") -> dict[str, Any]:
+def run_paper_experiments(
+    *,
+    seed: int = 42,
+    eval_seed: int = 142,
+    eval_episodes: int = 32,
+    train_episode_scale: float = 1.0,
+    device: str = "auto",
+) -> dict[str, Any]:
     PAPER_DIR.mkdir(parents=True, exist_ok=True)
+    tuning_candidates = _resolve_tuning_candidates(train_episode_scale)
 
     tuning_raw_rows: list[dict[str, Any]] = []
     tuning_runs: dict[str, dict[str, Any]] = {}
-    for candidate in TUNING_CANDIDATES:
+    for candidate in tuning_candidates:
         output_tag = f"tune_{candidate['name']}_s{seed}"
         train_eval = _run_train_eval(
             seed=seed,
@@ -666,7 +706,7 @@ def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes
     best_tuning_row = _select_best_candidate(tuning_summary_rows)
     selected_tuning_row = _select_named_candidate(tuning_summary_rows, name=FINAL_MAIN_CANDIDATE_NAME)
 
-    final_overrides = get_candidate_overrides(str(selected_tuning_row["label"]))
+    final_overrides = get_candidate_overrides(str(selected_tuning_row["label"]), train_episode_scale=train_episode_scale)
     final_config = build_marl_config(
         {
             **final_overrides,
@@ -878,13 +918,14 @@ def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes
             "tuning_seed": seed,
             "eval_seed": eval_seed,
             "eval_episodes": eval_episodes,
+            "train_episode_scale": train_episode_scale,
             "device_request": device,
             "selection_rule": "highest completion_rate, then lowest total_energy, then lowest average_latency",
             "main_setting": {
                 "num_uavs": MAIN_NUM_UAVS,
                 "assignment_rule": MAIN_ASSIGNMENT_RULE,
             },
-            "candidates": TUNING_CANDIDATES,
+            "candidates": tuning_candidates,
         },
         "selected_final_config": final_config,
         "main_matrix_notes": {
@@ -928,6 +969,7 @@ def run_paper_experiments(*, seed: int = 42, eval_seed: int = 142, eval_episodes
         "best_observed_tuning_candidate": best_tuning_row["label"],
         "tuning_seed": seed,
         "eval_seed": eval_seed,
+        "train_episode_scale": train_episode_scale,
         "device_request": device,
         "compare_ch4_summary_path": str(compare_json),
         "tuning_summary_path": str(tuning_json),

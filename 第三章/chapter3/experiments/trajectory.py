@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from common.uav_mec.logging_utils import write_json
+from common.uav_mec.plot_i18n import configure_matplotlib_for_chinese, policy_label
 
 
 class EpisodeTrajectoryRecorder:
@@ -118,6 +119,7 @@ def _plot_trajectory(*, payload: dict[str, Any], output_path: Path) -> None:
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    configure_matplotlib_for_chinese(plt)
 
     area = payload["area"]
     uav_path = payload["uav_path"]
@@ -128,13 +130,13 @@ def _plot_trajectory(*, payload: dict[str, Any], output_path: Path) -> None:
     axis.set_xlim(0.0, area["width"])
     axis.set_ylim(0.0, area["height"])
     axis.set_aspect("equal", adjustable="box")
-    axis.set_xlabel("X Position (m)")
-    axis.set_ylabel("Y Position (m)")
+    axis.set_xlabel("X 坐标 (m)")
+    axis.set_ylabel("Y 坐标 (m)")
     axis.set_title(
-        "Chapter 3 UAV Trajectory\n"
-        f"policy={payload['policy']}  seed={payload['seed']}  "
-        f"completion={_format_metric(summary_metrics.get('completion_rate'))}  "
-        f"energy={_format_metric(summary_metrics.get('total_energy'))}"
+        "第三章单无人机轨迹\n"
+        f"策略={policy_label(str(payload['policy']))}  随机种子={payload['seed']}  "
+        f"完成率={_format_metric(summary_metrics.get('completion_rate'))}  "
+        f"总能耗={_format_metric(summary_metrics.get('total_energy'))}"
     )
     axis.grid(alpha=0.25, linestyle="--", linewidth=0.6)
 
@@ -149,9 +151,9 @@ def _plot_trajectory(*, payload: dict[str, Any], output_path: Path) -> None:
 
     uav_xs = [sample["x"] for sample in uav_path]
     uav_ys = [sample["y"] for sample in uav_path]
-    axis.plot(uav_xs, uav_ys, color="#005f73", linewidth=2.2, marker="o", markersize=4.5, label="UAV path")
-    axis.scatter(uav_xs[0], uav_ys[0], color="#2a9d8f", s=60, marker="s", label="start")
-    axis.scatter(uav_xs[-1], uav_ys[-1], color="#d62828", s=70, marker="*", label="end")
+    axis.plot(uav_xs, uav_ys, color="#005f73", linewidth=2.2, marker="o", markersize=4.5, label="无人机轨迹")
+    axis.scatter(uav_xs[0], uav_ys[0], color="#2a9d8f", s=60, marker="s", label="起点")
+    axis.scatter(uav_xs[-1], uav_ys[-1], color="#d62828", s=70, marker="*", label="终点")
 
     label_stride = max(1, len(uav_path) // 8)
     for index, sample in enumerate(uav_path):

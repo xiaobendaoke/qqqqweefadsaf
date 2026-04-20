@@ -21,10 +21,16 @@ def main() -> None:
     """解析命令行参数并执行终稿复现实验。"""
     parser = argparse.ArgumentParser()
     parser.add_argument("--seeds", type=int, nargs="+", default=[42, 52, 62])
+    parser.add_argument("--train-episodes", type=int, default=240)
     parser.add_argument("--eval-episodes", type=int, default=32)
     parser.add_argument("--device", type=str, default="auto", help="Torch device request: auto, cpu, cuda, or cuda:N.")
     args = parser.parse_args()
-    result = run_final_paper_package(seeds=args.seeds, eval_episodes=args.eval_episodes, device=args.device)
+    result = run_final_paper_package(
+        seeds=args.seeds,
+        train_episodes=args.train_episodes,
+        eval_episodes=args.eval_episodes,
+        device=args.device,
+    )
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
 
