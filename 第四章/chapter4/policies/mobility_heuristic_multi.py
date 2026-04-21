@@ -1,12 +1,15 @@
-"""第四章多 UAV 启发式协同移动策略模块。
+"""第四章 legacy mobility-only 多 UAV 启发式协同移动策略模块。
 
-该模块根据多 UAV 局部观测中的用户积压、邻居状态和局部负载信息，
-为每架 UAV 生成启发式移动方向，作为多 UAV 实验中的轻量基线方法。
+该策略只根据 flat legacy observation 生成 `dx, dy`，
+作为“移动学习/移动启发式，环境自动决策卸载与缓存”的旧 baseline。
 """
 
 from __future__ import annotations
 
 import math
+
+POLICY_ID = "legacy_mobility_only"
+POLICY_LABEL = "Legacy mobility-only heuristic"
 
 
 def select_actions(observations: list[list[float]], env=None) -> list[list[float]]:

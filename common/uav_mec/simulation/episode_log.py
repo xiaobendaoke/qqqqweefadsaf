@@ -10,6 +10,8 @@ from ..config import SystemConfig
 from ..core.action import action_schema
 from ..core.state import observation_schema, uav_state_schema
 from ..entities import UAVNode
+from ..metrics import episode_metric_schema
+from ..metrics import step_signal_schema
 
 
 def episode_log_schema(config: SystemConfig, agent_ids: list[str]) -> dict[str, object]:
@@ -22,17 +24,22 @@ def episode_log_schema(config: SystemConfig, agent_ids: list[str]) -> dict[str, 
             "num_uavs",
             "num_users",
             "assignment_rule",
+            "metric_schemas",
             "global_metrics",
             "per_uav_metrics",
             "action_schema",
             "observation_schema",
             "uav_state_schema",
-            "step_metrics",
+            "step_signals",
             "energy_breakdown",
             "queue_breakdown",
             "cache_events",
             "task_lifecycle_counts",
         ],
+        "metric_schemas": {
+            "episode_metrics": episode_metric_schema(),
+            "step_signals": step_signal_schema(),
+        },
         "action_schema": action_schema(num_agents=config.num_uavs, agent_ids=agent_ids, config=config),
         "observation_schema": observation_schema(config),
         "uav_state_schema": uav_state_schema(config),

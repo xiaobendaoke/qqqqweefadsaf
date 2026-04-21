@@ -16,13 +16,14 @@ from common.uav_mec.logging_utils import write_json
 from common.uav_mec.plot_i18n import assignment_rule_label, configure_matplotlib_for_chinese, variant_label
 
 from ..experiments import run_sensitive_experiment
+from ..results_paths import stage5_dir
 from .config import build_marl_config
 from .eval import run_marl_evaluation
 from .train import run_marl_training
 
 
-RESULTS_DIR = Path(__file__).resolve().parents[2] / "results"
-PAPER_DIR = RESULTS_DIR / "paper_stage5"
+RESULTS_DIR = stage5_dir()
+PAPER_DIR = RESULTS_DIR
 WORKSPACE_ROOT = Path(__file__).resolve().parents[3]
 CHAPTER3_DIR = WORKSPACE_ROOT / "第三章"
 
@@ -30,7 +31,6 @@ MAIN_NUM_UAVS = 2
 MAIN_ASSIGNMENT_RULE = "nearest_uav"
 DEFAULT_TUNING_SEEDS = [42, 52, 62]
 TUNING_EVAL_OFFSET = 100
-FINAL_MAIN_CANDIDATE_NAME = "freeze_noshaping_240"
 
 TUNING_CANDIDATES: list[dict[str, Any]] = [
     {
@@ -43,7 +43,7 @@ TUNING_CANDIDATES: list[dict[str, Any]] = [
             "ppo_clip_eps": 0.20,
             "entropy_coef": 0.010,
             "value_loss_coef": 0.50,
-            "reward_energy_weight": 1.20,
+            "reward_energy_weight": 0.020,
             "reward_action_magnitude_weight": 0.15,
         },
     },
@@ -57,8 +57,8 @@ TUNING_CANDIDATES: list[dict[str, Any]] = [
             "ppo_clip_eps": 0.18,
             "entropy_coef": 0.008,
             "value_loss_coef": 0.60,
-            "reward_energy_weight": 1.50,
-            "reward_action_magnitude_weight": 0.20,
+            "reward_energy_weight": 0.030,
+            "reward_action_magnitude_weight": 0.18,
         },
     },
     {
@@ -71,8 +71,8 @@ TUNING_CANDIDATES: list[dict[str, Any]] = [
             "ppo_clip_eps": 0.18,
             "entropy_coef": 0.008,
             "value_loss_coef": 0.60,
-            "reward_energy_weight": 1.50,
-            "reward_action_magnitude_weight": 0.20,
+            "reward_energy_weight": 0.030,
+            "reward_action_magnitude_weight": 0.18,
         },
     },
     {
@@ -85,8 +85,8 @@ TUNING_CANDIDATES: list[dict[str, Any]] = [
             "ppo_clip_eps": 0.15,
             "entropy_coef": 0.005,
             "value_loss_coef": 0.70,
-            "reward_energy_weight": 1.70,
-            "reward_action_magnitude_weight": 0.22,
+            "reward_energy_weight": 0.035,
+            "reward_action_magnitude_weight": 0.20,
         },
     },
     {
@@ -99,8 +99,8 @@ TUNING_CANDIDATES: list[dict[str, Any]] = [
             "ppo_clip_eps": 0.12,
             "entropy_coef": 0.0008,
             "value_loss_coef": 0.75,
-            "reward_energy_weight": 4.50,
-            "reward_action_magnitude_weight": 0.65,
+            "reward_energy_weight": 0.060,
+            "reward_action_magnitude_weight": 0.28,
             "action_std_init": 0.10,
             "action_std_min": 0.015,
             "action_std_decay": 0.983,
@@ -108,7 +108,7 @@ TUNING_CANDIDATES: list[dict[str, Any]] = [
     },
     {
         "name": "freeze_energy2_240",
-        "description": "ultra-low exploration with stronger energy and action regularization",
+        "description": "ultra-low exploration with normalized backlog/latency/energy regularization",
         "overrides": {
             "train_episodes": 240,
             "actor_lr": 8.0e-5,
@@ -116,25 +116,11 @@ TUNING_CANDIDATES: list[dict[str, Any]] = [
             "ppo_clip_eps": 0.10,
             "entropy_coef": 0.0003,
             "value_loss_coef": 0.82,
-            "reward_energy_weight": 2.00,
-            "reward_action_magnitude_weight": 1.00,
-            "action_std_init": 0.04,
-            "action_std_min": 0.005,
-            "action_std_decay": 0.984,
-        },
-    },
-    {
-        "name": "freeze_noshaping_240",
-        "description": "ultra-low exploration with movement budget and no explicit energy/action shaping",
-        "overrides": {
-            "train_episodes": 240,
-            "actor_lr": 8.0e-5,
-            "critic_lr": 5.0e-4,
-            "ppo_clip_eps": 0.10,
-            "entropy_coef": 0.0003,
-            "value_loss_coef": 0.82,
-            "reward_energy_weight": 0.00,
-            "reward_action_magnitude_weight": 0.00,
+            "reward_latency_weight": 0.25,
+            "reward_energy_weight": 0.10,
+            "reward_backlog_weight": 0.25,
+            "reward_expired_weight": 1.0,
+            "reward_action_magnitude_weight": 0.05,
             "action_std_init": 0.04,
             "action_std_min": 0.005,
             "action_std_decay": 0.984,
@@ -269,6 +255,8 @@ def _build_eval_overrides(train_payload: dict[str, Any], *, output_tag: str, dev
     return {
         "output_tag": output_tag,
         "use_movement_budget": bool(config.get("use_movement_budget", True)),
+        "trainer_mode": str(config.get("trainer_mode", "hybrid_joint")),
+        "baseline_policy_id": str(config.get("baseline_policy_id", "auto")),
         "device": device,
     }
 
@@ -316,12 +304,14 @@ def _summarize_eval_result(
 ) -> dict[str, Any]:
     config = train_eval["train"]["config"]
     marl_metrics = train_eval["eval"]["marl_metrics"]
-    heuristic_metrics = train_eval["eval"]["heuristic_metrics"]
+    heuristic_metrics = train_eval["eval"].get("baseline_metrics", train_eval["eval"]["heuristic_metrics"])
     return {
         "label": label,
         "output_tag": config["output_tag"],
         "num_uavs": config["num_uavs"],
         "assignment_rule": config["assignment_rule"],
+        "trainer_mode": config.get("trainer_mode", "hybrid_joint"),
+        "baseline_policy_id": train_eval["eval"].get("baseline_policy_id", config.get("baseline_policy_id", "auto")),
         "train_episodes": config["train_episodes"],
         "actor_lr": config["actor_lr"],
         "critic_lr": config["critic_lr"],
@@ -597,6 +587,7 @@ def _make_markdown_summary(
     final_config: dict[str, Any],
     selected_tuning_row: dict[str, Any],
     tuning_seeds: list[int],
+    tuning_eval_seeds: list[int],
     chapter_compare_rows: list[dict[str, Any]],
     assignment_rows: list[dict[str, Any]],
     main_rows: list[dict[str, Any]],
@@ -609,12 +600,20 @@ def _make_markdown_summary(
         "",
         f"- selected_candidate: `{selected_tuning_row['label']}`",
         f"- tuning_seeds: `{', '.join(str(seed) for seed in tuning_seeds)}`",
+        f"- tuning_eval_seeds: `{', '.join(str(seed) for seed in tuning_eval_seeds)}`",
         f"- train_episodes: `{final_config['train_episodes']}`",
         f"- actor_lr / critic_lr: `{final_config['actor_lr']}` / `{final_config['critic_lr']}`",
         f"- clip_ratio: `{final_config['ppo_clip_eps']}`",
         f"- entropy_coef: `{final_config['entropy_coef']}`",
         f"- value_coef: `{final_config['value_loss_coef']}`",
+        f"- reward_completion_weight: `{final_config['reward_completion_weight']}`",
+        f"- reward_cache_hit_weight: `{final_config['reward_cache_hit_weight']}`",
+        f"- reward_latency_weight: `{final_config['reward_latency_weight']}`",
         f"- reward_energy_weight: `{final_config['reward_energy_weight']}`",
+        f"- reward_backlog_weight: `{final_config['reward_backlog_weight']}`",
+        f"- reward_expired_weight: `{final_config['reward_expired_weight']}`",
+        f"- reward_deadline_weight: `{final_config['reward_deadline_weight']}`",
+        f"- reward_reliability_weight: `{final_config['reward_reliability_weight']}`",
         f"- reward_action_magnitude_weight: `{final_config['reward_action_magnitude_weight']}`",
         f"- use_movement_budget: `{final_config['use_movement_budget']}`",
         "",
@@ -675,42 +674,53 @@ def run_paper_experiments(
     *,
     seed: int = 42,
     eval_seed: int = 142,
+    tuning_seeds: list[int] | None = None,
+    tuning_eval_offset: int = TUNING_EVAL_OFFSET,
     eval_episodes: int = 32,
     train_episode_scale: float = 1.0,
+    selected_candidate_name: str | None = None,
     device: str = "auto",
 ) -> dict[str, Any]:
     PAPER_DIR.mkdir(parents=True, exist_ok=True)
     tuning_candidates = _resolve_tuning_candidates(train_episode_scale)
+    resolved_tuning_seeds = _normalize_seeds(tuning_seeds)
+    resolved_tuning_eval_seeds = [int(tuning_seed) + int(tuning_eval_offset) for tuning_seed in resolved_tuning_seeds]
+    reference_seed = resolved_tuning_seeds[0]
+    reference_eval_seed = resolved_tuning_eval_seeds[0]
 
     tuning_raw_rows: list[dict[str, Any]] = []
     tuning_runs: dict[str, dict[str, Any]] = {}
-    for candidate in tuning_candidates:
-        output_tag = f"tune_{candidate['name']}_s{seed}"
-        train_eval = _run_train_eval(
-            seed=seed,
-            eval_seed=eval_seed,
-            eval_episodes=eval_episodes,
-            num_uavs=MAIN_NUM_UAVS,
-            assignment_rule=MAIN_ASSIGNMENT_RULE,
-            output_tag=output_tag,
-            overrides=candidate["overrides"],
-            device=device,
-        )
-        row = _summarize_eval_result(label=candidate["name"], train_eval=train_eval)
-        row["description"] = candidate["description"]
-        row["tuning_seed"] = seed
-        row["eval_seed"] = eval_seed
-        tuning_raw_rows.append(row)
-        tuning_runs[candidate["name"]] = train_eval
+    for tuning_seed, tuning_eval_seed in zip(resolved_tuning_seeds, resolved_tuning_eval_seeds):
+        for candidate in tuning_candidates:
+            output_tag = f"tune_{candidate['name']}_s{tuning_seed}"
+            train_eval = _run_train_eval(
+                seed=tuning_seed,
+                eval_seed=tuning_eval_seed,
+                eval_episodes=eval_episodes,
+                num_uavs=MAIN_NUM_UAVS,
+                assignment_rule=MAIN_ASSIGNMENT_RULE,
+                output_tag=output_tag,
+                overrides=candidate["overrides"],
+                device=device,
+            )
+            row = _summarize_eval_result(label=candidate["name"], train_eval=train_eval)
+            row["description"] = candidate["description"]
+            row["tuning_seed"] = tuning_seed
+            row["eval_seed"] = tuning_eval_seed
+            tuning_raw_rows.append(row)
+            tuning_runs[f"{candidate['name']}@{tuning_seed}"] = train_eval
     tuning_summary_rows = _aggregate_tuning_rows(tuning_raw_rows)
     best_tuning_row = _select_best_candidate(tuning_summary_rows)
-    selected_tuning_row = _select_named_candidate(tuning_summary_rows, name=FINAL_MAIN_CANDIDATE_NAME)
+    resolved_selected_candidate = selected_candidate_name or str(best_tuning_row["label"])
+    selected_tuning_row = _select_named_candidate(tuning_summary_rows, name=resolved_selected_candidate)
+    selected_reference_key = f"{selected_tuning_row['label']}@{reference_seed}"
+    metric_schemas = dict(tuning_runs[selected_reference_key]["eval"].get("metric_schemas", {}))
 
     final_overrides = get_candidate_overrides(str(selected_tuning_row["label"]), train_episode_scale=train_episode_scale)
     final_config = build_marl_config(
         {
             **final_overrides,
-            "seed": seed,
+            "seed": reference_seed,
             "num_uavs": MAIN_NUM_UAVS,
             "assignment_rule": MAIN_ASSIGNMENT_RULE,
             "output_tag": f"paper_{selected_tuning_row['label']}_u{MAIN_NUM_UAVS}",
@@ -720,25 +730,26 @@ def run_paper_experiments(
 
     main_raw_rows: list[dict[str, Any]] = []
     main_training_logs: dict[str, list[list[dict[str, Any]]]] = {"main": []}
-    for num_uavs in (2, 3):
-        output_tag = f"paper_main_s{seed}_u{num_uavs}"
-        train_eval = _run_train_eval(
-            seed=seed,
-            eval_seed=eval_seed,
-            eval_episodes=eval_episodes,
-            num_uavs=num_uavs,
-            assignment_rule=MAIN_ASSIGNMENT_RULE,
-            output_tag=output_tag,
-            overrides=final_overrides,
-            device=device,
-        )
-        row = _summarize_eval_result(label=f"paper_main_u{num_uavs}", train_eval=train_eval)
-        row["description"] = "stage5 main experiment"
-        row["seed"] = seed
-        row["eval_seed"] = eval_seed
-        main_raw_rows.append(row)
-        if num_uavs == MAIN_NUM_UAVS:
-            main_training_logs["main"].append(train_eval["train"]["training_log"])
+    for tuning_seed, tuning_eval_seed in zip(resolved_tuning_seeds, resolved_tuning_eval_seeds):
+        for num_uavs in (2, 3):
+            output_tag = f"paper_main_s{tuning_seed}_u{num_uavs}"
+            train_eval = _run_train_eval(
+                seed=tuning_seed,
+                eval_seed=tuning_eval_seed,
+                eval_episodes=eval_episodes,
+                num_uavs=num_uavs,
+                assignment_rule=MAIN_ASSIGNMENT_RULE,
+                output_tag=output_tag,
+                overrides=final_overrides,
+                device=device,
+            )
+            row = _summarize_eval_result(label=f"paper_main_u{num_uavs}", train_eval=train_eval)
+            row["description"] = "stage5 main experiment"
+            row["seed"] = tuning_seed
+            row["eval_seed"] = tuning_eval_seed
+            main_raw_rows.append(row)
+            if num_uavs == MAIN_NUM_UAVS:
+                main_training_logs["main"].append(train_eval["train"]["training_log"])
     main_summary_rows = _aggregate_rows(
         main_raw_rows,
         group_keys=["num_uavs", "assignment_rule", "label"],
@@ -767,11 +778,11 @@ def run_paper_experiments(
     ablation_settings = [
         {
             "label": "with_reward_shaping",
-            "description": "reward_energy_weight=2.0 and reward_action_magnitude_weight=1.0",
+            "description": "increase reward_energy_weight to at least 0.12 and reward_action_magnitude_weight to at least 0.08",
             "overrides": {
                 **final_overrides,
-                "reward_energy_weight": 2.0,
-                "reward_action_magnitude_weight": 1.0,
+                "reward_energy_weight": max(float(final_overrides.get("reward_energy_weight", 0.0)), 0.12),
+                "reward_action_magnitude_weight": max(float(final_overrides.get("reward_action_magnitude_weight", 0.0)), 0.08),
             },
         },
         {
@@ -783,24 +794,25 @@ def run_paper_experiments(
             },
         },
     ]
-    for ablation in ablation_settings:
-        output_tag = f"paper_{ablation['label']}_s{seed}"
-        train_eval = _run_train_eval(
-            seed=seed,
-            eval_seed=eval_seed,
-            eval_episodes=eval_episodes,
-            num_uavs=MAIN_NUM_UAVS,
-            assignment_rule=MAIN_ASSIGNMENT_RULE,
-            output_tag=output_tag,
-            overrides=ablation["overrides"],
-            device=device,
-        )
-        row = _summarize_eval_result(label=ablation["label"], train_eval=train_eval)
-        row["description"] = ablation["description"]
-        row["seed"] = seed
-        row["eval_seed"] = eval_seed
-        ablation_raw_rows.append(row)
-        ablation_training_logs[str(ablation["label"])].append(train_eval["train"]["training_log"])
+    for tuning_seed, tuning_eval_seed in zip(resolved_tuning_seeds, resolved_tuning_eval_seeds):
+        for ablation in ablation_settings:
+            output_tag = f"paper_{ablation['label']}_s{tuning_seed}"
+            train_eval = _run_train_eval(
+                seed=tuning_seed,
+                eval_seed=tuning_eval_seed,
+                eval_episodes=eval_episodes,
+                num_uavs=MAIN_NUM_UAVS,
+                assignment_rule=MAIN_ASSIGNMENT_RULE,
+                output_tag=output_tag,
+                overrides=ablation["overrides"],
+                device=device,
+            )
+            row = _summarize_eval_result(label=ablation["label"], train_eval=train_eval)
+            row["description"] = ablation["description"]
+            row["seed"] = tuning_seed
+            row["eval_seed"] = tuning_eval_seed
+            ablation_raw_rows.append(row)
+            ablation_training_logs[str(ablation["label"])].append(train_eval["train"]["training_log"])
     ablation_summary_rows = _aggregate_rows(
         ablation_raw_rows,
         group_keys=["label", "description"],
@@ -822,29 +834,30 @@ def run_paper_experiments(
     )
 
     assignment_raw_rows: list[dict[str, Any]] = []
-    for num_uavs in (2, 3):
-        for assignment_rule in ("nearest_uav", "least_loaded_uav"):
-            result = run_sensitive_experiment(
-                seed=seed,
-                episodes=eval_episodes,
-                num_uavs=num_uavs,
-                assignment_rule=assignment_rule,
-            )
-            metrics = result["averaged_metrics"]
-            assignment_raw_rows.append(
-                {
-                    "profile": "sensitive",
-                    "num_uavs": num_uavs,
-                    "assignment_rule": assignment_rule,
-                    "seed": seed,
-                    "completion_rate": _float_or_none(metrics["completion_rate"]),
-                    "average_latency": _float_or_none(metrics["average_latency"]),
-                    "total_energy": _float_or_none(metrics["total_energy"]),
-                    "cache_hit_rate": _float_or_none(metrics["cache_hit_rate"]),
-                    "fairness_uav_load": _float_or_none(metrics["fairness_uav_load"]),
-                    "result_path": str(RESULTS_DIR / f"experiment_sensitive_u{num_uavs}_{assignment_rule}.json"),
-                }
-            )
+    for tuning_seed in resolved_tuning_seeds:
+        for num_uavs in (2, 3):
+            for assignment_rule in ("nearest_uav", "least_loaded_uav"):
+                result = run_sensitive_experiment(
+                    seed=tuning_seed,
+                    episodes=eval_episodes,
+                    num_uavs=num_uavs,
+                    assignment_rule=assignment_rule,
+                )
+                metrics = result["averaged_metrics"]
+                assignment_raw_rows.append(
+                    {
+                        "profile": "sensitive",
+                        "num_uavs": num_uavs,
+                        "assignment_rule": assignment_rule,
+                        "seed": tuning_seed,
+                        "completion_rate": _float_or_none(metrics["completion_rate"]),
+                        "average_latency": _float_or_none(metrics["average_latency"]),
+                        "total_energy": _float_or_none(metrics["total_energy"]),
+                        "cache_hit_rate": _float_or_none(metrics["cache_hit_rate"]),
+                        "fairness_uav_load": _float_or_none(metrics["fairness_uav_load"]),
+                        "result_path": str(stage5_dir() / f"experiment_sensitive_legacy_mobility_only_u{num_uavs}_{assignment_rule}.json"),
+                    }
+                )
     assignment_summary_rows = _aggregate_rows(
         assignment_raw_rows,
         group_keys=["profile", "num_uavs", "assignment_rule"],
@@ -861,15 +874,20 @@ def run_paper_experiments(
         sys.path.insert(0, str(CHAPTER3_DIR))
     from chapter3.experiments import compare_with_chapter4
 
-    chapter_compare = compare_with_chapter4(seed=seed, episodes=1)
-    chapter_compare_raw_rows = [
-        {
-            "seed": seed,
-            "metric": metric,
-            "delta": payload["delta"],
-        }
-        for metric, payload in chapter_compare["comparison"].items()
-    ]
+    chapter_compare_raw_rows: list[dict[str, Any]] = []
+    chapter_compare = None
+    for tuning_seed in resolved_tuning_seeds:
+        chapter_compare = compare_with_chapter4(seed=tuning_seed, episodes=1)
+        chapter_compare_raw_rows.extend(
+            {
+                "seed": tuning_seed,
+                "metric": metric,
+                "delta": payload["delta"],
+            }
+            for metric, payload in chapter_compare["comparison"].items()
+        )
+    if chapter_compare is None:
+        raise RuntimeError("compare_with_chapter4 did not produce any result.")
     chapter_compare_summary_rows = _aggregate_rows(
         chapter_compare_raw_rows,
         group_keys=["metric"],
@@ -897,16 +915,21 @@ def run_paper_experiments(
         {
             "selected_candidate": selected_tuning_row["label"],
             "best_observed_candidate": best_tuning_row["label"],
-            "tuning_seed": seed,
-            "eval_seed": eval_seed,
+            "selected_candidate_override": selected_candidate_name,
+            "tuning_seed": reference_seed,
+            "eval_seed": reference_eval_seed,
+            "tuning_train_seeds": resolved_tuning_seeds,
+            "tuning_eval_seeds": resolved_tuning_eval_seeds,
+            "seed_split_policy": "stage5_multi_seed_tuning_only",
+            "metric_schemas": metric_schemas,
             "rows": tuning_summary_rows,
             "raw_rows": tuning_raw_rows,
         },
     )
-    write_json(main_json, {"rows": main_summary_rows, "raw_rows": main_raw_rows})
-    write_json(ablation_json, {"rows": ablation_summary_rows, "raw_rows": ablation_raw_rows})
-    write_json(assignment_json, {"rows": assignment_summary_rows, "raw_rows": assignment_raw_rows})
-    write_json(compare_json, {"comparison": chapter_compare["comparison"], "rows": chapter_compare_summary_rows, "raw_rows": chapter_compare_raw_rows})
+    write_json(main_json, {"metric_schemas": metric_schemas, "rows": main_summary_rows, "raw_rows": main_raw_rows})
+    write_json(ablation_json, {"metric_schemas": metric_schemas, "rows": ablation_summary_rows, "raw_rows": ablation_raw_rows})
+    write_json(assignment_json, {"metric_schemas": metric_schemas, "rows": assignment_summary_rows, "raw_rows": assignment_raw_rows})
+    write_json(compare_json, {"metric_schemas": metric_schemas, "comparison": chapter_compare["comparison"], "rows": chapter_compare_summary_rows, "raw_rows": chapter_compare_raw_rows})
     _write_csv(tuning_csv, tuning_summary_rows)
     _write_csv(main_csv, main_summary_rows)
     _write_csv(ablation_csv, ablation_summary_rows)
@@ -915,11 +938,15 @@ def run_paper_experiments(
 
     config_notes = {
         "tuning_protocol": {
-            "tuning_seed": seed,
-            "eval_seed": eval_seed,
+            "tuning_seed": reference_seed,
+            "eval_seed": reference_eval_seed,
+            "tuning_train_seeds": resolved_tuning_seeds,
+            "tuning_eval_seeds": resolved_tuning_eval_seeds,
+            "tuning_eval_offset": int(tuning_eval_offset),
             "eval_episodes": eval_episodes,
             "train_episode_scale": train_episode_scale,
             "device_request": device,
+            "selected_candidate_override": selected_candidate_name,
             "selection_rule": "highest completion_rate, then lowest total_energy, then lowest average_latency",
             "main_setting": {
                 "num_uavs": MAIN_NUM_UAVS,
@@ -934,7 +961,7 @@ def run_paper_experiments(
             "ppo_vs_heuristic_settings": ["u2 nearest_uav", "u3 nearest_uav"],
         },
         "ablations": {
-            "with_reward_shaping": "reward_energy_weight=2.0 and reward_action_magnitude_weight=1.0",
+            "with_reward_shaping": "increase reward_energy_weight to at least 0.12 and reward_action_magnitude_weight to at least 0.08",
             "no_movement_budget": "use_movement_budget=False with all other main PPO settings fixed",
             "no_centralized_critic": "not included in this stage to keep a single algorithm implementation",
         },
@@ -944,7 +971,8 @@ def run_paper_experiments(
     summary_text = _make_markdown_summary(
         final_config=final_config,
         selected_tuning_row=selected_tuning_row,
-        tuning_seeds=[seed],
+        tuning_seeds=resolved_tuning_seeds,
+        tuning_eval_seeds=resolved_tuning_eval_seeds,
         chapter_compare_rows=chapter_compare_summary_rows,
         assignment_rows=assignment_summary_rows,
         main_rows=main_summary_rows,
@@ -967,10 +995,15 @@ def run_paper_experiments(
         "selected_final_config": final_config,
         "selected_tuning_candidate": selected_tuning_row["label"],
         "best_observed_tuning_candidate": best_tuning_row["label"],
-        "tuning_seed": seed,
-        "eval_seed": eval_seed,
+        "selected_candidate_override": selected_candidate_name,
+        "tuning_seed": reference_seed,
+        "eval_seed": reference_eval_seed,
+        "tuning_train_seeds": resolved_tuning_seeds,
+        "tuning_eval_seeds": resolved_tuning_eval_seeds,
+        "seed_split_policy": "stage5_multi_seed_tuning_only",
         "train_episode_scale": train_episode_scale,
         "device_request": device,
+        "metric_schemas": metric_schemas,
         "compare_ch4_summary_path": str(compare_json),
         "tuning_summary_path": str(tuning_json),
         "main_matrix_path": str(main_json),

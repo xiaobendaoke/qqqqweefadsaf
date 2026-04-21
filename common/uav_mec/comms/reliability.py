@@ -12,8 +12,20 @@ from __future__ import annotations
 
 import math
 
+from .rates import noise_power_dbm_from_density
 
-def success_probability(*, received_power_dbm: float, noise_power_dbm: float, snr_threshold_db: float) -> float:
+
+def success_probability(
+    *,
+    received_power_dbm: float,
+    bandwidth_hz: float,
+    noise_density_dbm_per_hz: float,
+    snr_threshold_db: float,
+) -> float:
+    noise_power_dbm = noise_power_dbm_from_density(
+        bandwidth_hz=bandwidth_hz,
+        noise_density_dbm_per_hz=noise_density_dbm_per_hz,
+    )
     snr_avg_linear = 10.0 ** ((received_power_dbm - noise_power_dbm) / 10.0)
     snr_threshold_linear = 10.0 ** (snr_threshold_db / 10.0)
     if snr_avg_linear <= 0:

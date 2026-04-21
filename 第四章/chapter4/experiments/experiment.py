@@ -1,40 +1,126 @@
 """第四章启发式实验模块。
 
-该模块负责组织第四章多 UAV 场景下的启发式基线实验，
-包括 default/hard 场景运行、sensitive 布局实验以及结果文件导出。
+该模块现在显式区分两类 baseline：
 
-输入输出与关键参数：
-主要输入包括随机种子、episode 数、场景 profile、UAV 数量和关联规则；
-输出为包含平均指标、episode 日志和实验标识信息的结果字典。
+- `legacy_mobility_only`: 只输出 mobility，卸载/缓存仍由旧环境路径决定
+- `joint_heuristic`: 同时输出 mobility/offloading/caching 的联合启发式策略
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
+from typing import Callable
 
 from common.uav_mec.logging_utils import write_json
 from common.uav_mec.simulation import run_short_experiment
 
 from ..env import Chapter4Env
-from ..policies.mobility_heuristic_multi import select_actions
+from ..policies.joint_heuristic_multi import POLICY_LABEL as JOINT_HEURISTIC_LABEL
+from ..policies.joint_heuristic_multi import select_actions as select_joint_actions
+from ..policies.mobility_heuristic_multi import POLICY_LABEL as LEGACY_POLICY_LABEL
+from ..policies.mobility_heuristic_multi import select_actions as select_legacy_mobility_actions
+from ..results_paths import baseline_results_dir
 
-CHAPTER4_RESULTS = Path(__file__).resolve().parents[2] / "results"
+PolicyFn = Callable[..., list[Any]]
+
+POLICY_REGISTRY: dict[str, dict[str, Any]] = {
+    "legacy_mobility_only": {
+        "label": LEGACY_POLICY_LABEL,
+        "family": "legacy_baseline",
+        "scheduler_mode": "legacy_heuristic",
+        "policy_fn": select_legacy_mobility_actions,
+    },
+    "joint_heuristic": {
+        "label": JOINT_HEURISTIC_LABEL,
+        "family": "joint_baseline",
+        "scheduler_mode": "joint_action",
+        "policy_fn": select_joint_actions,
+    },
+}
 
 
-def run_experiment(*, seed: int, episodes: int, hard: bool, num_uavs: int, assignment_rule: str) -> dict[str, Any]:
-    """运行第四章启发式主实验。
+def recommended_experiment_matrix() -> dict[str, list[dict[str, Any]]]:
+    """返回推荐实验矩阵，供 CLI 和论文脚本复用。"""
+    return {
+        "main_tracks": [
+            {
+                "track": "mobility_only_rl",
+                "description": "legacy RL baseline: only mobility is learned; environment keeps heuristic offloading/cache",
+                "trainer_mode": "legacy_mobility_only",
+                "baseline_policy_id": "legacy_mobility_only",
+            },
+            {
+                "track": "joint_heuristic",
+                "description": "new joint heuristic baseline: mobility + offloading + caching are all chosen heuristically",
+                "policy_id": "joint_heuristic",
+            },
+            {
+                "track": "joint_rl",
+                "description": "new joint RL policy: hybrid MAPPO/PPO with joint actor and centralized critic",
+                "trainer_mode": "hybrid_joint",
+                "baseline_policy_id": "joint_heuristic",
+            },
+        ],
+        "ablations": [
+            {
+                "track": "joint_rl_no_cache",
+                "description": "joint RL with cache branch masked to zero to isolate caching contribution",
+            },
+            {
+                "track": "joint_rl_no_offloading",
+                "description": "joint RL with offloading branch forced to defer to isolate offloading contribution",
+            },
+            {
+                "track": "joint_rl_no_joint_critic_summary",
+                "description": "joint RL with reduced critic summary to measure centralized critic context value",
+            },
+            {
+                "track": "joint_rl_vs_legacy_baseline",
+                "description": "fairness sanity check: report joint RL against both joint heuristic and legacy mobility-only baseline",
+            },
+        ],
+    }
 
-    参数：
-        seed: 实验起始随机种子。
-        episodes: 需要运行的 episode 数量。
-        hard: 是否启用 hard 场景配置。
-        num_uavs: 参与实验的 UAV 数量。
-        assignment_rule: 用户关联 UAV 的规则名称。
 
-    返回：
-        包含平均指标、日志和实验标签的结果字典。
-    """
+def _resolve_policy(policy_id: str) -> dict[str, Any]:
+    if policy_id not in POLICY_REGISTRY:
+        raise KeyError(f"Unknown Chapter 4 policy_id: {policy_id}")
+    return POLICY_REGISTRY[policy_id]
+
+
+def _run_policy_experiment(
+    *,
+    policy_id: str,
+    seed: int,
+    episodes: int,
+    overrides: dict[str, Any],
+) -> dict[str, Any]:
+    policy_spec = _resolve_policy(policy_id)
+    result = run_short_experiment(
+        env_factory=Chapter4Env,
+        policy_fn=policy_spec["policy_fn"],
+        overrides=overrides,
+        episodes=episodes,
+        seed=seed,
+    )
+    result["policy_id"] = policy_id
+    result["policy_label"] = policy_spec["label"]
+    result["policy_family"] = policy_spec["family"]
+    result["scheduler_mode"] = policy_spec["scheduler_mode"]
+    return result
+
+
+def run_experiment(
+    *,
+    seed: int,
+    episodes: int,
+    hard: bool,
+    num_uavs: int,
+    assignment_rule: str,
+    policy_id: str = "legacy_mobility_only",
+) -> dict[str, Any]:
+    """运行第四章主实验，可显式选择 baseline 口径。"""
     overrides = {"num_uavs": num_uavs, "assignment_rule": assignment_rule}
     if hard:
         overrides.update(
@@ -53,39 +139,24 @@ def run_experiment(*, seed: int, episodes: int, hard: bool, num_uavs: int, assig
                 "uav_service_cache_capacity": 2,
             }
         )
-    elif assignment_rule in {"nearest_uav", "least_loaded_uav"} and num_uavs > 1:
-        overrides.update({})
-    result = run_short_experiment(
-        env_factory=Chapter4Env,
-        policy_fn=select_actions,
-        overrides=overrides,
-        episodes=episodes,
-        seed=seed,
-    )
+    result = _run_policy_experiment(policy_id=policy_id, seed=seed, episodes=episodes, overrides=overrides)
     result["chapter"] = "chapter4"
     result["profile"] = "hard" if hard else "default"
     result["assignment_rule"] = assignment_rule
-    output_name = (
-        f"experiment_hard_u{num_uavs}_{assignment_rule}.json"
-        if hard
-        else f"experiment_short_u{num_uavs}_{assignment_rule}.json"
-    )
-    write_json(CHAPTER4_RESULTS / output_name, result)
+    output_name = f"experiment_{result['profile']}_{policy_id}_u{num_uavs}_{assignment_rule}.json"
+    write_json(baseline_results_dir(policy_id) / output_name, result)
     return result
 
 
-def run_sensitive_experiment(*, seed: int, episodes: int, num_uavs: int, assignment_rule: str) -> dict[str, Any]:
-    """运行第四章固定布局的 sensitive 实验。
-
-    参数：
-        seed: 实验起始随机种子。
-        episodes: 需要运行的 episode 数量。
-        num_uavs: 参与实验的 UAV 数量。
-        assignment_rule: 用户关联 UAV 的规则名称。
-
-    返回：
-        包含固定布局实验结果与平均指标的结果字典。
-    """
+def run_sensitive_experiment(
+    *,
+    seed: int,
+    episodes: int,
+    num_uavs: int,
+    assignment_rule: str,
+    policy_id: str = "legacy_mobility_only",
+) -> dict[str, Any]:
+    """运行第四章固定布局 sensitive 实验，可切换 baseline 口径。"""
     fixed_uavs = (
         (130.0, 200.0),
         (220.0, 200.0),
@@ -121,15 +192,9 @@ def run_sensitive_experiment(*, seed: int, episodes: int, num_uavs: int, assignm
         "fixed_uav_positions": fixed_uavs[:num_uavs],
         "fixed_user_positions": fixed_users,
     }
-    result = run_short_experiment(
-        env_factory=Chapter4Env,
-        policy_fn=select_actions,
-        overrides=overrides,
-        episodes=episodes,
-        seed=seed,
-    )
+    result = _run_policy_experiment(policy_id=policy_id, seed=seed, episodes=episodes, overrides=overrides)
     result["chapter"] = "chapter4"
     result["profile"] = "sensitive"
     result["assignment_rule"] = assignment_rule
-    write_json(CHAPTER4_RESULTS / f"experiment_sensitive_u{num_uavs}_{assignment_rule}.json", result)
+    write_json(baseline_results_dir(policy_id) / f"experiment_sensitive_{policy_id}_u{num_uavs}_{assignment_rule}.json", result)
     return result

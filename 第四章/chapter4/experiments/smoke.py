@@ -12,10 +12,11 @@ from common.uav_mec.simulation.result_exporter import export_smoke_result
 
 from ..env import Chapter4Env
 from ..policies.mobility_heuristic_multi import select_actions
+from ..results_paths import LEGACY_RESULTS_DIR
 
 
 def run_smoke(mode: str, *, seed: int = 42, num_uavs: int = 1, assignment_rule: str = "nearest_uav") -> dict[str, Any]:
-    results_dir = "第四章/results"
+    results_dir = str(LEGACY_RESULTS_DIR)
 
     if mode == "import_only":
         payload = {"mode": mode, "status": "ok", "chapter": "chapter4"}

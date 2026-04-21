@@ -15,6 +15,8 @@ from .core.observation import build_observations
 from .core.state import build_uav_state, observation_schema, uav_state_schema
 from .entities import BaseStation, ServiceCatalog, UAVNode, UserEquipment
 from .metrics import MetricTracker
+from .metrics import episode_metric_schema
+from .metrics import step_signal_schema
 from .scheduler import ComputeQueue, TDMAQueue
 from .simulation.episode_log import build_per_uav_metrics, episode_log_schema
 from .simulation.engine import run_step
@@ -37,7 +39,7 @@ class BaseEnv:
         self.pending_tasks = []
         self.completed_tasks = []
         self.expired_tasks = []
-        self.step_metrics_history: list[dict[str, Any]] = []
+        self.step_signal_history: list[dict[str, Any]] = []
         self.energy_breakdown_history: list[dict[str, float]] = []
         self.queue_breakdown_history: list[dict[str, Any]] = []
         self.cache_event_history: list[dict[str, Any]] = []
@@ -57,7 +59,7 @@ class BaseEnv:
         self.pending_tasks = []
         self.completed_tasks = []
         self.expired_tasks = []
-        self.step_metrics_history = []
+        self.step_signal_history = []
         self.energy_breakdown_history = []
         self.queue_breakdown_history = []
         self.cache_event_history = []
@@ -68,6 +70,10 @@ class BaseEnv:
             pending_tasks=[],
             config=self.config,
             current_time=0.0,
+            bs=self.bs,
+            service_catalog=self.service_catalog,
+            tdma_queue=self.tdma_queue,
+            compute_queue=self.compute_queue,
         )
         return {
             "observations": observations,
@@ -78,9 +84,14 @@ class BaseEnv:
             },
         }
 
-    def step(self, actions: list[list[float]] | list[tuple[float, float]]) -> dict[str, Any]:
+    def step(self, actions: Any, *, scheduler_mode: str = "auto") -> dict[str, Any]:
         """推进一个时隙，执行移动、任务调度、指标更新与日志累积。"""
-        normalized_actions = normalize_actions(actions, num_agents=self.config.num_uavs)
+        normalized_actions = normalize_actions(
+            actions,
+            num_agents=self.config.num_uavs,
+            num_service_types=self.config.num_service_types,
+            config=self.config,
+        )
         execution = run_step(
             config=self.config,
             users=self.users,
@@ -96,6 +107,7 @@ class BaseEnv:
             expired_tasks=self.expired_tasks,
             actions=normalized_actions,
             rng=self.rng,
+            scheduler_mode=scheduler_mode,
         )
         self.current_step += 1
         observations = build_observations(
@@ -104,10 +116,14 @@ class BaseEnv:
             pending_tasks=execution.pending_tasks,
             config=self.config,
             current_time=self.current_step * self.config.time_slot_duration,
+            bs=self.bs,
+            service_catalog=self.service_catalog,
+            tdma_queue=self.tdma_queue,
+            compute_queue=self.compute_queue,
         )
         metrics_snapshot = self.metrics.snapshot()
-        step_metrics = self.metrics.step_snapshot()
-        self.step_metrics_history.append({"step": self.current_step, **step_metrics})
+        step_signals = self.metrics.step_signal_snapshot()
+        self.step_signal_history.append({"step": self.current_step, **step_signals})
         self.energy_breakdown_history.append({"step": self.current_step, **execution.energy_breakdown})
         # 队列与负载分解用于论文中的过程分析，因此在 step 级单独保留。
         self.queue_breakdown_history.append(
@@ -134,11 +150,14 @@ class BaseEnv:
             "observations": observations,
             # This reward is only kept for simple baselines and smoke runs.
             # The Chapter 4 paper reward is shaped in the MARL trainer.
-            "rewards": [float(step_metrics["completion_rate"] - 0.05 * step_metrics["average_latency"]) for _ in self.uavs],
+            "rewards": [
+                float(step_signals["step_completion_ratio"] - 0.05 * step_signals["step_average_latency"])
+                for _ in self.uavs
+            ],
             "terminated": terminated,
             "truncated": False,
             "metrics": metrics_snapshot,
-            "step_metrics": step_metrics,
+            "step_signals": step_signals,
             "info": {
                 "time_step": self.current_step,
                 "agent_ids": self.get_agent_ids(),
@@ -149,6 +168,8 @@ class BaseEnv:
                 "num_cache_hits": sum(1 for task in execution.finalized_tasks if task.cache_hit),
                 "num_deadline_violations": sum(1 for task in execution.finalized_tasks if task.total_latency > task.slack),
                 "num_reliability_violations": sum(1 for task in execution.finalized_tasks if task.success_probability < task.required_reliability),
+                "scheduler_mode": execution.scheduler_mode,
+                "action_feedback": execution.action_feedback,
             },
         }
 
@@ -182,6 +203,12 @@ class BaseEnv:
     def get_episode_log_schema(self) -> dict[str, object]:
         return episode_log_schema(self.config, self.get_agent_ids())
 
+    def get_metric_schemas(self) -> dict[str, object]:
+        return {
+            "episode_metrics": episode_metric_schema(),
+            "step_signals": step_signal_schema(),
+        }
+
     def export_episode_log(self, *, episode_index: int, seed: int) -> dict[str, Any]:
         """导出带 schema 的完整 episode 日志，供分析脚本与论文图表复用。"""
         return {
@@ -191,12 +218,13 @@ class BaseEnv:
             "num_uavs": self.config.num_uavs,
             "num_users": self.config.num_users,
             "assignment_rule": self.config.assignment_rule,
+            "metric_schemas": self.get_metric_schemas(),
             "global_metrics": self.metrics.snapshot(),
             "per_uav_metrics": build_per_uav_metrics(self.uavs),
             "action_schema": self.get_action_schema(),
             "observation_schema": self.get_observation_schema(),
             "uav_state_schema": self.get_uav_state_schema(),
-            "step_metrics": self.step_metrics_history,
+            "step_signals": self.step_signal_history,
             "energy_breakdown": {
                 "episode_totals": self.metrics.energy_breakdown_snapshot(),
                 "step_breakdown": self.energy_breakdown_history,

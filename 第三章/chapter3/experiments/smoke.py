@@ -48,7 +48,9 @@ def run_smoke(mode: str, *, seed: int = 42) -> dict[str, Any]:
         payload = {
             "mode": mode,
             "status": "ok",
+            "schema_version": env.get_observation_schema()["schema_version"],
             "observation_dim": len(reset_result["observations"][0]),
+            "config_snapshot": env.config.to_dict(),
             "required_task_fields": ["service_type", "slack", "deadline", "required_reliability", "success_probability"],
         }
         export_smoke_result(results_dir, mode, payload)
@@ -56,8 +58,20 @@ def run_smoke(mode: str, *, seed: int = 42) -> dict[str, Any]:
 
     if mode == "comms_contract":
         rx = received_power_dbm(tx_power_dbm=20.0, carrier_frequency_hz=2.4e9, distance_m=120.0)
-        prob = success_probability(received_power_dbm=rx, noise_power_dbm=-90.0, snr_threshold_db=8.0)
-        payload = {"mode": mode, "status": "ok", "received_power_dbm": rx, "success_probability": prob}
+        prob = success_probability(
+            received_power_dbm=rx,
+            bandwidth_hz=env.config.bandwidth_edge_hz,
+            noise_density_dbm_per_hz=env.config.noise_density_dbm_per_hz,
+            snr_threshold_db=env.config.snr_threshold_db,
+        )
+        payload = {
+            "mode": mode,
+            "status": "ok",
+            "schema_version": env.get_metric_schemas()["step_signals"]["schema_version"],
+            "config_snapshot": env.config.to_dict(),
+            "received_power_dbm": rx,
+            "success_probability": prob,
+        }
         export_smoke_result(results_dir, mode, payload)
         return payload
 
@@ -96,6 +110,9 @@ def run_smoke(mode: str, *, seed: int = 42) -> dict[str, Any]:
         payload = {
             "mode": mode,
             "status": "ok",
+            "schema_version": env.get_metric_schemas()["episode_metrics"]["schema_version"],
+            "observation_dim": len(reset_result["observations"][0]),
+            "config_snapshot": env.config.to_dict(),
             "decision_target": decision.target,
             "decision_total_latency": decision.total_latency,
             "decision_success_probability": decision.success_probability,
@@ -110,6 +127,9 @@ def run_smoke(mode: str, *, seed: int = 42) -> dict[str, Any]:
         payload = {
             "mode": mode,
             "status": "ok",
+            "schema_version": env.get_metric_schemas()["episode_metrics"]["schema_version"],
+            "observation_dim": len(reset_result["observations"][0]),
+            "config_snapshot": env.config.to_dict(),
             "step_result_keys": sorted(step_result.keys()),
             "metrics": step_result["metrics"],
             "info": step_result["info"],
@@ -130,6 +150,9 @@ def run_smoke(mode: str, *, seed: int = 42) -> dict[str, Any]:
         payload = {
             "mode": mode,
             "status": "ok",
+            "schema_version": env.get_metric_schemas()["episode_metrics"]["schema_version"],
+            "observation_dim": len(reset_result["observations"][0]),
+            "config_snapshot": env.config.to_dict(),
             "summary": env.export_episode_summary(),
             "last_info": last_step["info"] if last_step else {},
         }

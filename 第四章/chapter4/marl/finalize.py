@@ -24,18 +24,21 @@ from common.uav_mec.plot_i18n import (
 )
 
 from ..experiments import run_sensitive_experiment
+from ..results_paths import stage5_dir
+from ..results_paths import stage6_dir
 from .eval import run_marl_evaluation
 from .train import run_marl_training
 
 
-RESULTS_DIR = Path(__file__).resolve().parents[2] / "results"
-FINAL_DIR = RESULTS_DIR / "paper_stage6"
+FINAL_DIR_NAME = "paper_stage6_v2"
+FINAL_DIR = stage6_dir(FINAL_DIR_NAME)
 TABLES_DIR = FINAL_DIR / "tables"
 FIGURES_DIR = FINAL_DIR / "figures"
 WORKSPACE_ROOT = Path(__file__).resolve().parents[3]
 CHAPTER3_DIR = WORKSPACE_ROOT / "第三章"
 
-DEFAULT_SEEDS = [42, 52, 62]
+DEFAULT_SEEDS = [72, 82, 92]
+FINAL_EVAL_OFFSET = 100
 FINAL_MAIN_CONFIG: dict[str, Any] = {
     "train_episodes": 240,
     "actor_lr": 8.0e-5,
@@ -43,8 +46,11 @@ FINAL_MAIN_CONFIG: dict[str, Any] = {
     "ppo_clip_eps": 0.10,
     "entropy_coef": 0.0003,
     "value_loss_coef": 0.82,
-    "reward_energy_weight": 0.00,
-    "reward_action_magnitude_weight": 0.00,
+    "reward_latency_weight": 0.25,
+    "reward_energy_weight": 0.10,
+    "reward_backlog_weight": 0.25,
+    "reward_expired_weight": 1.0,
+    "reward_action_magnitude_weight": 0.05,
     "action_std_init": 0.04,
     "action_std_min": 0.005,
     "action_std_decay": 0.984,
@@ -54,30 +60,6 @@ MAIN_SETTINGS = [
     {"num_uavs": 2, "assignment_rule": "nearest_uav"},
     {"num_uavs": 3, "assignment_rule": "nearest_uav"},
 ]
-ABLATION_SETTINGS = [
-    {
-        "label": "main",
-        "description": "fixed freeze_noshaping_240 PPO configuration",
-        "overrides": dict(FINAL_MAIN_CONFIG),
-    },
-    {
-        "label": "with_reward_shaping",
-        "description": "reward_energy_weight=2.0 and reward_action_magnitude_weight=1.0",
-        "overrides": {
-            **FINAL_MAIN_CONFIG,
-            "reward_energy_weight": 2.0,
-            "reward_action_magnitude_weight": 1.0,
-        },
-    },
-    {
-        "label": "no_movement_budget",
-        "description": "use_movement_budget=False with all other settings fixed",
-        "overrides": {
-            **FINAL_MAIN_CONFIG,
-            "use_movement_budget": False,
-        },
-    },
-]
 
 ENERGY_COMPONENTS = [
     "uav_move_energy",
@@ -86,6 +68,7 @@ ENERGY_COMPONENTS = [
     "ue_uplink_energy",
     "bs_compute_energy",
     "relay_fetch_energy",
+    "bs_fetch_tx_energy",
 ]
 BASE_METRICS = [
     "completion_rate",
@@ -100,6 +83,61 @@ BASE_METRICS = [
     "reliability_violation_rate",
     *ENERGY_COMPONENTS,
 ]
+
+
+def _final_output_dirs(dir_name: str = FINAL_DIR_NAME) -> tuple[Path, Path, Path]:
+    final_dir = stage6_dir(dir_name)
+    return final_dir, final_dir / "tables", final_dir / "figures"
+
+
+def _resolve_main_config(selected_candidate_name: str | None = None) -> tuple[dict[str, Any], str, str | None]:
+    if selected_candidate_name:
+        if selected_candidate_name == "freeze_noshaping_240":
+            return dict(FINAL_MAIN_CONFIG), "freeze_energy2_240", selected_candidate_name
+        from .paper import get_candidate_overrides
+
+        return dict(get_candidate_overrides(selected_candidate_name)), selected_candidate_name, selected_candidate_name
+
+    stage5_summary = stage5_dir() / "tuning_summary.json"
+    candidate_name = ""
+    if stage5_summary.exists():
+        payload = json.loads(stage5_summary.read_text(encoding="utf-8"))
+        candidate_name = str(payload.get("selected_candidate") or "")
+        if candidate_name:
+            if candidate_name == "freeze_noshaping_240":
+                return dict(FINAL_MAIN_CONFIG), "freeze_energy2_240", None
+            from .paper import get_candidate_overrides
+
+            return dict(get_candidate_overrides(candidate_name)), candidate_name, None
+
+    return dict(FINAL_MAIN_CONFIG), "freeze_energy2_240", None
+
+
+def _build_ablation_settings(main_config: dict[str, Any], *, main_label: str) -> list[dict[str, Any]]:
+    return [
+        {
+            "label": "main",
+            "description": f"main PPO configuration from candidate `{main_label}`",
+            "overrides": dict(main_config),
+        },
+        {
+            "label": "with_reward_shaping",
+            "description": "increase reward_energy_weight to at least 0.12 and reward_action_magnitude_weight to at least 0.08",
+            "overrides": {
+                **dict(main_config),
+                "reward_energy_weight": max(float(main_config.get("reward_energy_weight", 0.0)), 0.12),
+                "reward_action_magnitude_weight": max(float(main_config.get("reward_action_magnitude_weight", 0.0)), 0.08),
+            },
+        },
+        {
+            "label": "no_movement_budget",
+            "description": "use_movement_budget=False with all other settings fixed",
+            "overrides": {
+                **dict(main_config),
+                "use_movement_budget": False,
+            },
+        },
+    ]
 
 
 def _load_matplotlib() -> Any:
@@ -284,12 +322,13 @@ def _run_main_multiseed(
     *,
     eval_episodes: int,
     train_episodes: int,
+    main_config: dict[str, Any],
     device: str = "auto",
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, list[list[dict[str, Any]]]]]:
     raw_rows: list[dict[str, Any]] = []
     training_logs: dict[str, list[list[dict[str, Any]]]] = {"main": []}
     for seed in seeds:
-        eval_seed = seed + 100
+        eval_seed = seed + FINAL_EVAL_OFFSET
         for setting in MAIN_SETTINGS:
             num_uavs = int(setting["num_uavs"])
             assignment_rule = str(setting["assignment_rule"])
@@ -301,7 +340,7 @@ def _run_main_multiseed(
                 assignment_rule=assignment_rule,
                 output_tag=output_tag,
                 eval_episodes=eval_episodes,
-                overrides={**dict(FINAL_MAIN_CONFIG), "train_episodes": int(train_episodes)},
+                overrides={**dict(main_config), "train_episodes": int(train_episodes)},
                 device=device,
             )
             marl_metrics = train_eval["eval"]["marl_metrics"]
@@ -343,13 +382,14 @@ def _run_ablation_multiseed(
     *,
     eval_episodes: int,
     train_episodes: int,
+    ablation_settings: list[dict[str, Any]],
     device: str = "auto",
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, list[list[dict[str, Any]]]]]:
     raw_rows: list[dict[str, Any]] = []
     training_logs: dict[str, list[list[dict[str, Any]]]] = {}
     for seed in seeds:
-        eval_seed = seed + 100
-        for ablation in ABLATION_SETTINGS:
+        eval_seed = seed + FINAL_EVAL_OFFSET
+        for ablation in ablation_settings:
             label = str(ablation["label"])
             output_tag = f"final_{label}_s{seed}"
             train_eval = _run_train_eval(
@@ -473,7 +513,7 @@ def _plot_training_behavior_overview(
         ("average_latency", "平均时延"),
         ("total_energy", "总能耗"),
         ("mean_step_action_magnitude", "平均动作幅度"),
-        ("mean_step_energy_norm", "平均归一化步能耗"),
+        ("mean_step_energy", "平均步系统能耗"),
     ]
 
     for axis, (metric, title) in zip(axes.flat, panels):
@@ -538,6 +578,7 @@ def _plot_energy_breakdown(main_rows: list[dict[str, Any]], output_path: Path) -
         "ue_uplink_energy": "#F4A261",
         "bs_compute_energy": "#E76F51",
         "relay_fetch_energy": "#2A9D8F",
+        "bs_fetch_tx_energy": "#6D597A",
     }
     label_map = {
         "uav_move_energy": ENERGY_COMPONENT_LABEL_CN["uav_move_energy"],
@@ -546,6 +587,7 @@ def _plot_energy_breakdown(main_rows: list[dict[str, Any]], output_path: Path) -
         "ue_uplink_energy": ENERGY_COMPONENT_LABEL_CN["ue_uplink_energy"],
         "bs_compute_energy": ENERGY_COMPONENT_LABEL_CN["bs_compute_energy"],
         "relay_fetch_energy": ENERGY_COMPONENT_LABEL_CN["relay_fetch_energy"],
+        "bs_fetch_tx_energy": ENERGY_COMPONENT_LABEL_CN["bs_fetch_tx_energy"],
     }
 
     for axis, row in zip(axes, main_rows):
@@ -998,33 +1040,50 @@ def run_final_paper_package(
     seeds: list[int] | None = None,
     train_episodes: int = 240,
     eval_episodes: int = 32,
+    selected_candidate_name: str | None = None,
+    output_dir_name: str = FINAL_DIR_NAME,
     device: str = "auto",
 ) -> dict[str, Any]:
     seeds = list(seeds or DEFAULT_SEEDS)
-    FINAL_DIR.mkdir(parents=True, exist_ok=True)
-    TABLES_DIR.mkdir(parents=True, exist_ok=True)
-    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+    final_dir, tables_dir, figures_dir = _final_output_dirs(output_dir_name)
+    final_dir.mkdir(parents=True, exist_ok=True)
+    tables_dir.mkdir(parents=True, exist_ok=True)
+    figures_dir.mkdir(parents=True, exist_ok=True)
+    main_config, main_label, resolved_override = _resolve_main_config(selected_candidate_name)
+    ablation_settings = _build_ablation_settings(main_config, main_label=main_label)
 
     compare_raw, compare_agg = _run_compare_ch4(seeds, episodes=eval_episodes)
     assignment_raw, assignment_agg = _run_assignment_multiseed(seeds, eval_episodes=eval_episodes)
     main_raw, main_agg, main_training_logs = _run_main_multiseed(
-        seeds, eval_episodes=eval_episodes, train_episodes=train_episodes, device=device
+        seeds,
+        eval_episodes=eval_episodes,
+        train_episodes=train_episodes,
+        main_config=main_config,
+        device=device,
     )
     ablation_raw, ablation_agg, ablation_training_logs = _run_ablation_multiseed(
-        seeds, eval_episodes=eval_episodes, train_episodes=train_episodes, device=device
+        seeds,
+        eval_episodes=eval_episodes,
+        train_episodes=train_episodes,
+        ablation_settings=ablation_settings,
+        device=device,
     )
     per_uav_diag = _collect_per_uav_diagnostics(main_raw)
+    metric_schemas: dict[str, Any] = {}
+    if main_raw:
+        sample_eval = _load_json(str(main_raw[0]["eval_path"]))
+        metric_schemas = dict(sample_eval.get("metric_schemas", {}))
 
-    training_return_path = FIGURES_DIR / "final_training_return_curve.png"
-    training_energy_path = FIGURES_DIR / "final_training_energy_curve.png"
-    training_overview_path = FIGURES_DIR / "final_training_behavior_overview.png"
-    ppo_vs_heuristic_path = FIGURES_DIR / "final_ppo_vs_heuristic.png"
-    assignment_path = FIGURES_DIR / "final_assignment_comparison.png"
-    energy_breakdown_path = FIGURES_DIR / "final_energy_breakdown.png"
-    compare_delta_path = FIGURES_DIR / "final_compare_ch4_delta.png"
-    per_uav_path = FIGURES_DIR / "final_per_uav_diagnostics.png"
-    ablation_path = FIGURES_DIR / "final_ablation_energy.png"
-    summary_panel_path = FIGURES_DIR / "final_comparison_bars.png"
+    training_return_path = figures_dir / "final_training_return_curve.png"
+    training_energy_path = figures_dir / "final_training_energy_curve.png"
+    training_overview_path = figures_dir / "final_training_behavior_overview.png"
+    ppo_vs_heuristic_path = figures_dir / "final_ppo_vs_heuristic.png"
+    assignment_path = figures_dir / "final_assignment_comparison.png"
+    energy_breakdown_path = figures_dir / "final_energy_breakdown.png"
+    compare_delta_path = figures_dir / "final_compare_ch4_delta.png"
+    per_uav_path = figures_dir / "final_per_uav_diagnostics.png"
+    ablation_path = figures_dir / "final_ablation_energy.png"
+    summary_panel_path = figures_dir / "final_comparison_bars.png"
     training_logs = {
         "main": ablation_training_logs["main"],
         "with_reward_shaping": ablation_training_logs["with_reward_shaping"],
@@ -1053,6 +1112,10 @@ def run_final_paper_package(
     _plot_ablation_energy(ablation_agg, ablation_path)
     _plot_summary_panel(main_agg, assignment_agg, ablation_agg, summary_panel_path)
 
+    global TABLES_DIR
+    global FIGURES_DIR
+    TABLES_DIR = tables_dir
+    FIGURES_DIR = figures_dir
     tables = _write_tables(
         compare_rows=compare_agg,
         assignment_rows=assignment_agg,
@@ -1061,21 +1124,30 @@ def run_final_paper_package(
     )
 
     package_manifest = {
-        "final_main_config": {**FINAL_MAIN_CONFIG, "train_episodes": int(train_episodes)},
+        "final_main_config": {**main_config, "train_episodes": int(train_episodes)},
+        "selected_main_candidate": main_label,
+        "selected_candidate_override": resolved_override,
+        "seed_split_policy": "stage5_tuning_vs_stage6_final_disjoint",
+        "tuning_train_seeds": [42, 52, 62],
+        "tuning_eval_seeds": [142, 152, 162],
+        "final_train_seeds": seeds,
+        "final_eval_seeds": [int(seed + FINAL_EVAL_OFFSET) for seed in seeds],
         "seeds": seeds,
         "train_episodes": int(train_episodes),
         "eval_episodes": eval_episodes,
+        "output_dir_name": output_dir_name,
         "device_request": device,
+        "metric_schemas": metric_schemas,
         "one_click_commands": [
             "python -m venv .venv",
             ".\\.venv\\Scripts\\python.exe -m pip install -r 第四章/requirements.txt",
             ".\\.venv\\Scripts\\python.exe 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42",
-            f".\\.venv\\Scripts\\python.exe 第四章/run_finalize_paper.py --seeds 42 52 62 --eval-episodes {int(eval_episodes)} --train-episodes {int(train_episodes)} --device auto",
+            f".\\.venv\\Scripts\\python.exe 第四章/run_finalize_paper.py --seeds {' '.join(str(seed) for seed in seeds)} --eval-episodes {int(eval_episodes)} --train-episodes {int(train_episodes)} --output-dir-name {output_dir_name} --device auto",
         ],
         "result_directories": {
-            "stage5": str(RESULTS_DIR / "paper_stage5"),
-            "stage6": str(FINAL_DIR),
-            "root_results": str(RESULTS_DIR),
+            "stage5": str(stage5_dir()),
+            "stage6": str(final_dir),
+            "root_results": str(stage6_dir().parents[1]),
         },
         "tables": tables,
         "figures": {
@@ -1092,25 +1164,34 @@ def run_final_paper_package(
         },
     }
 
-    write_json(FINAL_DIR / "compare_ch4_multiseed_raw.json", {"rows": compare_raw})
-    write_json(FINAL_DIR / "compare_ch4_multiseed_summary.json", {"rows": compare_agg})
-    write_json(FINAL_DIR / "assignment_multiseed_raw.json", {"rows": assignment_raw})
-    write_json(FINAL_DIR / "assignment_multiseed_summary.json", {"rows": assignment_agg})
-    write_json(FINAL_DIR / "ppo_vs_heuristic_multiseed_raw.json", {"rows": main_raw})
-    write_json(FINAL_DIR / "ppo_vs_heuristic_multiseed_summary.json", {"rows": main_agg})
-    write_json(FINAL_DIR / "ablation_multiseed_raw.json", {"rows": ablation_raw})
-    write_json(FINAL_DIR / "ablation_multiseed_summary.json", {"rows": ablation_agg})
-    write_json(FINAL_DIR / "reproducibility_package.json", package_manifest)
+    write_json(final_dir / "compare_ch4_multiseed_raw.json", {"rows": compare_raw})
+    write_json(final_dir / "compare_ch4_multiseed_summary.json", {"rows": compare_agg})
+    write_json(final_dir / "assignment_multiseed_raw.json", {"rows": assignment_raw})
+    write_json(final_dir / "assignment_multiseed_summary.json", {"rows": assignment_agg})
+    write_json(final_dir / "ppo_vs_heuristic_multiseed_raw.json", {"rows": main_raw})
+    write_json(final_dir / "ppo_vs_heuristic_multiseed_summary.json", {"rows": main_agg})
+    write_json(final_dir / "ablation_multiseed_raw.json", {"rows": ablation_raw})
+    write_json(final_dir / "ablation_multiseed_summary.json", {"rows": ablation_agg})
+    write_json(final_dir / "reproducibility_package.json", package_manifest)
 
     return {
-        "final_main_config": {**FINAL_MAIN_CONFIG, "train_episodes": int(train_episodes)},
+        "final_main_config": {**main_config, "train_episodes": int(train_episodes)},
+        "selected_main_candidate": main_label,
+        "selected_candidate_override": resolved_override,
+        "seed_split_policy": "stage5_tuning_vs_stage6_final_disjoint",
+        "tuning_train_seeds": [42, 52, 62],
+        "tuning_eval_seeds": [142, 152, 162],
+        "final_train_seeds": seeds,
+        "final_eval_seeds": [int(seed + FINAL_EVAL_OFFSET) for seed in seeds],
         "seeds": seeds,
         "train_episodes": int(train_episodes),
+        "output_dir_name": output_dir_name,
         "device_request": device,
-        "compare_ch4_summary_path": str(FINAL_DIR / "compare_ch4_multiseed_summary.json"),
-        "assignment_summary_path": str(FINAL_DIR / "assignment_multiseed_summary.json"),
-        "ppo_vs_heuristic_summary_path": str(FINAL_DIR / "ppo_vs_heuristic_multiseed_summary.json"),
-        "ablation_summary_path": str(FINAL_DIR / "ablation_multiseed_summary.json"),
+        "metric_schemas": metric_schemas,
+        "compare_ch4_summary_path": str(final_dir / "compare_ch4_multiseed_summary.json"),
+        "assignment_summary_path": str(final_dir / "assignment_multiseed_summary.json"),
+        "ppo_vs_heuristic_summary_path": str(final_dir / "ppo_vs_heuristic_multiseed_summary.json"),
+        "ablation_summary_path": str(final_dir / "ablation_multiseed_summary.json"),
         "tables": tables,
         "figures": {
             "training_return_curve": str(training_return_path),
@@ -1124,5 +1205,5 @@ def run_final_paper_package(
             "ablation_energy": str(ablation_path),
             "summary_panel": str(summary_panel_path),
         },
-        "package_manifest_path": str(FINAL_DIR / "reproducibility_package.json"),
+        "package_manifest_path": str(final_dir / "reproducibility_package.json"),
     }

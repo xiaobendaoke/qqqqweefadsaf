@@ -44,6 +44,7 @@ class Task:
     uav_compute_energy: float = 0.0
     bs_compute_energy: float = 0.0
     relay_fetch_energy: float = 0.0
+    bs_fetch_tx_energy: float = 0.0
 
     def mark_result(
         self,
@@ -70,6 +71,7 @@ class Task:
         uav_compute_energy: float = 0.0,
         bs_compute_energy: float = 0.0,
         relay_fetch_energy: float = 0.0,
+        bs_fetch_tx_energy: float = 0.0,
     ) -> None:
         """将一次卸载决策回写到任务对象，形成统一日志记录。"""
         self.execution_target = execution_target
@@ -94,3 +96,4 @@ class Task:
         self.uav_compute_energy = uav_compute_energy
         self.bs_compute_energy = bs_compute_energy
         self.relay_fetch_energy = relay_fetch_energy
+        self.bs_fetch_tx_energy = bs_fetch_tx_energy

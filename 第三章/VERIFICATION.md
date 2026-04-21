@@ -1,273 +1,96 @@
 # 第三章验证记录
 
-## 第一阶段
+> 当前真值以 `第三章/results/verification_refresh.json` 为准。本文件只保留当前代码版本下的可复跑验证摘要，不再把历史手填数字当作当前论文引用来源。文中的 `MPC shell` 指基于候选动作滚动评分的 look-ahead heuristic shell，而非标准优化求解式 MPC。
 
-### 已运行命令
+## 当前验证命令
 
 ```powershell
-python 第三章/run_smoke.py --mode import_only
-python 第三章/run_smoke.py --mode env_step
-python 第三章/run_smoke.py --mode episode
-python 第三章/run_smoke.py --mode task_contract
-python 第三章/run_smoke.py --mode comms_contract
-python 第三章/run_smoke.py --mode scheduler_contract
+.\.venv\Scripts\python.exe 第三章/run_refresh_verification.py
 ```
 
-### 关键结果
+该命令会统一刷新：
 
-- `import_only`: 通过
-- `env_step`: 通过
-  - `completion_rate=1.0`
-  - `average_latency=0.29126824754856045`
-  - `cache_hit_rate=1.0`
-- `episode`: 通过
-  - `completion_rate=1.0`
-  - `average_latency=0.2924221163699376`
-  - `total_energy=55.9523399752047`
-- `task_contract`: 通过
-  - `observation_dim=17`
-- `comms_contract`: 通过
-  - `success_probability=0.990863216100025`
-- `scheduler_contract`: 通过
+- smoke 验证
+- 单 UAV baseline 实验
+- `compare-ch4` 退化一致性验证
+
+当前刷新结果文件：
+
+- `第三章/results/verification_refresh.json`
+
+## Smoke 当前结果
+
+当前 smoke 子项：
+
+- `import_only`
+- `task_contract`
+- `comms_contract`
+- `scheduler_contract`
+- `env_step`
+- `episode`
+
+关键结果：
+
+- `task_contract`
+  - `schema_version=observation.v2`
+  - `observation_dim=56`
+- `comms_contract`
+  - `success_probability=0.9996346529295138`
+- `scheduler_contract`
   - `decision_target=bs`
-  - `decision_total_latency=0.3032819491836381`
-
-### 结果文件
-
-- `第三章/results/smoke_import_only.json`
-- `第三章/results/smoke_env_step.json`
-- `第三章/results/smoke_episode.json`
-- `第三章/results/smoke_task_contract.json`
-- `第三章/results/smoke_comms_contract.json`
-- `第三章/results/smoke_scheduler_contract.json`
-
-## 第一阶段 1.5 修正
-
-### 新增运行命令
-
-```powershell
-python 第三章/run_experiment.py --episodes 1 --profile default --seed 42
-python 第三章/run_experiment.py --episodes 1 --profile hard --seed 42
-python 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42
-```
-
-### 关键结果
-
-- `default`:
+  - `decision_total_latency=0.17511975507332653`
+- `env_step`
   - `completion_rate=1.0`
-  - `cache_hit_rate=0.9166666666666666`
-- `hard`:
-  - `completion_rate=0.0`
-  - `cache_hit_rate=0.7291666666666666`
-  - `deadline_violation_rate=0.9895833333333334`
-  - `reliability_violation_rate=0.7395833333333334`
-- `compare-ch4`:
-  - 第三章与第四章 `NUM_UAVS=1` 指标逐项一致
-
-### 新增结果文件
-
-- `第三章/results/experiment_short.json`
-- `第三章/results/experiment_hard.json`
-- `第三章/results/experiment_compare_ch3_ch4.json`
-
-## 第二阶段
-
-### 复核命令
-
-```powershell
-python 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42
-```
-
-### 复核结果
-
-- `第四章(NUM_UAVS=1)` 与 `第三章` 指标仍一致
-- 各项对照 `delta=0.0`
-
-## 第二阶段 2.5
-
-### 复核命令
-
-```powershell
-python 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42
-```
-
-### 复核结果
-
-- `compare-ch4` 跨章节导入在当前工作目录下稳定运行
-- `第四章(NUM_UAVS=1)` 与 `第三章` 仍保持一致
-
-## 第三阶段前置整理
-
-### 复核命令
-
-```powershell
-python 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42
-```
-
-### 复核结果
-
-- `compare-ch4` 继续直接成功运行
-- 第三章与第四章 `NUM_UAVS=1` 的主指标保持逐项一致
-- `comparison` 中除 `fairness_uav_load=null` 外，其余指标 `delta=0.0`
-
-### 结果文件
-
-- `第三章/results/experiment_compare_ch3_ch4.json`
-
-## 第六阶段补完：MPC shell
-
-### 新增运行命令
-
-```powershell
-.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --policy mpc --seed 42
-.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42
-```
-
-### 关键结果
-
-- `mpc`:
+  - `average_latency=0.3321061383970643`
+- `episode`
   - `completion_rate=1.0`
-  - `average_latency=0.28992447022728784`
-  - `total_energy=216.22837538036669`
-  - `cache_hit_rate=0.9166666666666666`
-- `compare-ch4`:
-  - 第三章与第四章 `NUM_UAVS=1` 逐项对照继续成立
-  - `completion_rate / average_latency / total_energy delta=0.0`
+  - `average_latency=0.4002087360101324`
+  - `total_energy=2.9462380689981567`
 
-### 新增结果文件
+## 实验当前结果
 
-- `第三章/results/experiment_short_mpc.json`
+`run_refresh_verification.py` 当前覆盖的单 UAV 实验包括：
 
-## 第六阶段补完：单 UAV 轨迹日志与路径图
+- `heuristic`
+- `mpc`
+- `fixed_point`
+- `fixed_patrol`
 
-### 新增运行命令
+对应当前结果摘要：
 
-```powershell
-.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --policy heuristic --seed 42
-.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --policy mpc --seed 42
-.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42
-```
+- `heuristic`
+  - `total_energy=2.9462380689981567`
+- `mpc`
+  - `total_energy=2.9462380689981567`
+- `fixed_point`
+  - `total_energy=7.29604341109928`
+- `fixed_patrol`
+  - `total_energy=547.1281479765431`
 
-### 关键结果
+若需要更细的 episode 日志、轨迹导出和能耗分解，请直接查看 `verification_refresh.json` 中的 `experiments` 字段。
 
-- `heuristic`:
-  - `completion_rate=1.0`
-  - `average_latency=0.2898769422422626`
-  - `total_energy=56.18071535557137`
-  - 已生成单 UAV 轨迹 `json/png`
-- `mpc`:
-  - `completion_rate=1.0`
-  - `average_latency=0.28992447022728784`
-  - `total_energy=216.22837538036669`
-  - 已生成单 UAV 轨迹 `json/png`
-- `compare-ch4`:
-  - 第三章与第四章 `NUM_UAVS=1` 逐项对照继续成立
-  - `completion_rate / average_latency / total_energy delta=0.0`
+## Compare-Ch4 当前结果
 
-### 新增结果文件
+当前 `compare-ch4` 由 `verification_refresh.json.compare_ch4` 记录，验证的是：
 
-- `第三章/results/trajectories/trajectory_default_heuristic_seed42_ep0.json`
-- `第三章/results/trajectories/trajectory_default_heuristic_seed42_ep0.png`
-- `第三章/results/trajectories/trajectory_default_mpc_seed42_ep0.json`
-- `第三章/results/trajectories/trajectory_default_mpc_seed42_ep0.png`
+- 第三章 heuristic shared 口径
+- 第四章 `NUM_UAVS=1` 退化口径
 
-## 第六阶段整理：长轨迹与论文基线
+当前结论：
 
-### 新增运行命令
+- `completion_rate delta = 0.0`
+- `average_latency delta = 0.0`
+- `total_energy delta = 0.0`
+- `cache_hit_rate delta = 0.0`
+- `fairness_uav_load delta = null`
+- 新增能耗拆分指标也保持逐项一致
 
-```powershell
-.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --policy heuristic --steps-per-episode 20 --seed 42
-.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --policy mpc --steps-per-episode 20 --seed 42
-.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --policy fixed_point --steps-per-episode 20 --seed 42
-.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --policy fixed_patrol --steps-per-episode 20 --seed 42
-.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42
-```
+当前对齐样例：
 
-### 关键结果
+- `chapter3 total_energy = 2.9462380689981567`
+- `chapter4 total_energy = 2.9462380689981567`
 
-- `heuristic (20 steps)`:
-  - `completion_rate=1.0`
-  - `average_latency=0.276176731772956`
-  - `total_energy=105.73552009918245`
-- `mpc (20 steps)`:
-  - `completion_rate=1.0`
-  - `average_latency=0.27634236549410374`
-  - `total_energy=459.9450803374705`
-  - 路径由直角折线改为连续候选 + 惯性平滑后的弯曲轨迹
-- `fixed_point (20 steps)`:
-  - `completion_rate=1.0`
-  - `average_latency=0.2761164399848625`
-  - `total_energy=0.5843118416494011`
-- `fixed_patrol (20 steps)`:
-  - `completion_rate=1.0`
-  - `average_latency=0.27609754970239925`
-  - `total_energy=540.4162595424357`
-- `compare-ch4`:
-  - 第三章与第四章 `NUM_UAVS=1` 逐项对照继续成立
-  - `completion_rate / average_latency / total_energy delta=0.0`
+## 引用规则
 
-### 新增结果文件
-
-- `第三章/results/experiment_default_heuristic_s20.json`
-- `第三章/results/experiment_default_mpc_s20.json`
-- `第三章/results/experiment_default_fixed_point_s20.json`
-- `第三章/results/experiment_default_fixed_patrol_s20.json`
-- `第三章/results/trajectories/trajectory_default_s20_heuristic_seed42_ep0.png`
-- `第三章/results/trajectories/trajectory_default_s20_mpc_seed42_ep0.png`
-- `第三章/results/trajectories/trajectory_default_s20_fixed_point_seed42_ep0.png`
-- `第三章/results/trajectories/trajectory_default_s20_fixed_patrol_seed42_ep0.png`
-
-## 第七阶段统一系统可信度修复：schema v2 与 backlog-driven 第三章
-
-### 运行命令
-
-```powershell
-.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --policy fixed_point --steps-per-episode 4 --seed 42
-.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --compare-ch4 --seed 42
-.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --profile hard --policy fixed_point --steps-per-episode 12 --seed 42
-.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --profile hard --policy fixed_patrol --steps-per-episode 12 --seed 42
-.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --profile hard --policy heuristic --steps-per-episode 12 --seed 42
-.\.venv\Scripts\python.exe 第三章/run_experiment.py --episodes 1 --profile hard --policy mpc --steps-per-episode 12 --seed 42
-```
-
-### 关键结果
-
-- `schema`:
-  - `observation_schema = observation.v2`
-  - `uav_state_schema = uav_state.v2`
-  - `episode_log_schema = episode_log.v2`
-- `compare-ch4`:
-  - 在 v2 schema 与新 backlog/queue 语义下继续通过
-  - `completion_rate / average_latency / total_energy / cache_hit_rate / energy breakdown` 的 `delta = 0.0`
-- `fixed_point (hard_s12)`:
-  - `completion_rate=0.0`
-  - `average_latency=2.53715414903098`
-  - `total_energy=51.931548561483886`
-  - `cache_hit_rate=0.7454545454545455`
-- `fixed_patrol (hard_s12)`:
-  - `completion_rate=0.0`
-  - `average_latency=2.5245400579306874`
-  - `total_energy=376.24828264204336`
-- `heuristic (hard_s12)`:
-  - `completion_rate=0.0`
-  - `average_latency=2.590691052032494`
-  - `total_energy=179.35356391247493`
-- `mpc (hard_s12)`:
-  - `completion_rate=0.0`
-  - `average_latency=2.605213273468042`
-  - `total_energy=303.62769305280545`
-  - backlog、`tx_queue`、`compute_queue` 已显式进入 episode log
-  - 例如终局 `current_compute_queue_length=7`、`current_backlog_load=2`
-
-### 新增结果文件
-
-- `第三章/results/experiment_hard_fixed_point_s12.json`
-- `第三章/results/experiment_hard_fixed_patrol_s12.json`
-- `第三章/results/experiment_hard_heuristic_s12.json`
-- `第三章/results/experiment_hard_mpc_s12.json`
-- `第三章/results/chapter3_baseline_hard_s12.csv`
-- `第三章/results/chapter3_baseline_hard_s12.md`
-- `第三章/results/trajectories/trajectory_hard_s12_fixed_point_seed42_ep0.png`
-- `第三章/results/trajectories/trajectory_hard_s12_fixed_patrol_seed42_ep0.png`
-- `第三章/results/trajectories/trajectory_hard_s12_heuristic_seed42_ep0.png`
-- `第三章/results/trajectories/trajectory_hard_s12_mpc_seed42_ep0.png`
+- 论文、README、附录若需要引用第三章当前验证数字，应优先引用 `第三章/results/verification_refresh.json`
+- 若本文件与 JSON 不一致，应以 JSON 为准并重新刷新本文件

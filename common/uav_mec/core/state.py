@@ -151,13 +151,136 @@ def _base_section_defs(config: SystemConfig) -> list[tuple[str, list[str], int]]
     ]
 
 
+def observation_task_slot_count(config: SystemConfig) -> int:
+    """统一 observation 侧固定 task slot 数。"""
+    return max(1, int(getattr(config, "task_arrival_max_per_step", 1)))
+
+
+def offloading_candidate_count(config: SystemConfig) -> int:
+    """固定每个 task slot 的候选 plan 数上界。"""
+    return max(2, int(config.num_uavs) + 2)
+
+
+def task_slot_feature_fields() -> list[str]:
+    return [
+        "active_flag",
+        "user_rel_x_norm",
+        "user_rel_y_norm",
+        "input_size_norm",
+        "cpu_cycles_norm",
+        "remaining_slack_norm",
+        "deadline_margin_norm",
+        "service_type_norm",
+        "required_reliability",
+        "same_user_backlog_norm",
+        "within_coverage_flag",
+    ]
+
+
+def offloading_candidate_feature_fields() -> list[str]:
+    return [
+        "tx_wait",
+        "tx_delay",
+        "fetch_wait",
+        "fetch_delay",
+        "compute_wait",
+        "compute_delay",
+        "total_latency_est",
+        "success_prob_est",
+        "energy_est",
+        "cache_hit_flag",
+        "deadline_margin",
+        "feasible_flag",
+    ]
+
+
+def cache_candidate_feature_fields() -> list[str]:
+    return [
+        "service_type_norm",
+        "cached_flag",
+        "cache_value_score_norm",
+        "request_count_norm",
+        "ema_score_norm",
+        "local_pending_demand_norm",
+        "global_pending_demand_norm",
+        "peer_cache_fraction",
+        "fetch_size_norm",
+    ]
+
+
+def structured_observation_schema(config: SystemConfig) -> dict[str, object]:
+    """返回 joint-optimization 结构化观测契约。"""
+    task_slot_count = observation_task_slot_count(config)
+    candidate_count = offloading_candidate_count(config)
+    return {
+        "schema_version": "observation_structured.v1",
+        "task_slot_count": task_slot_count,
+        "offloading_candidate_count": candidate_count,
+        "components": {
+            "uav_state": uav_state_schema(config),
+            "associated_user_state": {
+                "count": config.observation_max_users,
+                "fields": [
+                    "user_rel_x_norm",
+                    "user_rel_y_norm",
+                    "user_pending_task_count_norm",
+                    "user_min_slack_norm",
+                    "user_service_type_norm",
+                ],
+            },
+            "task_slots": {
+                "count": task_slot_count,
+                "fields": task_slot_feature_fields(),
+                "metadata_fields": ["slot_index", "task_id", "user_id", "service_type", "active"],
+            },
+            "offload_candidates": {
+                "count_per_task_slot": candidate_count,
+                "fields": offloading_candidate_feature_fields(),
+                "metadata_fields": [
+                    "candidate_id",
+                    "target",
+                    "associated_uav_id",
+                    "assigned_uav_id",
+                    "fetch_source",
+                    "energy_ok",
+                    "reliability_ok",
+                    "deadline_ok",
+                ],
+            },
+            "cache_candidates": {
+                "count": config.num_service_types,
+                "fields": cache_candidate_feature_fields(),
+                "metadata_fields": ["service_type", "is_cached", "cache_priority_allowed"],
+            },
+            "action_masks": {
+                "mobility_mask_shape": [2],
+                "task_slot_mask_shape": [task_slot_count],
+                "offloading_candidate_mask_shape": [task_slot_count, candidate_count],
+                "offloading_defer_mask_shape": [task_slot_count],
+                "cache_service_mask_shape": [config.num_service_types],
+            },
+        },
+        "migration_note": {
+            "flat_legacy_export": "preserved for current trainer and heuristic policies",
+            "joint_structured_export": "added for future mobility+offloading+caching policy heads",
+        },
+    }
+
+
 def observation_schema(config: SystemConfig) -> dict[str, object]:
     """返回完整观测向量的字段展开方式与切片位置。"""
     sections = _base_section_defs(config)
     frozen = _flat_schema(sections)
     return {
-        "schema_version": "observation.v2",
+        "schema_version": "observation.v3",
+        "export_modes": ["flat_legacy", "structured_joint"],
         "sections": [{"name": name, "fields": fields, "repeat": repeat} for name, fields, repeat in sections],
+        "flat_legacy": {
+            "schema_version": "observation_flat_legacy.v2",
+            "sections": [{"name": name, "fields": fields, "repeat": repeat} for name, fields, repeat in sections],
+            **frozen,
+        },
+        "structured_joint": structured_observation_schema(config),
         **frozen,
     }
 

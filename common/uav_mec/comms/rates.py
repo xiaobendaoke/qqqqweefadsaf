@@ -13,7 +13,21 @@ from __future__ import annotations
 import math
 
 
-def shannon_rate_bps(*, bandwidth_hz: float, received_power_dbm: float, noise_power_dbm: float) -> float:
+def noise_power_dbm_from_density(*, bandwidth_hz: float, noise_density_dbm_per_hz: float) -> float:
+    """将噪声功率谱密度换算到给定带宽下的总噪声功率。"""
+    return float(noise_density_dbm_per_hz + 10.0 * math.log10(max(bandwidth_hz, 1.0)))
+
+
+def shannon_rate_bps(
+    *,
+    bandwidth_hz: float,
+    received_power_dbm: float,
+    noise_density_dbm_per_hz: float,
+) -> float:
     """根据 Shannon 公式计算链路理论速率。"""
+    noise_power_dbm = noise_power_dbm_from_density(
+        bandwidth_hz=bandwidth_hz,
+        noise_density_dbm_per_hz=noise_density_dbm_per_hz,
+    )
     snr_linear = 10.0 ** ((received_power_dbm - noise_power_dbm) / 10.0)
     return max(1.0, bandwidth_hz * math.log2(1.0 + max(snr_linear, 0.0)))

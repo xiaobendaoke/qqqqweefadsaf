@@ -10,6 +10,7 @@ import math
 
 from ..entities import UAVNode, UserEquipment
 from .compute_queue import ComputeQueue
+from .tdma import EDGE_ACCESS_QUEUE_ID
 from .tdma import TDMAQueue
 
 
@@ -42,8 +43,8 @@ def assign_uav(
         return min(
             covering_uavs,
             key=lambda item: (
-                tdma_queue.get_queue_length(queue_id=f"uav:{item.uav_id}", current_time=current_time),
-                tdma_queue.estimate_wait(current_time, queue_id=f"uav:{item.uav_id}"),
+                tdma_queue.get_queue_length(queue_id=EDGE_ACCESS_QUEUE_ID, current_time=current_time),
+                tdma_queue.estimate_wait(current_time, queue_id=EDGE_ACCESS_QUEUE_ID),
                 (
                     compute_queue.get_queue_length(queue_id=f"uav:{item.uav_id}", current_time=current_time)
                     if compute_queue is not None

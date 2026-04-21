@@ -18,24 +18,41 @@ if str(REPO_ROOT) not in sys.path:
 from chapter4.marl import run_marl_training
 
 
+def _resolve_trainer_mode(policy_family: str) -> str:
+    if policy_family in {"mobility_only_rl", "legacy_mobility_only"}:
+        return "legacy_mobility_only"
+    if policy_family in {"joint_rl", "hybrid_joint"}:
+        return "hybrid_joint"
+    raise ValueError(f"Unsupported policy family: {policy_family}")
+
+
 def main() -> None:
     """解析命令行参数并执行 MARL 训练。"""
     parser = argparse.ArgumentParser(
-        description="Train the shared-PPO Chapter 4 agent. The CLI defaults are for quick iteration and are not the final paper preset."
+        description="Train Chapter 4 RL policies. Use `mobility_only_rl` for the legacy baseline and `joint_rl` for the new hybrid joint policy."
     )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--train-episodes", type=int, default=24, help="Training episodes for this run; final paper runs use the stage-6 pipeline.")
     parser.add_argument("--num-uavs", type=int, default=2)
     parser.add_argument("--assignment-rule", type=str, default="nearest_uav", choices=["nearest_uav", "least_loaded_uav"])
     parser.add_argument("--tag", type=str, default="default")
+    parser.add_argument(
+        "--policy-family",
+        type=str,
+        default="joint_rl",
+        choices=["mobility_only_rl", "joint_rl", "legacy_mobility_only", "hybrid_joint"],
+        help="User-facing policy selector: legacy mobility-only RL or new joint RL.",
+    )
     parser.add_argument("--device", type=str, default="auto", help="Torch device request: auto, cpu, cuda, or cuda:N.")
     args = parser.parse_args()
+    trainer_mode = _resolve_trainer_mode(args.policy_family)
+    output_tag = args.tag if args.tag != "default" else ("joint_rl" if trainer_mode == "hybrid_joint" else "mobility_only_rl")
     result = run_marl_training(
         seed=args.seed,
         train_episodes=args.train_episodes,
         num_uavs=args.num_uavs,
         assignment_rule=args.assignment_rule,
-        overrides={"output_tag": args.tag, "device": args.device},
+        overrides={"output_tag": output_tag, "device": args.device, "trainer_mode": trainer_mode},
     )
     print(json.dumps(result, indent=2, ensure_ascii=False))
 

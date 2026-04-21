@@ -19,6 +19,7 @@ class BaseStation:
     height: float
     compute_hz: float
     cumulative_compute_energy_j: float = 0.0
+    cumulative_fetch_tx_energy_j: float = 0.0
 
     @classmethod
     def from_config(cls, config: SystemConfig) -> "BaseStation":

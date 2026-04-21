@@ -1,7 +1,8 @@
 """传输队列近似模块。
 
-该模块以轻量 TDMA 排队模型近似共享无线链路的串行占用过程，
-用于估计用户上行、UAV 协同转发和服务拉取链路的等待时延与队列长度。
+该模块以轻量“共享资源类串行服务”模型近似无线传输等待，
+用于估计用户接入链路与回程/协同链路的等待时延与队列长度。
+当前实现不建模更细粒度的空间复用或干扰图。
 """
 
 from __future__ import annotations
@@ -9,9 +10,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 
+EDGE_ACCESS_QUEUE_ID = "edge_access"
+BACKHAUL_QUEUE_ID = "backhaul"
+
+
 @dataclass(slots=True)
 class TDMAQueue:
-    """按链路 id 串行化传输时隙，近似 TDMA 发送队列。"""
+    """按共享资源类串行化传输占用。"""
 
     next_available_time_by_queue: dict[str, float] = field(default_factory=dict)
     scheduled_end_times_by_queue: dict[str, list[float]] = field(default_factory=dict)

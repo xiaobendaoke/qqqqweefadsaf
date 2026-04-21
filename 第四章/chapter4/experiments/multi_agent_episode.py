@@ -13,9 +13,7 @@ from common.uav_mec.logging_utils import write_json
 
 from ..env import Chapter4Env
 from ..policies.mobility_heuristic_multi import select_actions
-
-
-RESULTS_DIR = Path(__file__).resolve().parents[2] / "results"
+from ..results_paths import LEGACY_RESULTS_DIR
 
 
 def run_multi_agent_episode(*, seed: int, num_uavs: int, assignment_rule: str) -> dict[str, Any]:
@@ -31,7 +29,7 @@ def run_multi_agent_episode(*, seed: int, num_uavs: int, assignment_rule: str) -
             break
 
     episode_log = env.export_episode_log(episode_index=0, seed=seed)
-    output_path = RESULTS_DIR / f"multi_agent_episode_u{num_uavs}_{assignment_rule}_seed{seed}.json"
+    output_path = LEGACY_RESULTS_DIR / f"multi_agent_episode_u{num_uavs}_{assignment_rule}_seed{seed}.json"
     write_json(output_path, episode_log)
     return {
         "status": "ok",

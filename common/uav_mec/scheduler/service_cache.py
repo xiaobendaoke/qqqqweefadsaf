@@ -44,6 +44,88 @@ def cache_score_snapshot(uav: UAVNode, *, num_service_types: int) -> list[float]
     return [float(uav.cache_value_scores.get(service_type, 0.0)) for service_type in range(num_service_types)]
 
 
+def apply_cache_action(
+    uav: UAVNode,
+    service_priorities: list[float],
+    *,
+    config: SystemConfig,
+    service_catalog: ServiceCatalog,
+) -> list[CacheEvent]:
+    """学习主路径：按策略给出的 priority 分数投影缓存集合。"""
+    if len(service_priorities) != service_catalog.num_service_types:
+        raise ValueError(
+            f"Cache action length must equal num_service_types={service_catalog.num_service_types}, "
+            f"got {len(service_priorities)}."
+        )
+    if uav.service_cache_capacity <= 0:
+        events: list[CacheEvent] = []
+        for service_type in sorted(uav.service_cache):
+            events.append(
+                CacheEvent(
+                    uav_id=uav.uav_id,
+                    action="evict",
+                    service_type=int(service_type),
+                    value_score=float(service_priorities[service_type]),
+                    reason="policy_capacity_zero",
+                )
+            )
+        uav.service_cache.clear()
+        return events
+
+    ranked_services = sorted(
+        range(service_catalog.num_service_types),
+        key=lambda service_type: (float(service_priorities[service_type]), -int(service_type)),
+        reverse=True,
+    )
+    keep = {
+        service_type
+        for service_type in ranked_services
+        if float(service_priorities[service_type]) > 0.0
+    }
+    if len(keep) > uav.service_cache_capacity:
+        keep = set(
+            sorted(
+                keep,
+                key=lambda service_type: (float(service_priorities[service_type]), -int(service_type)),
+                reverse=True,
+            )[: uav.service_cache_capacity]
+        )
+
+    events: list[CacheEvent] = []
+    for service_type in sorted(uav.service_cache - keep):
+        events.append(
+            CacheEvent(
+                uav_id=uav.uav_id,
+                action="evict",
+                service_type=int(service_type),
+                value_score=float(service_priorities[service_type]),
+                reason="policy_priority",
+            )
+        )
+    for service_type in sorted(keep - uav.service_cache):
+        events.append(
+            CacheEvent(
+                uav_id=uav.uav_id,
+                action="admit",
+                service_type=int(service_type),
+                value_score=float(service_priorities[service_type]),
+                reason="policy_priority",
+            )
+        )
+    for service_type in sorted(keep & uav.service_cache):
+        events.append(
+            CacheEvent(
+                uav_id=uav.uav_id,
+                action="retain",
+                service_type=int(service_type),
+                value_score=float(service_priorities[service_type]),
+                reason="policy_priority",
+            )
+        )
+    uav.service_cache = keep
+    return events
+
+
 def apply_service_cache_policy(
     uav: UAVNode,
     service_type: int,

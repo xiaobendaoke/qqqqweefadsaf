@@ -43,6 +43,7 @@ ENERGY_COMPONENT_LABEL_CN = {
     "ue_uplink_energy": "用户上行传输能耗",
     "bs_compute_energy": "基站计算能耗",
     "relay_fetch_energy": "中继/回源能耗",
+    "bs_fetch_tx_energy": "基站回源传输能耗",
 }
 
 METRIC_LABEL_CN = {
@@ -58,7 +59,7 @@ METRIC_LABEL_CN = {
     "reliability_violation_rate": "可靠性违约率",
     "team_return": "团队回报",
     "mean_step_action_magnitude": "平均动作幅度",
-    "mean_step_energy_norm": "平均归一化步能耗",
+    "mean_step_energy": "平均步系统能耗",
     "delta_total_energy": "总能耗差值",
     "delta_average_latency": "平均时延差值",
     "delta_completion_rate": "完成率差值",

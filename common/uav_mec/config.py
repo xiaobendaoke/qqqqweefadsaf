@@ -53,9 +53,12 @@ class SystemConfig:
     carrier_frequency_hz: float = 2.4e9
     tx_power_dbm: float = 20.0
     noise_power_dbm: float = -90.0
+    noise_density_dbm_per_hz: float = -174.0
     snr_threshold_db: float = 8.0
     bandwidth_edge_hz: float = 10e6
     bandwidth_backhaul_hz: float = 20e6
+    uav_tx_power_w: float = 1.0
+    bs_backhaul_tx_power_w: float = 5.0
     relay_tx_energy_per_bit: float = 1.0e-8
     observation_max_users: int = 3
     observation_max_neighbors: int = 2

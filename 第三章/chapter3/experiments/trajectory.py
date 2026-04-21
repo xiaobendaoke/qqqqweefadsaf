@@ -32,7 +32,7 @@ class EpisodeTrajectoryRecorder:
         }
         self.uav_path: list[dict[str, float]] = []
         self.user_paths: dict[int, list[dict[str, float]]] = {user.user_id: [] for user in env.users}
-        self.step_metrics: list[dict[str, float | None]] = []
+        self.step_signals: list[dict[str, float | None]] = []
         self._capture(step_index=0)
 
     def _capture(self, *, step_index: int) -> None:
@@ -56,16 +56,16 @@ class EpisodeTrajectoryRecorder:
                 }
             )
 
-    def record_step(self, *, step_index: int, metrics: dict[str, float | None]) -> None:
-        """追加一步轨迹样本，并保留论文常用的过程指标。"""
+    def record_step(self, *, step_index: int, signals: dict[str, float | None]) -> None:
+        """追加一步轨迹样本，并保留论文常用的过程信号。"""
         self._capture(step_index=step_index)
-        self.step_metrics.append(
+        self.step_signals.append(
             {
                 "step": float(step_index),
-                "completion_rate": metrics.get("completion_rate"),
-                "average_latency": metrics.get("average_latency"),
-                "total_energy": metrics.get("total_energy"),
-                "cache_hit_rate": metrics.get("cache_hit_rate"),
+                "step_completion_ratio": signals.get("step_completion_ratio"),
+                "step_average_latency": signals.get("step_average_latency"),
+                "step_total_energy": signals.get("step_total_energy"),
+                "step_cache_hit_ratio": signals.get("step_cache_hit_ratio"),
             }
         )
 
@@ -82,7 +82,7 @@ class EpisodeTrajectoryRecorder:
             "user_paths": [
                 {"user_id": user_id, "samples": samples} for user_id, samples in sorted(self.user_paths.items())
             ],
-            "step_metrics": self.step_metrics,
+            "step_signals": self.step_signals,
             "summary_metrics": summary_metrics,
         }
 

@@ -37,6 +37,7 @@ ENERGY_COMPONENTS = [
     ("ue_uplink_energy", ENERGY_COMPONENT_LABEL_CN["ue_uplink_energy"]),
     ("bs_compute_energy", ENERGY_COMPONENT_LABEL_CN["bs_compute_energy"]),
     ("relay_fetch_energy", ENERGY_COMPONENT_LABEL_CN["relay_fetch_energy"]),
+    ("bs_fetch_tx_energy", ENERGY_COMPONENT_LABEL_CN["bs_fetch_tx_energy"]),
 ]
 
 
@@ -103,14 +104,14 @@ def _aggregate_step_metric(result: dict[str, Any], metric: str) -> tuple[list[in
     episode_logs = result["episode_logs"]
     if not episode_logs:
         return [], [], []
-    steps = [int(item["step"]) for item in episode_logs[0]["step_metrics"]]
+    steps = [int(item["step"]) for item in episode_logs[0]["step_signals"]]
     means: list[float] = []
     stds: list[float] = []
     for step_index in range(len(steps)):
         values = [
-            float(episode_log["step_metrics"][step_index][metric])
+            float(episode_log["step_signals"][step_index][metric])
             for episode_log in episode_logs
-            if episode_log["step_metrics"][step_index].get(metric) is not None
+            if episode_log["step_signals"][step_index].get(metric) is not None
         ]
         mean, std = _metric_stats(values)
         means.append(mean)
@@ -208,10 +209,10 @@ def _plot_step_curves(results_by_policy: dict[str, dict[str, Any]], output_path:
     plt = _load_matplotlib()
     figure, axes = plt.subplots(2, 2, figsize=(11.6, 7.8), sharex=True)
     panels = [
-        ("completion_rate", "逐步任务完成率", "比例"),
-        ("average_latency", "逐步平均时延", "时延"),
-        ("total_energy", "逐步总能耗", "能耗"),
-        ("cache_hit_rate", "逐步缓存命中率", "比例"),
+        ("step_completion_ratio", "逐步任务完成占比", "比例"),
+        ("step_average_latency", "逐步平均时延", "时延"),
+        ("step_total_energy", "逐步总能耗", "能耗"),
+        ("step_cache_hit_ratio", "逐步缓存命中占比", "比例"),
     ]
 
     for axis, (metric, title, ylabel) in zip(axes.flat, panels):
@@ -229,7 +230,7 @@ def _plot_step_curves(results_by_policy: dict[str, dict[str, Any]], output_path:
         axis.set_title(title)
         axis.set_ylabel(ylabel)
         axis.set_xlabel("步骤")
-        if metric in {"completion_rate", "cache_hit_rate"}:
+        if metric in {"step_completion_ratio", "step_cache_hit_ratio"}:
             axis.set_ylim(0.0, 1.05)
         _style_axis(axis)
 
@@ -388,14 +389,14 @@ def _write_tables(rows: list[dict[str, Any]], *, output_prefix: str) -> dict[str
         )
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     energy_lines = [
-        "| policy | uav_move | uav_compute | ue_local | ue_uplink | bs_compute | relay_fetch |",
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "| policy | uav_move | uav_compute | ue_local | ue_uplink | bs_compute | relay_fetch | bs_fetch_tx |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for row in rows:
         energy_lines.append(
             f"| {row['policy_label']} | {row['uav_move_energy']:.4f} | {row['uav_compute_energy']:.4f} | "
             f"{row['ue_local_energy']:.4f} | {row['ue_uplink_energy']:.4f} | "
-            f"{row['bs_compute_energy']:.4f} | {row['relay_fetch_energy']:.4f} |"
+            f"{row['bs_compute_energy']:.4f} | {row['relay_fetch_energy']:.4f} | {row['bs_fetch_tx_energy']:.4f} |"
         )
     energy_md_path.write_text("\n".join(energy_lines) + "\n", encoding="utf-8")
     return {

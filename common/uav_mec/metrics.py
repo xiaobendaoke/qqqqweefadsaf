@@ -10,6 +10,69 @@ from dataclasses import dataclass, field
 
 from .task import Task
 
+EPISODE_METRIC_SCHEMA_VERSION = "episode_metrics.v2"
+STEP_SIGNAL_SCHEMA_VERSION = "step_signals.v3"
+
+
+def episode_metric_schema() -> dict[str, object]:
+    return {
+        "schema_version": EPISODE_METRIC_SCHEMA_VERSION,
+        "fields": [
+            "completion_rate",
+            "average_latency",
+            "average_latency_finalized",
+            "average_latency_completed",
+            "latency_per_generated_task",
+            "total_energy",
+            "cache_hit_rate",
+            "fairness_user_completion",
+            "fairness_uav_load",
+            "deadline_violation_rate",
+            "reliability_violation_rate",
+            "uav_move_energy",
+            "uav_compute_energy",
+            "ue_local_energy",
+            "ue_uplink_energy",
+            "bs_compute_energy",
+            "relay_fetch_energy",
+            "bs_fetch_tx_energy",
+        ],
+    }
+
+
+def step_signal_schema() -> dict[str, object]:
+    return {
+        "schema_version": STEP_SIGNAL_SCHEMA_VERSION,
+        "fields": [
+            "generated_tasks",
+            "finalized_tasks",
+            "completed_tasks",
+            "expired_tasks",
+            "pending_tasks",
+            "cache_hits",
+            "cache_eligible_tasks",
+            "deadline_violations",
+            "reliability_violations",
+            "step_completion_ratio",
+            "step_completed_ratio_generated",
+            "step_expired_ratio",
+            "step_backlog_ratio",
+            "step_cache_hit_ratio",
+            "step_deadline_violation_ratio",
+            "step_reliability_violation_ratio",
+            "step_average_latency",
+            "step_average_latency_completed",
+            "step_total_energy",
+            "step_uav_move_energy",
+            "step_uav_compute_energy",
+            "step_ue_local_energy",
+            "step_ue_uplink_energy",
+            "step_bs_compute_energy",
+            "step_relay_fetch_energy",
+            "step_bs_fetch_tx_energy",
+        ],
+    }
+
 
 def _jain(values: list[float]) -> float | None:
     """计算 Jain 公平性指标；空输入时返回 None 以保留语义。"""
@@ -49,7 +112,8 @@ class MetricTracker:
     ue_uplink_energy: float = 0.0
     bs_compute_energy: float = 0.0
     relay_fetch_energy: float = 0.0
-    last_step_metrics: dict[str, float | None] = field(default_factory=dict)
+    bs_fetch_tx_energy: float = 0.0
+    last_step_signals: dict[str, float | None] = field(default_factory=dict)
 
     def record_generated(self, tasks: list[Task]) -> None:
         """登记本 step 新生成的任务数与用户侧生成计数。"""
@@ -96,46 +160,61 @@ class MetricTracker:
         self.ue_uplink_energy += float(energy_breakdown.get("ue_uplink_energy", 0.0))
         self.bs_compute_energy += float(energy_breakdown.get("bs_compute_energy", 0.0))
         self.relay_fetch_energy += float(energy_breakdown.get("relay_fetch_energy", 0.0))
+        self.bs_fetch_tx_energy += float(energy_breakdown.get("bs_fetch_tx_energy", 0.0))
         self.total_energy += _sum_energy_breakdown(energy_breakdown)
         self.total_cache_eligible += cache_eligible_count
 
         generated_count = len(generated_tasks)
         finalized_count = len(finalized_tasks)
         completed_count = sum(1 for task in finalized_tasks if task.completed)
+        expired_count = sum(1 for task in finalized_tasks if not task.completed)
         step_latency = sum(float(task.total_latency) for task in finalized_tasks) / finalized_count if finalized_count else 0.0
         step_cache_hits = sum(1 for task in finalized_tasks if task.cache_hit)
         step_cache_eligible = sum(1 for task in finalized_tasks if task.execution_target in {"uav", "collaborator"})
         step_deadline_violations = sum(1 for task in finalized_tasks if task.total_latency > task.slack)
         step_reliability_violations = sum(1 for task in finalized_tasks if task.success_probability < task.required_reliability)
-        self.last_step_metrics = {
+        backlog_denominator = max(1.0, float(generated_count + len(pending_tasks)))
+        self.last_step_signals = {
             "generated_tasks": float(generated_count),
             "finalized_tasks": float(finalized_count),
             "completed_tasks": float(completed_count),
+            "expired_tasks": float(expired_count),
             "pending_tasks": float(len(pending_tasks)),
-            "average_latency": step_latency,
+            "cache_hits": float(step_cache_hits),
+            "cache_eligible_tasks": float(step_cache_eligible),
+            "deadline_violations": float(step_deadline_violations),
+            "reliability_violations": float(step_reliability_violations),
+            "step_average_latency": step_latency,
             # 完成任务均时延和全部 finalized 任务均时延同时保留，
             # 方便区分“系统结局”与“成功完成体验”两个口径。
-            "average_latency_completed": (
+            "step_average_latency_completed": (
                 sum(float(task.total_latency) for task in finalized_tasks if task.completed) / completed_count
                 if completed_count
                 else 0.0
             ),
-            "cache_hit_rate": (step_cache_hits / step_cache_eligible) if step_cache_eligible else 0.0,
-            "completion_rate": (completed_count / finalized_count) if finalized_count else 0.0,
-            "deadline_violation_rate": (step_deadline_violations / finalized_count) if finalized_count else 0.0,
-            "reliability_violation_rate": (step_reliability_violations / finalized_count) if finalized_count else 0.0,
-            "total_energy": _sum_energy_breakdown(energy_breakdown),
-            "uav_move_energy": float(energy_breakdown.get("uav_move_energy", 0.0)),
-            "uav_compute_energy": float(energy_breakdown.get("uav_compute_energy", 0.0)),
-            "ue_local_energy": float(energy_breakdown.get("ue_local_energy", 0.0)),
-            "ue_uplink_energy": float(energy_breakdown.get("ue_uplink_energy", 0.0)),
-            "bs_compute_energy": float(energy_breakdown.get("bs_compute_energy", 0.0)),
-            "relay_fetch_energy": float(energy_breakdown.get("relay_fetch_energy", 0.0)),
+            "step_cache_hit_ratio": (step_cache_hits / step_cache_eligible) if step_cache_eligible else 0.0,
+            "step_completion_ratio": (completed_count / finalized_count) if finalized_count else 0.0,
+            "step_completed_ratio_generated": (completed_count / generated_count) if generated_count else 0.0,
+            "step_expired_ratio": (expired_count / generated_count) if generated_count else 0.0,
+            "step_backlog_ratio": float(len(pending_tasks)) / backlog_denominator,
+            "step_deadline_violation_ratio": (step_deadline_violations / finalized_count) if finalized_count else 0.0,
+            "step_reliability_violation_ratio": (step_reliability_violations / finalized_count) if finalized_count else 0.0,
+            "step_total_energy": _sum_energy_breakdown(energy_breakdown),
+            "step_uav_move_energy": float(energy_breakdown.get("uav_move_energy", 0.0)),
+            "step_uav_compute_energy": float(energy_breakdown.get("uav_compute_energy", 0.0)),
+            "step_ue_local_energy": float(energy_breakdown.get("ue_local_energy", 0.0)),
+            "step_ue_uplink_energy": float(energy_breakdown.get("ue_uplink_energy", 0.0)),
+            "step_bs_compute_energy": float(energy_breakdown.get("bs_compute_energy", 0.0)),
+            "step_relay_fetch_energy": float(energy_breakdown.get("relay_fetch_energy", 0.0)),
+            "step_bs_fetch_tx_energy": float(energy_breakdown.get("bs_fetch_tx_energy", 0.0)),
         }
         return self.snapshot()
 
+    def step_signal_snapshot(self) -> dict[str, float | None]:
+        return dict(self.last_step_signals)
+
     def step_snapshot(self) -> dict[str, float | None]:
-        return dict(self.last_step_metrics)
+        return self.step_signal_snapshot()
 
     def energy_breakdown_snapshot(self) -> dict[str, float]:
         return {
@@ -145,6 +224,7 @@ class MetricTracker:
             "ue_uplink_energy": self.ue_uplink_energy,
             "bs_compute_energy": self.bs_compute_energy,
             "relay_fetch_energy": self.relay_fetch_energy,
+            "bs_fetch_tx_energy": self.bs_fetch_tx_energy,
         }
 
     def snapshot(self) -> dict[str, float | None]:
